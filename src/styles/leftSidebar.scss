@@ -1,0 +1,9 @@
+.algo-item {
+  background: red;
+  margin-top: 1px;
+
+  &:hover {
+    background: white;
+    cursor: pointer;
+  }
+}

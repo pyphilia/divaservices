@@ -17,12 +17,15 @@
   "dependencies": {
     "bootstrap": "^4.3.1",
     "jquery": "^3.4.1",
+    "lodash.groupby": "^4.6.0",
+    "node-fetch": "^2.6.0",
     "path": "^0.12.7",
     "popper": "^1.0.1",
     "popper.js": "^1.15.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
+    "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
     "babel-core": "^6.26.3",
