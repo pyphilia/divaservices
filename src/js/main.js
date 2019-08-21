@@ -1,3 +1,3 @@
-import './leftSidebar';
+import "./leftSidebar";
 
 // main js here
