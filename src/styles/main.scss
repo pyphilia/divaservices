@@ -1,5 +1,16 @@
-* {
-  body {
-    background: darkgrey;
-  }
+@import "~bootstrap/scss/bootstrap";
+@import "./theme";
+
+@import "./header.scss";
+@import "./mainContent.scss";
+
+body, html {
+  background: white;
+  font-family: arial;
+  height:100%;
+  overflow: hidden;
+}
+
+#content-wrapper.row {
+  height:93%;
 }

@@ -7,7 +7,39 @@
     <title>InnoSuisse Workflow Interface</title>
 </head>
 <body>
-    <div id="root"></div>
+    
+    <div class="container-fluid no-gutters h-100">
+        <div id="header" class="row">
+            <h1>Name</h1> <img id="logo" src="http://wuersch.pillo-srv.ch/images/logo.png" alt="divaspotlight logo">
+        </div>
+        <div id="content-wrapper" class="row">
+            <div id="left-sidebar" class="col-3 row">
+                <div class="nav flex-column nav-pills col-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Home</a>
+                    <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Profile</a>
+                    <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</a>
+                    <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</a>
+                </div>
+                <div class="tab-content col" id="v-pills-tabContent">
+                    <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil quas cumque reiciendis culpa officia minima totam! Quae at ducimus reiciendis pariatur exercitationem modi nulla fugit. Aut sunt soluta blanditiis nam!</div>
+                    <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">...</div>
+                    <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">...</div>
+                    <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">...</div>
+                </div>
+                
+            </div>
+            <div id="main" class="col">main</div>
+            <div id="right-sidebar" class="col-1">
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#">Active</a>
+                    <a class="nav-link" href="#">Link</a>
+                    <a class="nav-link" href="#">Link</a>
+                    <a class="nav-link disabled" href="#">Disabled</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
     <script src="main.js"></script>
 </body>
 </html>
