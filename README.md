@@ -1,1 +1,1 @@
-# innoSuisse
+# DivaServices Workflow Interface
