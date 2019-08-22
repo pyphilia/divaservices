@@ -10,7 +10,7 @@
     "eslint": "eslint src/**/*.js",
     "prettier:check": "prettier --check \"src/**/*.js\" \"src/**/*.scss\"",
     "prettier:write": "prettier --write \"src/**/*.js\" \"src/**/*.scss\"",
-    "pre-commit": "yarn prettier:write && yarn eslint && yarn test",
+    "pre-commit": "yarn prettier:check && yarn eslint && yarn test",
     "pre-push": "yarn prettier:check && yarn eslint && yarn test",
     "test": "exit 0"
   },

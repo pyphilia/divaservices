@@ -14,7 +14,7 @@ const addItem = e => {
   console.log("je suis added", e.target.innerText);
 };
 
-const buildMenu = async () => {
+export const buildLeftSidebar = async () => {
   const webservices = await getWebServices();
   console.log("TCL: webservices", webservices);
 
@@ -45,5 +45,3 @@ const buildMenu = async () => {
     });
   }
 };
-
-buildMenu();
