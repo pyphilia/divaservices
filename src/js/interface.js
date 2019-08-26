@@ -1,75 +1,19 @@
 import * as $ from "jquery";
 import * as joint from "jointjs";
 import "select2";
-import { TOOLTIP_HTML, THEME } from "./constants";
+import { TOOLTIP_HTML, THEME, colorType } from "./constants";
+import {
+  getWebServiceFromUrl,
+  computeBoxWidth,
+  computeBoxHeight
+} from "./utils";
 import { INTERFACE_ROOT, PORT_SELECTOR, INFO_TOOLTIP_CLASS } from "./selectors";
 
 const graph = new joint.dia.Graph();
 let currentScale = 1;
 
 const transformWorkflowToGraph = workflow => {
-  return [
-    {
-      position: { x: 80, y: 80 },
-      size: { width: 430, height: 160 },
-      label: "I am HTML",
-      params: [
-        {
-          type: "number",
-          name: "in1",
-          defaultValue: "1",
-          description: "hwesdjnk"
-        },
-        {
-          type: "number",
-          name: "in2",
-          defaultValue: "2",
-          description: "nhtgrfe"
-        }
-      ],
-      ports: {
-        items: [
-          {
-            attrs: { description: "wef", text: { text: "23456" } },
-            group: "in"
-          },
-          {
-            group: "out",
-            attrs: { text: { text: "out1" } }
-          }
-        ]
-      }
-    },
-    {
-      position: { x: 370, y: 160 },
-      size: { width: 270, height: 200 },
-      label: "Me too",
-      params: [
-        {
-          type: "select",
-          name: "in3",
-          defaultValue: "1.3",
-          description: "jzhrtgrfe",
-          options: ["a", "b", "c"]
-        },
-        {
-          type: "number",
-          name: "in4",
-          defaultValue: "24",
-          description: "67utzhfg"
-        }
-      ],
-      ports: {
-        items: [
-          { attrs: { text: { text: "in1\n<div>wef</div>" } }, group: "in" },
-          {
-            group: "out",
-            attrs: { text: { text: "out1" } }
-          }
-        ]
-      }
-    }
-  ];
+  console.log("TCL: transformWorkflowToGraph");
 };
 
 const setSelectValueInElement = (element, select) => {
@@ -86,12 +30,12 @@ const createBox = (e, id) => {
   const template = `<rect></rect>
   <foreignObject id="${id}" x="0" y="-30" width="${e.size.width}" height="${e.size.height}">
   <body xmlns="http://www.w3.org/1999/xhtml">
-  ${e.label}<br/>
+  <h3>${e.label}</h3>
   </body>
   </foreignObject>`;
 
   return joint.shapes.basic.Rect.define(
-    "example",
+    e.label,
     {
       markup: template,
       attrs: {
@@ -147,14 +91,16 @@ const addElement = e => {
   const inputs = $("<div></div>").addClass("inputs");
   e.params.forEach(param => {
     const name = param.name;
-
     switch (param.type) {
       case "select": {
         const newSelect = $("<div></div>")
           .addClass("select")
           .attr("name", name);
-        const selectEl = $("<select></select>");
-        param.options.forEach(option => {
+        const selectEl = $("<select></select>").prop(
+          "disabled",
+          !param.userdefined
+        );
+        param.values.forEach(option => {
           $("<option></option>")
             .text(option)
             .attr("value", option)
@@ -177,6 +123,7 @@ const addElement = e => {
       case "number": {
         const newInput = $("<div></div>").addClass("input");
         const inputEl = $("<input />")
+          .prop("disabled", !param.userdefined)
           .attr("type", "text")
           .attr("name", param.name)
           .attr("value", param.defaultValue);
@@ -200,6 +147,8 @@ const addElement = e => {
 
   // add params to boxes
   const foreignObject = $(`foreignObject#${id} body`);
+  const tooltipBox = $(TOOLTIP_HTML).addClass("tooltip-box");
+  foreignObject.append(tooltipBox);
   foreignObject.append(inputs).append(selects);
 
   foreignObject.find(`.${INFO_TOOLTIP_CLASS}`).each(function() {
@@ -267,11 +216,27 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
   if (mT.getAttribute("port-group") !== "in") {
     return false;
   }
+
+  // input accept only one source
   const usedInPorts = vT.model.getUsedInPorts();
-  const matchId = usedInPorts.find(port => {
-    return port.id === mT.getAttribute("port");
-  });
+  const matchId = usedInPorts.find(port => port.id === mT.getAttribute("port"));
   if (matchId) {
+    return false;
+  }
+
+  // allow only same input-output type
+  if (
+    mT.getAttribute("type") === undefined ||
+    mS.getAttribute("type") === undefined
+  ) {
+    return false;
+  }
+
+  // check allowed type
+  const allowedS = mS.getAttribute("type-allowed").split(",");
+  const allowedT = mT.getAttribute("type-allowed").split(",");
+  const commonType = allowedS.filter(value => -1 !== allowedT.indexOf(value));
+  if (commonType.length == 0) {
     return false;
   }
 
@@ -282,7 +247,7 @@ const initPaper = () => {
   const paper = new joint.dia.Paper({
     el: $(INTERFACE_ROOT),
     model: graph,
-    width: 1400,
+    width: "100%",
     height: 800,
     gridSize: 15,
     drawGrid: true,
@@ -374,27 +339,7 @@ const initPaper = () => {
 
   /*-----------------------*/
 
-  paper.on("blank:contextmenu", () => {
-    const elele = {
-      position: { x: 370, y: 160 },
-      size: { width: 270, height: 200 },
-      label: "Me too",
-      params: [
-        { type: "select", name: "in3", defaultValue: "1.3" },
-        { type: "number", name: "in4", defaultValue: "24" }
-      ],
-      ports: {
-        items: [
-          { attrs: { text: { text: "in1\n<div>wef</div>" } }, group: "in" },
-          {
-            group: "out",
-            attrs: { text: { text: "out1" } }
-          }
-        ]
-      }
-    };
-    addElement(elele);
-  });
+  paper.on("blank:contextmenu", () => {});
 };
 
 const buildGraph = async workflow => {
@@ -413,6 +358,108 @@ const saveWorkflow = () => {
   console.log(graph.toJSON());
 };
 
+const transformWebserviceForGraph = webservice => {
+  const position = { x: 370, y: 160 };
+  const size = {
+    width: computeBoxWidth(webservice),
+    height: computeBoxHeight(webservice)
+  };
+  const label = webservice.general.name;
+
+  const ports = { items: [] };
+  webservice.input
+    .filter(input => input.file)
+    .forEach(input => {
+      const file = input.file;
+      if (file.userdefined) {
+        // @TODO display !userdefined ports ?
+        const options = file.options;
+        const typeAllowed = options.mimeTypes.allowed;
+        const type = typeAllowed[0].substr(
+          0,
+          options.mimeTypes.allowed[0].indexOf("/")
+        );
+        const inPort = {
+          group: `in`,
+          attrs: {
+            [PORT_SELECTOR]: {
+              fill: colorType(type),
+              type,
+              typeAllowed
+            },
+            text: { text: `${file.name}\n${typeAllowed}` }
+          }
+        };
+        ports.items.push(inPort);
+      }
+    });
+
+  webservice.output
+    .filter(output => output.file)
+    .forEach(output => {
+      const file = output.file;
+      const options = file.options;
+      const typeAllowed = options.mimeTypes.allowed;
+      const type = typeAllowed[0].substr(
+        0,
+        options.mimeTypes.allowed[0].indexOf("/")
+      );
+      const outPort = {
+        group: `out`,
+        attrs: {
+          [PORT_SELECTOR]: {
+            fill: colorType(type),
+            type,
+            typeAllowed
+          },
+          text: { text: `${file.name}\n${typeAllowed}` }
+        }
+      };
+      ports.items.push(outPort);
+    });
+
+  const params = [];
+  webservice.input
+    .filter(input => input.number)
+    .forEach(input => {
+      const number = input.number;
+      const options = number.options;
+      const param = {
+        type: "number",
+        name: number.name,
+        defaultValue: options.default,
+        description: number.description,
+        userdefined: number.userdefined
+      };
+      params.push(param);
+    });
+  webservice.input
+    .filter(input => input.select)
+    .forEach(input => {
+      const select = input.select;
+      const options = select.options;
+      const param = {
+        type: "select",
+        name: select.name,
+        defaultValue: options.default,
+        description: select.description,
+        userdefined: select.userdefined,
+        values: options.values
+      };
+      params.push(param);
+    });
+
+  const ret = { position, size, label, params, ports };
+  console.log(ret);
+  return ret;
+};
+
+const addElementToGraph = async url => {
+  const webservice = await getWebServiceFromUrl(url);
+  const transformedWebservice = transformWebserviceForGraph(webservice);
+  addElement(transformedWebservice);
+};
+
 $("#save").click(() => saveWorkflow());
 
-export { buildGraph };
+export { buildGraph, addElementToGraph };

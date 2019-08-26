@@ -1,22 +1,22 @@
 // left menu
 import $ from "jquery";
-import fetch from "node-fetch";
 import groupBy from "lodash.groupby";
 import { categoryName } from "./constants";
+import { getWebServices } from "./utils";
+import { addElementToGraph } from "./interface";
 
-const getWebServices = async () => {
-  const data = await fetch("http://divaservices.unifr.ch/api/v2/");
-  const json = await data.json();
-  return json;
-};
-
-const addItem = e => {
-  console.log("je suis added", e.target.innerText);
+const addWebservice = async (webservices, name) => {
+  const algo = webservices.filter(service => service.name == name);
+  if (algo.length) {
+    const url = algo[0].url;
+    await addElementToGraph(url);
+  } else {
+    console.error(`${name} doesnt exist`);
+  }
 };
 
 export const buildLeftSidebar = async () => {
   const webservices = await getWebServices();
-  console.log("TCL: webservices", webservices);
 
   // get categories => algorithms
   let servicesPerCategory = webservices.map(service => {
@@ -40,7 +40,9 @@ export const buildLeftSidebar = async () => {
 
     servicesPerCategory[service].forEach(({ name }) => {
       const algoItem = $('<div class="algo-item"></div>').text(name);
-      algoItem.click(addItem);
+      algoItem.on("click", function() {
+        addWebservice(webservices, name);
+      });
       currentTab.append(algoItem);
     });
   }

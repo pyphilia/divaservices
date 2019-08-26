@@ -1,3 +1,7 @@
+import { PORT_SELECTOR } from "./selectors";
+
+export const DIVA_SERVICES_API_URL = "http://divaservices.unifr.ch/api/v2/";
+
 export const categoryName = {
   binarization: "binarization",
   kws: "kws",
@@ -11,13 +15,20 @@ export const categoryName = {
   activelearning: "active learning"
 };
 
-export const getWebServices = async () => {
-  const data = await fetch("http://divaservices.unifr.ch/api/v2/");
-  const json = await data.json();
-  return json;
-};
-
 export const TOOLTIP_HTML = `<span>(i)</span>`;
+
+export const colorType = type => {
+  switch (type) {
+    case "image":
+      return "orange";
+    case "application":
+      return "yellow";
+    case "text":
+      return "blue";
+    default:
+      return "red";
+  }
+};
 
 export const THEME = {
   magnetAvailabilityHighlighter: {
@@ -40,7 +51,7 @@ export const THEME = {
     in: {
       position: { name: "left" },
       attrs: {
-        portBody: {
+        [PORT_SELECTOR]: {
           magnet: "passive",
           r: 12,
           fill: "darkblue",
@@ -57,7 +68,7 @@ export const THEME = {
     out: {
       position: { name: "right" },
       attrs: {
-        portBody: {
+        [PORT_SELECTOR]: {
           magnet: "active",
           r: 12,
           fill: "lightblue",
