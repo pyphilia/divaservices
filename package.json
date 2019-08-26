@@ -16,12 +16,14 @@
   },
   "dependencies": {
     "bootstrap": "^4.3.1",
+    "jointjs": "^3.0.4",
     "jquery": "^3.4.1",
     "lodash.groupby": "^4.6.0",
     "node-fetch": "^2.6.0",
     "path": "^0.12.7",
     "popper": "^1.0.1",
-    "popper.js": "^1.15.0"
+    "popper.js": "^1.15.0",
+    "select2": "^4.0.9"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
