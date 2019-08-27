@@ -1,16 +1,40 @@
+/* eslint-disable */
+import "select2";
 import * as $ from "jquery";
 import * as joint from "jointjs";
-import "select2";
-import { TOOLTIP_HTML, THEME, colorType } from "./constants";
+import {
+  TOOLTIP_HTML,
+  THEME,
+  colorType,
+  BOX_TITLE_HTML_TAG,
+  TOOLTIP_OPTIONS,
+  TOOLTIP_BREAK_LINE,
+  NAME_COL,
+  RESET_COL,
+  TOOLTIP_COL,
+  PARAM_COL,
+  TOOLTIP_BOX_COL,
+  TITLE_COL
+} from "./constants";
 import {
   getWebServiceFromUrl,
   computeBoxWidth,
-  computeBoxHeight
+  computeBoxHeight,
+  objectToString
 } from "./utils";
-import { INTERFACE_ROOT, PORT_SELECTOR, INFO_TOOLTIP_CLASS } from "./selectors";
+import {
+  INTERFACE_ROOT,
+  PORT_SELECTOR,
+  INFO_TOOLTIP_CLASS,
+  PARAM_NAME_CLASS,
+  TITLE_ROW_CLASS,
+  BOX_CONTAINER_CLASS
+} from "./selectors";
 
+let paper;
 const graph = new joint.dia.Graph();
 let currentScale = 1;
+let trashHover = false;
 
 const transformWorkflowToGraph = workflow => {
   console.log("TCL: transformWorkflowToGraph");
@@ -27,10 +51,20 @@ const setInputValueInElement = (element, input) => {
 };
 
 const createBox = (e, id) => {
+  const margin = 30;
+
   const template = `<rect></rect>
-  <foreignObject id="${id}" x="0" y="-30" width="${e.size.width}" height="${e.size.height}">
+  <foreignObject class="algo-box" id="${id}" x="0" y="-60" width="${
+    e.size.width
+  }" height="${e.size.height + margin}">
   <body xmlns="http://www.w3.org/1999/xhtml">
-  <h3>${e.label}</h3>
+  <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
+  <div class="${TITLE_ROW_CLASS} row">
+  <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${
+    e.label
+  }</${BOX_TITLE_HTML_TAG}>
+  </div>
+  </div>
   </body>
   </foreignObject>`;
 
@@ -78,6 +112,23 @@ const createBox = (e, id) => {
   );
 };
 
+function resetValue(event) {
+  const el = event.target;
+  const defaultValue = el.dataset.value;
+  switch (el.dataset.parent) {
+    case "select": {
+      const select = el.parentNode.getElementsByTagName("select")[0];
+      $(select)
+        .val(defaultValue)
+        .trigger("change");
+      break;
+    }
+    case "input":
+      el.parentNode.getElementsByTagName("input")[0].value = defaultValue;
+    default:
+  }
+}
+
 // Create a custom element.
 // ------------------------
 const addElement = e => {
@@ -89,56 +140,96 @@ const addElement = e => {
   // add params
   const selects = $("<div></div>").addClass("selects");
   const inputs = $("<div></div>").addClass("inputs");
+
+  const resetButton = $("<button></button>")
+    .addClass(`reset-button btn ${RESET_COL}`)
+    .text("Reset")
+    .on("click", resetValue);
+
   e.params.forEach(param => {
     const name = param.name;
     switch (param.type) {
       case "select": {
         const newSelect = $("<div></div>")
-          .addClass("select")
+          .addClass("select row")
           .attr("name", name);
-        const selectEl = $("<select></select>").prop(
-          "disabled",
-          !param.userdefined
-        );
-        param.values.forEach(option => {
+        const selectEl = $("<select></select>")
+          .addClass(PARAM_COL)
+          .prop("disabled", !param.userdefined);
+        const nameEl = $("<span></span>")
+          .addClass(`${PARAM_NAME_CLASS} ${NAME_COL}`)
+          .text(param.name);
+        param.options.values.forEach((values, i) => {
           $("<option></option>")
-            .text(option)
-            .attr("value", option)
+            .text(values)
+            .attr("value", values)
+            .prop("selected", i == param.options.default)
             .appendTo(selectEl);
         });
-        newSelect.append(selectEl);
-        const tooltip = $(TOOLTIP_HTML)
-          .addClass(INFO_TOOLTIP_CLASS)
-          .data("id", param.name)
-          .data("description", param.description)
-          .data("param", e.label);
+
+        const tooltip = param.description
+          ? $(TOOLTIP_HTML)
+              .addClass(`${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
+              .data("id", param.name)
+              .data("param", e.label)
+              .data("title", param.description)
+              .data("toggle", "tooltip")
+              .data("placement", "right")
+          : $();
 
         newSelect
-          .append(param.name)
-          .append(newSelect)
-          .append(tooltip);
-        selects.append(newSelect);
+          .append(nameEl)
+          .append(selectEl)
+          .append(
+            resetButton
+              .clone(true)
+              .attr("data-parent", "select")
+              .attr("data-value", param.options.values[param.options.default])
+          ) //.attr('id', )
+          .append(tooltip)
+          .appendTo(selects);
         break;
       }
       case "number": {
-        const newInput = $("<div></div>").addClass("input");
+        const newInput = $("<div></div>")
+          .addClass("input row")
+          .appendTo(inputs);
+        const nameEl = $("<span></span>")
+          .addClass(`${PARAM_NAME_CLASS} ${NAME_COL}`)
+          .text(name);
         const inputEl = $("<input />")
+          .addClass(PARAM_COL)
           .prop("disabled", !param.userdefined)
           .attr("type", "text")
           .attr("name", param.name)
-          .attr("value", param.defaultValue);
+          .attr("value", param.options.default);
 
-        const tooltip = $(TOOLTIP_HTML)
-          .addClass(INFO_TOOLTIP_CLASS)
-          .data("id", name)
-          .data("description", param.description)
-          .data("param", e.label);
+        const resetButtonNumber = resetButton.clone(true);
+        resetButtonNumber
+          .attr("data-parent", "input")
+          .attr("data-value", param.options.default);
 
         newInput
-          .append(name)
+          .append(nameEl)
           .append(inputEl)
-          .append(tooltip);
-        inputs.append(newInput);
+          .append(resetButtonNumber)
+          .appendTo(inputs);
+
+        if (param.description || param.options.length) {
+          const tooltipText = `${
+            param.description
+          }${TOOLTIP_BREAK_LINE}${objectToString(param.options)}`;
+          $(TOOLTIP_HTML)
+            .addClass(`${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
+            .data("id", name)
+            .data("param", e.label)
+            .data("title", tooltipText)
+            .data("toggle", "tooltip")
+            .data("placement", "right")
+            .appendTo(newInput)
+            .tooltip(TOOLTIP_OPTIONS);
+        }
+
         break;
       }
       default:
@@ -147,15 +238,24 @@ const addElement = e => {
 
   // add params to boxes
   const foreignObject = $(`foreignObject#${id} body`);
-  const tooltipBox = $(TOOLTIP_HTML).addClass("tooltip-box");
-  foreignObject.append(tooltipBox);
-  foreignObject.append(inputs).append(selects);
+  foreignObject
+    .find(`.${BOX_CONTAINER_CLASS}`)
+    .append(inputs)
+    .append(selects);
 
+  if (e.description) {
+    $(TOOLTIP_HTML)
+      .addClass(`tooltip-box ${TOOLTIP_BOX_COL}`)
+      .data("title", e.description)
+      .data("toggle", "tooltip")
+      .data("placement", "right")
+      .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`))
+      .tooltip(TOOLTIP_OPTIONS);
+  }
+
+  // init param tooltips
   foreignObject.find(`.${INFO_TOOLTIP_CLASS}`).each(function() {
-    $(this).mouseenter(function() {
-      const desc = $(this).data("description");
-      $("#message").text(desc);
-    });
+    $(this).tooltip(TOOLTIP_OPTIONS);
   });
 
   // select events
@@ -165,6 +265,7 @@ const addElement = e => {
   // avoid select click bug
   allSelects.each(function() {
     $(this).select2({
+      width: "element",
       minimumResultsForSearch: -1
     });
 
@@ -243,14 +344,27 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
   return true;
 };
 
+const changeZoom = scale => {
+  /** 
+  var bcr = paper.svg.getBoundingClientRect();
+  var localRect1 = paper.clientToLocalRect({ x: bcr.left, y: bcr.top, width: bcr.width, height: bcr.height });*/
+  const paperPosition = paper.translate();
+  let tx = -paperPosition.tx + 400 * currentScale;
+  let ty = -paperPosition.ty + 400 * currentScale;
+  paper.scale(scale, scale, tx, ty);
+  currentScale = scale;
+};
+
 const initPaper = () => {
-  const paper = new joint.dia.Paper({
+  paper = new joint.dia.Paper({
     el: $(INTERFACE_ROOT),
     model: graph,
     width: "100%",
     height: 800,
     gridSize: 15,
-    drawGrid: true,
+    drawGrid: {
+      name: "fixedDot"
+    },
     linkPinning: false,
     snapLinks: true,
     defaultLink: new joint.shapes.standard.Link({ z: 20 }),
@@ -264,6 +378,24 @@ const initPaper = () => {
   paper.options.highlighting.magnetAvailability =
     THEME.magnetAvailabilityHighlighter;
 
+  // init trash
+  $("#trash").on("mouseover", function() {
+    trashHover = true;
+  });
+  $("#trash").on("mouseleave", function() {
+    trashHover = false;
+  });
+
+  paper.on("element:pointerup", e => {
+    if (trashHover) {
+      if (confirm("Are you sure you want to delete this element?")) {
+        e.model.remove();
+      } else {
+        // @TODO replace where it was before moving
+      }
+    }
+  });
+
   /**********ZOOM*/
 
   const onMouseWheel = e => {
@@ -275,8 +407,7 @@ const initPaper = () => {
 
     if (newScale > 0.4 && newScale < 1) {
       // paper.setOrigin(-paper.translate().tx, -paper.translate().ty); // reset the previous viewport translation
-      paper.scale(newScale, newScale, 0, 0);
-      currentScale = newScale;
+      changeZoom(newScale);
     }
   };
   paper.$el.on("mousewheel DOMMouseScroll", onMouseWheel);
@@ -359,12 +490,14 @@ const saveWorkflow = () => {
 };
 
 const transformWebserviceForGraph = webservice => {
-  const position = { x: 370, y: 160 };
+  const paperPosition = paper.translate();
+  const position = { x: -paperPosition.tx + 100, y: -paperPosition.ty + 100 };
   const size = {
     width: computeBoxWidth(webservice),
     height: computeBoxHeight(webservice)
   };
   const label = webservice.general.name;
+  const description = webservice.general.description;
 
   const ports = { items: [] };
   webservice.input
@@ -379,6 +512,29 @@ const transformWebserviceForGraph = webservice => {
           0,
           options.mimeTypes.allowed[0].indexOf("/")
         );
+        const inPort = {
+          group: `in`,
+          attrs: {
+            [PORT_SELECTOR]: {
+              fill: colorType(type),
+              type,
+              typeAllowed
+            },
+            text: { text: `${file.name}\n${typeAllowed}` }
+          }
+        };
+        ports.items.push(inPort);
+      }
+    });
+
+  webservice.input
+    .filter(input => input.folder)
+    .forEach(input => {
+      const file = input.folder;
+      if (file.userdefined) {
+        // @TODO display !userdefined ports ?
+        const typeAllowed = "folder";
+        const type = "folder";
         const inPort = {
           group: `in`,
           attrs: {
@@ -422,12 +578,13 @@ const transformWebserviceForGraph = webservice => {
   webservice.input
     .filter(input => input.number)
     .forEach(input => {
+      console.log("TCL: input", input);
       const number = input.number;
       const options = number.options;
       const param = {
         type: "number",
         name: number.name,
-        defaultValue: options.default,
+        options: options,
         description: number.description,
         userdefined: number.userdefined
       };
@@ -436,21 +593,22 @@ const transformWebserviceForGraph = webservice => {
   webservice.input
     .filter(input => input.select)
     .forEach(input => {
+      console.log("TCL: input", input);
       const select = input.select;
       const options = select.options;
       const param = {
         type: "select",
         name: select.name,
-        defaultValue: options.default,
         description: select.description,
         userdefined: select.userdefined,
-        values: options.values
+        options: options
       };
       params.push(param);
     });
 
-  const ret = { position, size, label, params, ports };
-  console.log(ret);
+  const ret = { description, position, size, label, params, ports };
+  console.log(webservice);
+  console.log("return", ret);
   return ret;
 };
 
@@ -460,6 +618,14 @@ const addElementToGraph = async url => {
   addElement(transformedWebservice);
 };
 
+const clearWorkflow = () => {
+  graph.clear();
+};
+
 $("#save").click(() => saveWorkflow());
+$("#clear").click(() => clearWorkflow());
+$("#resetZoom").click(() => changeZoom(1));
+
+console.log($(INTERFACE_ROOT));
 
 export { buildGraph, addElementToGraph };

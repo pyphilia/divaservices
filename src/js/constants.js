@@ -15,10 +15,23 @@ export const categoryName = {
   activelearning: "active learning"
 };
 
-export const TOOLTIP_HTML = `<span>(i)</span>`;
+export const TOOLTIP_OPTIONS = { html: true };
+export const TOOLTIP_BREAK_LINE = "<br>";
+export const TOOLTIP_HTML = `<span><i class="fas fa-info-circle"></i></span>`;
+export const BOX_TITLE_HTML_TAG = "h3";
+
+export const TOOLTIP_COL = "col-1";
+export const NAME_COL = "col-5";
+export const PARAM_COL = "col-4";
+export const RESET_COL = "col-2";
+
+export const TITLE_COL = "col-10";
+export const TOOLTIP_BOX_COL = "col-2";
 
 export const colorType = type => {
   switch (type) {
+    case "folder":
+      return "red";
     case "image":
       return "orange";
     case "application":
@@ -45,7 +58,7 @@ export const THEME = {
     fill: "lightgray"
   },
   rect: {
-    fill: "#2ECC71"
+    fill: "#eeeeee"
   },
   groups: {
     in: {
