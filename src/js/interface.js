@@ -2,6 +2,7 @@
 import "select2";
 import * as $ from "jquery";
 import * as joint from "jointjs";
+import { saveWorkflow } from "./saveWorkflow";
 import {
   TOOLTIP_HTML,
   THEME,
@@ -14,13 +15,15 @@ import {
   TOOLTIP_COL,
   PARAM_COL,
   TOOLTIP_BOX_COL,
-  TITLE_COL
+  TITLE_COL,
+  Inputs
 } from "./constants";
 import {
   getWebServiceFromUrl,
   computeBoxWidth,
   computeBoxHeight,
-  objectToString
+  objectToString,
+  computeTitleLength
 } from "./utils";
 import {
   INTERFACE_ROOT,
@@ -28,17 +31,19 @@ import {
   INFO_TOOLTIP_CLASS,
   PARAM_NAME_CLASS,
   TITLE_ROW_CLASS,
-  BOX_CONTAINER_CLASS
+  BOX_CONTAINER_CLASS,
+  FOREIGN_CLASS,
+  RESET_BUTTON_CLASS,
+  ATTR_TYPE_ALLOWED,
+  ATTR_TYPE,
+  TRASH_SELECTOR,
+  IN_PORT_CLASS,
+  OUT_PORT_CLASS
 } from "./selectors";
 
 let paper;
 const graph = new joint.dia.Graph();
 let currentScale = 1;
-let trashHover = false;
-
-const transformWorkflowToGraph = workflow => {
-  console.log("TCL: transformWorkflowToGraph");
-};
 
 const setSelectValueInElement = (element, select) => {
   const selectedValue = select.find(":selected").attr("value");
@@ -53,10 +58,17 @@ const setInputValueInElement = (element, input) => {
 const createBox = (e, id) => {
   const margin = 30;
 
+  const size = {
+    width: computeBoxWidth(e),
+    height: computeBoxHeight(e)
+  };
+
+  const titleHeight = computeTitleLength(e).isCut ? 120 : 60;
+
   const template = `<rect></rect>
-  <foreignObject class="algo-box" id="${id}" x="0" y="-60" width="${
-    e.size.width
-  }" height="${e.size.height + margin}">
+  <foreignObject class="${FOREIGN_CLASS}" id="${id}" x="0" y="-${titleHeight}" width="${
+    size.width
+  }" height="${size.height + titleHeight}">
   <body xmlns="http://www.w3.org/1999/xhtml">
   <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
   <div class="${TITLE_ROW_CLASS} row">
@@ -68,6 +80,9 @@ const createBox = (e, id) => {
   </body>
   </foreignObject>`;
 
+  const paperPosition = paper.translate();
+  const position = { x: -paperPosition.tx + 100, y: -paperPosition.ty + 100 };
+
   return joint.shapes.basic.Rect.define(
     e.label,
     {
@@ -77,10 +92,10 @@ const createBox = (e, id) => {
           magnet: false
         },
         body: THEME.body,
-        rect: { ...THEME.rect, width: e.size.width, height: e.size.height }
+        rect: { ...THEME.rect, ...size }
       },
-      position: { x: e.position.x, y: e.position.y },
-      size: { width: e.size.width, height: e.size.height },
+      position,
+      size,
       ports: {
         groups: THEME.groups,
         items: e.ports.items
@@ -97,7 +112,7 @@ const createBox = (e, id) => {
       },
 
       getInPorts: function() {
-        return this.getGroupPorts("in");
+        return this.getGroupPorts(IN_PORT_CLASS);
       },
 
       getUsedInPorts: function() {
@@ -116,16 +131,20 @@ function resetValue(event) {
   const el = event.target;
   const defaultValue = el.dataset.value;
   switch (el.dataset.parent) {
-    case "select": {
-      const select = el.parentNode.getElementsByTagName("select")[0];
+    case Inputs.SELECT.tag: {
+      const select = el.parentNode.getElementsByTagName(Inputs.SELECT.tag)[0];
       $(select)
         .val(defaultValue)
         .trigger("change");
       break;
     }
-    case "input":
-      el.parentNode.getElementsByTagName("input")[0].value = defaultValue;
+    case Inputs.NUMBER.tag:
+      el.parentNode.getElementsByTagName(
+        Inputs.NUMBER.tag
+      )[0].value = defaultValue;
+      break;
     default:
+      alert("error");
   }
 }
 
@@ -142,23 +161,37 @@ const addElement = e => {
   const inputs = $("<div></div>").addClass("inputs");
 
   const resetButton = $("<button></button>")
-    .addClass(`reset-button btn ${RESET_COL}`)
+    .addClass(`${RESET_BUTTON_CLASS} btn ${RESET_COL}`)
     .text("Reset")
     .on("click", resetValue);
 
   e.params.forEach(param => {
     const name = param.name;
+    const defaultTooltip = $(TOOLTIP_HTML)
+      .addClass(`${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
+      .data("id", name)
+      .data("param", e.label)
+      .data("toggle", "tooltip")
+      .data("placement", "right");
+
     switch (param.type) {
-      case "select": {
+      case Inputs.SELECT.type: {
+        // wrapper
         const newSelect = $("<div></div>")
           .addClass("select row")
           .attr("name", name);
-        const selectEl = $("<select></select>")
+
+        // select
+        const selectEl = $(`<${Inputs.SELECT.tag}/>`)
           .addClass(PARAM_COL)
           .prop("disabled", !param.userdefined);
+
+        // param name
         const nameEl = $("<span></span>")
           .addClass(`${PARAM_NAME_CLASS} ${NAME_COL}`)
-          .text(param.name);
+          .text(name);
+
+        // param options
         param.options.values.forEach((values, i) => {
           $("<option></option>")
             .text(values)
@@ -167,43 +200,48 @@ const addElement = e => {
             .appendTo(selectEl);
         });
 
-        const tooltip = param.description
-          ? $(TOOLTIP_HTML)
-              .addClass(`${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
-              .data("id", param.name)
-              .data("param", e.label)
-              .data("title", param.description)
-              .data("toggle", "tooltip")
-              .data("placement", "right")
-          : $();
-
         newSelect
           .append(nameEl)
           .append(selectEl)
-          .append(
-            resetButton
-              .clone(true)
-              .attr("data-parent", "select")
-              .attr("data-value", param.options.values[param.options.default])
-          ) //.attr('id', )
-          .append(tooltip)
           .appendTo(selects);
+
+        // reset
+        resetButton
+          .clone(true)
+          .attr("data-parent", "select")
+          .attr("data-value", param.options.values[param.options.default])
+          .appendTo(newSelect);
+
+        // add tooltip
+        if (param.description) {
+          defaultTooltip
+            .clone(true)
+            .data("title", param.description)
+            .appendTo(newSelect)
+            .tooltip(TOOLTIP_OPTIONS);
+        }
         break;
       }
-      case "number": {
+      case Inputs.NUMBER.type: {
+        // wrapper
         const newInput = $("<div></div>")
           .addClass("input row")
           .appendTo(inputs);
+
+        // param name
         const nameEl = $("<span></span>")
           .addClass(`${PARAM_NAME_CLASS} ${NAME_COL}`)
           .text(name);
-        const inputEl = $("<input />")
+
+        // param input
+        const inputEl = $(`<${Inputs.NUMBER.tag} />`)
           .addClass(PARAM_COL)
           .prop("disabled", !param.userdefined)
           .attr("type", "text")
-          .attr("name", param.name)
+          .attr("name", name)
           .attr("value", param.options.default);
 
+        // reset
         const resetButtonNumber = resetButton.clone(true);
         resetButtonNumber
           .attr("data-parent", "input")
@@ -215,17 +253,13 @@ const addElement = e => {
           .append(resetButtonNumber)
           .appendTo(inputs);
 
+        // add tooltip
         if (param.description || param.options.length) {
           const tooltipText = `${
             param.description
           }${TOOLTIP_BREAK_LINE}${objectToString(param.options)}`;
-          $(TOOLTIP_HTML)
-            .addClass(`${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
-            .data("id", name)
-            .data("param", e.label)
+          defaultTooltip
             .data("title", tooltipText)
-            .data("toggle", "tooltip")
-            .data("placement", "right")
             .appendTo(newInput)
             .tooltip(TOOLTIP_OPTIONS);
         }
@@ -243,6 +277,7 @@ const addElement = e => {
     .append(inputs)
     .append(selects);
 
+  // main tooltip
   if (e.description) {
     $(TOOLTIP_HTML)
       .addClass(`tooltip-box ${TOOLTIP_BOX_COL}`)
@@ -253,20 +288,14 @@ const addElement = e => {
       .tooltip(TOOLTIP_OPTIONS);
   }
 
-  // init param tooltips
-  foreignObject.find(`.${INFO_TOOLTIP_CLASS}`).each(function() {
-    $(this).tooltip(TOOLTIP_OPTIONS);
-  });
-
-  // select events
-  const allSelects = selects.find("select");
+  // SELECT EVENTS
+  const allSelects = selects.find(Inputs.SELECT.tag);
 
   // add select2 on elements
   // avoid select click bug
   allSelects.each(function() {
     $(this).select2({
-      width: "element",
-      minimumResultsForSearch: -1
+      minimumResultsForSearch: -1 // hide search box
     });
 
     // set default value
@@ -287,7 +316,7 @@ const addElement = e => {
     });
   });
 
-  // input events
+  // NUMBER EVENTS
   const allInputs = inputs.find("input");
 
   // on input click, select all text
@@ -314,7 +343,7 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
   if (vS === vT) {
     return false;
   }
-  if (mT.getAttribute("port-group") !== "in") {
+  if (mT.getAttribute("port-group") !== IN_PORT_CLASS) {
     return false;
   }
 
@@ -327,15 +356,15 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
 
   // allow only same input-output type
   if (
-    mT.getAttribute("type") === undefined ||
-    mS.getAttribute("type") === undefined
+    mT.getAttribute(ATTR_TYPE) === undefined ||
+    mS.getAttribute(ATTR_TYPE) === undefined
   ) {
     return false;
   }
 
   // check allowed type
-  const allowedS = mS.getAttribute("type-allowed").split(",");
-  const allowedT = mT.getAttribute("type-allowed").split(",");
+  const allowedS = mS.getAttribute(ATTR_TYPE_ALLOWED).split(",");
+  const allowedT = mT.getAttribute(ATTR_TYPE_ALLOWED).split(",");
   const commonType = allowedS.filter(value => -1 !== allowedT.indexOf(value));
   if (commonType.length == 0) {
     return false;
@@ -346,8 +375,8 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
 
 const changeZoom = scale => {
   /** 
-  var bcr = paper.svg.getBoundingClientRect();
-  var localRect1 = paper.clientToLocalRect({ x: bcr.left, y: bcr.top, width: bcr.width, height: bcr.height });*/
+        var bcr = paper.svg.getBoundingClientRect();
+        var localRect1 = paper.clientToLocalRect({ x: bcr.left, y: bcr.top, width: bcr.width, height: bcr.height });*/
   const paperPosition = paper.translate();
   let tx = -paperPosition.tx + 400 * currentScale;
   let ty = -paperPosition.ty + 400 * currentScale;
@@ -378,16 +407,8 @@ const initPaper = () => {
   paper.options.highlighting.magnetAvailability =
     THEME.magnetAvailabilityHighlighter;
 
-  // init trash
-  $("#trash").on("mouseover", function() {
-    trashHover = true;
-  });
-  $("#trash").on("mouseleave", function() {
-    trashHover = false;
-  });
-
   paper.on("element:pointerup", e => {
-    if (trashHover) {
+    if ($(TRASH_SELECTOR).is(":hover")) {
       if (confirm("Are you sure you want to delete this element?")) {
         e.model.remove();
       } else {
@@ -461,7 +482,7 @@ const initPaper = () => {
 
   /*************/
 
-  // unfocus input when clicks
+  // unfocus inputs when clicks
   paper.on("blank:pointerdown", () => {
     $("input").each(function() {
       $(this).blur();
@@ -471,6 +492,10 @@ const initPaper = () => {
   /*-----------------------*/
 
   paper.on("blank:contextmenu", () => {});
+};
+
+const transformWorkflowToGraph = workflow => {
+  console.log("TCL: transformWorkflowToGraph");
 };
 
 const buildGraph = async workflow => {
@@ -485,129 +510,82 @@ const buildGraph = async workflow => {
   }
 };
 
-const saveWorkflow = () => {
-  console.log(graph.toJSON());
+const createPort = (param, group) => {
+  let port = {};
+  const obj = param[Object.keys(param)[0]];
+  if (group == OUT_PORT_CLASS || obj.userdefined) {
+    // always create out port, check userdefined for inputs
+
+    let typeAllowed;
+    let type;
+
+    // folder case
+    if (param.folder) {
+      typeAllowed = ["folder"]; // use options allowed types, otherwise it is a folder
+      type = "folder";
+    } else {
+      // @TODO display !userdefined ports ?
+      typeAllowed = obj.options.mimeTypes.allowed;
+      type = typeAllowed[0].substr(
+        //@TODO diff types ?
+        0,
+        typeAllowed[0].indexOf("/")
+      );
+    }
+
+    port = {
+      group,
+      attrs: {
+        [PORT_SELECTOR]: {
+          fill: colorType(type),
+          type,
+          typeAllowed
+        },
+        text: { text: `${obj.name}\n${typeAllowed}` }
+      }
+    };
+  }
+  return port;
 };
 
 const transformWebserviceForGraph = webservice => {
-  const paperPosition = paper.translate();
-  const position = { x: -paperPosition.tx + 100, y: -paperPosition.ty + 100 };
-  const size = {
-    width: computeBoxWidth(webservice),
-    height: computeBoxHeight(webservice)
-  };
   const label = webservice.general.name;
   const description = webservice.general.description;
+  const information = webservice.general;
 
+  // handle ports
   const ports = { items: [] };
   webservice.input
-    .filter(input => input.file)
-    .forEach(input => {
-      const file = input.file;
-      if (file.userdefined) {
-        // @TODO display !userdefined ports ?
-        const options = file.options;
-        const typeAllowed = options.mimeTypes.allowed;
-        const type = typeAllowed[0].substr(
-          0,
-          options.mimeTypes.allowed[0].indexOf("/")
-        );
-        const inPort = {
-          group: `in`,
-          attrs: {
-            [PORT_SELECTOR]: {
-              fill: colorType(type),
-              type,
-              typeAllowed
-            },
-            text: { text: `${file.name}\n${typeAllowed}` }
-          }
-        };
-        ports.items.push(inPort);
-      }
-    });
-
-  webservice.input
-    .filter(input => input.folder)
-    .forEach(input => {
-      const file = input.folder;
-      if (file.userdefined) {
-        // @TODO display !userdefined ports ?
-        const typeAllowed = "folder";
-        const type = "folder";
-        const inPort = {
-          group: `in`,
-          attrs: {
-            [PORT_SELECTOR]: {
-              fill: colorType(type),
-              type,
-              typeAllowed
-            },
-            text: { text: `${file.name}\n${typeAllowed}` }
-          }
-        };
-        ports.items.push(inPort);
-      }
-    });
+    .filter(input => input.file || input.folder)
+    .forEach(input => ports.items.push(createPort(input, IN_PORT_CLASS)));
 
   webservice.output
-    .filter(output => output.file)
-    .forEach(output => {
-      const file = output.file;
-      const options = file.options;
-      const typeAllowed = options.mimeTypes.allowed;
-      const type = typeAllowed[0].substr(
-        0,
-        options.mimeTypes.allowed[0].indexOf("/")
-      );
-      const outPort = {
-        group: `out`,
-        attrs: {
-          [PORT_SELECTOR]: {
-            fill: colorType(type),
-            type,
-            typeAllowed
-          },
-          text: { text: `${file.name}\n${typeAllowed}` }
-        }
-      };
-      ports.items.push(outPort);
-    });
+    .filter(output => output.file || output.folder)
+    .forEach(output => ports.items.push(createPort(output, OUT_PORT_CLASS)));
 
+  // handle params
   const params = [];
-  webservice.input
-    .filter(input => input.number)
-    .forEach(input => {
-      console.log("TCL: input", input);
-      const number = input.number;
-      const options = number.options;
-      const param = {
-        type: "number",
-        name: number.name,
-        options: options,
-        description: number.description,
-        userdefined: number.userdefined
-      };
-      params.push(param);
-    });
-  webservice.input
-    .filter(input => input.select)
-    .forEach(input => {
-      console.log("TCL: input", input);
-      const select = input.select;
-      const options = select.options;
-      const param = {
-        type: "select",
-        name: select.name,
-        description: select.description,
-        userdefined: select.userdefined,
-        options: options
-      };
-      params.push(param);
-    });
+  webservice.input.forEach(input => {
+    const type = Object.keys(input)[0];
+    const obj = input[type];
+    const param = {
+      type: type,
+      name: obj.name,
+      options: obj.options,
+      description: obj.description,
+      userdefined: obj.userdefined
+    };
+    params.push(param);
+  });
 
-  const ret = { description, position, size, label, params, ports };
-  console.log(webservice);
+  const ret = {
+    description,
+    label,
+    params,
+    ports,
+    information
+  };
+  console.log("webservice", webservice);
   console.log("return", ret);
   return ret;
 };
@@ -622,7 +600,7 @@ const clearWorkflow = () => {
   graph.clear();
 };
 
-$("#save").click(() => saveWorkflow());
+$("#save").click(() => saveWorkflow(graph.toJSON()));
 $("#clear").click(() => clearWorkflow());
 $("#resetZoom").click(() => changeZoom(1));
 

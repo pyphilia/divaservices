@@ -15,6 +15,12 @@ export const categoryName = {
   activelearning: "active learning"
 };
 
+export const Inputs = {
+  SELECT: { tag: "select", type: "select" },
+  NUMBER: { tag: "input", type: "number" }
+};
+Object.freeze(Inputs);
+
 export const TOOLTIP_OPTIONS = { html: true };
 export const TOOLTIP_BREAK_LINE = "<br>";
 export const TOOLTIP_HTML = `<span><i class="fas fa-info-circle"></i></span>`;
@@ -31,7 +37,7 @@ export const TOOLTIP_BOX_COL = "col-2";
 export const colorType = type => {
   switch (type) {
     case "folder":
-      return "red";
+      return "lightblue";
     case "image":
       return "orange";
     case "application":

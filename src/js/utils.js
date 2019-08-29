@@ -1,30 +1,49 @@
 import { DIVA_SERVICES_API_URL, TOOLTIP_BREAK_LINE } from "./constants";
 
 const isNonPortInput = input => {
-  return input.number || input.select;
+  return input.type == "select" || input.type == "number";
+};
+
+const isPortInput = input => {
+  return input.userdefined && (input.type == "file" || input.type == "folder");
+};
+
+const maxWidth = 650;
+const titleFontSize = 18;
+
+export const computeTitleLength = el => {
+  const value = Math.min(el.label.length * titleFontSize, maxWidth);
+  return { value, isCut: el.label.length * titleFontSize > maxWidth };
 };
 
 export const computeBoxWidth = el => {
-  console.log("TCL: el", el);
+  const paramNameLength = el.params
+    .filter(x => isPortInput(x))
+    .map(param => (param.name ? param.name.length : 0));
 
-  const InPortinputs = el.input
-    .filter(input => isNonPortInput(input))
-    .map(input => Object.values(input)[0].name.length);
-  const inputDefaultWidth = Math.max(InPortinputs) * 4 || 0;
-  const nameLength = el.general.name.length * 11;
-  return 270 + nameLength + inputDefaultWidth;
+  const inputDefaultWidth = Math.max(...paramNameLength) * 25;
+
+  const nameLength = computeTitleLength(el).value;
+
+  return Math.min(Math.max(nameLength, inputDefaultWidth) + 200, maxWidth); // 200 = button and stuff width
 };
+
+const paramHeight = 55;
 
 export const computeBoxHeight = el => {
   const inputsHeight =
-    el.input.filter(input => isNonPortInput(input)).length * 45;
-  const ports = [
-    ...el.input.filter(input => input.file),
-    ...el.output.filter(input => input.file)
-  ];
-  console.log("TCL: ports", ports);
+    el.params.filter(x => isNonPortInput(x)).length * paramHeight;
+
+  const inPorts = el.ports.items.length
+    ? el.ports.items.filter(x => x.group == "in")
+    : [];
+  const outPorts = el.ports.items.length
+    ? el.ports.items.filter(x => x.group == "out")
+    : [];
+
+  const maxPortEntry = Math.max(inPorts.length, outPorts.length);
   // @TODO count input + output port
-  return Math.max(40 + inputsHeight, ports.length * 50);
+  return Math.max(maxPortEntry * 50, inputsHeight);
 };
 
 export const getWebServices = async () => {
