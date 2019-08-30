@@ -17,7 +17,9 @@ export const categoryName = {
 
 export const Inputs = {
   SELECT: { tag: "select", type: "select" },
-  NUMBER: { tag: "input", type: "number" }
+  NUMBER: { tag: "input", type: "number" },
+  FILE: { type: "file" },
+  FOLDER: { type: "folder" }
 };
 Object.freeze(Inputs);
 

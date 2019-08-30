@@ -23,7 +23,10 @@ import {
   computeBoxWidth,
   computeBoxHeight,
   objectToString,
-  computeTitleLength
+  computeTitleLength,
+  isParamInput,
+  isPort,
+  isPortUserdefined
 } from "./utils";
 import {
   INTERFACE_ROOT,
@@ -63,7 +66,7 @@ const createBox = (e, id) => {
     height: computeBoxHeight(e)
   };
 
-  const titleHeight = computeTitleLength(e).isCut ? 120 : 60;
+  const titleHeight = computeTitleLength(e).isCut ? 85 : 60;
 
   const template = `<rect></rect>
   <foreignObject class="${FOREIGN_CLASS}" id="${id}" x="0" y="-${titleHeight}" width="${
@@ -508,6 +511,12 @@ const buildGraph = async workflow => {
       addElement(e);
     });
   }
+
+  $("#save").click(() => saveWorkflow(graph.toJSON()));
+  $("#clear").click(() => clearWorkflow());
+  $("#resetZoom").click(() => changeZoom(1));
+
+  console.log($(INTERFACE_ROOT));
 };
 
 const createPort = (param, group) => {
@@ -548,7 +557,9 @@ const createPort = (param, group) => {
   return port;
 };
 
-const transformWebserviceForGraph = webservice => {
+export const transformWebserviceForGraph = webservice => {
+  if (!webservice.general) return {};
+
   const label = webservice.general.name;
   const description = webservice.general.description;
   const information = webservice.general;
@@ -556,27 +567,39 @@ const transformWebserviceForGraph = webservice => {
   // handle ports
   const ports = { items: [] };
   webservice.input
-    .filter(input => input.file || input.folder)
-    .forEach(input => ports.items.push(createPort(input, IN_PORT_CLASS)));
+    .filter(input => isPortUserdefined(input))
+    .forEach(input => {
+      const port = createPort(input, IN_PORT_CLASS);
+      if (port.group) {
+        ports.items.push(port);
+      }
+    });
 
   webservice.output
-    .filter(output => output.file || output.folder)
-    .forEach(output => ports.items.push(createPort(output, OUT_PORT_CLASS)));
+    .filter(output => isPort(output))
+    .forEach(output => {
+      const port = createPort(output, OUT_PORT_CLASS);
+      if (port.group) {
+        ports.items.push(port);
+      }
+    });
 
   // handle params
   const params = [];
-  webservice.input.forEach(input => {
-    const type = Object.keys(input)[0];
-    const obj = input[type];
-    const param = {
-      type: type,
-      name: obj.name,
-      options: obj.options,
-      description: obj.description,
-      userdefined: obj.userdefined
-    };
-    params.push(param);
-  });
+  webservice.input
+    .filter(input => isParamInput(input))
+    .forEach(input => {
+      const type = Object.keys(input)[0];
+      const obj = input[type];
+      const param = {
+        type: type,
+        name: obj.name,
+        options: obj.options,
+        description: obj.description,
+        userdefined: obj.userdefined
+      };
+      params.push(param);
+    });
 
   const ret = {
     description,
@@ -599,11 +622,5 @@ const addElementToGraph = async url => {
 const clearWorkflow = () => {
   graph.clear();
 };
-
-$("#save").click(() => saveWorkflow(graph.toJSON()));
-$("#clear").click(() => clearWorkflow());
-$("#resetZoom").click(() => changeZoom(1));
-
-console.log($(INTERFACE_ROOT));
 
 export { buildGraph, addElementToGraph };

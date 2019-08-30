@@ -66,5 +66,8 @@ module.exports = {
       hot: true,
       inline: true,
       watchContentBase: true,
+   },
+   node: {
+      fs: "empty"
    }
 };

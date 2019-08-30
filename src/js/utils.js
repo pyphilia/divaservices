@@ -1,11 +1,31 @@
-import { DIVA_SERVICES_API_URL, TOOLTIP_BREAK_LINE } from "./constants";
+import { DIVA_SERVICES_API_URL, TOOLTIP_BREAK_LINE, Inputs } from "./constants";
 
-const isNonPortInput = input => {
-  return input.type == "select" || input.type == "number";
+export const isParamInput = input => {
+  if (input.type) {
+    return input.type == Inputs.SELECT.type || input.type == Inputs.NUMBER.type;
+  }
+
+  return input[Inputs.SELECT.type] || input[Inputs.NUMBER.type];
 };
 
-const isPortInput = input => {
-  return input.userdefined && (input.type == "file" || input.type == "folder");
+export const isPort = el => {
+  if (el.type) {
+    return el.type == Inputs.FILE.type || el.type == Inputs.FOLDER.type;
+  }
+  return el[Inputs.FILE.type] || el[Inputs.FOLDER.type];
+};
+
+export const isPortUserdefined = el => {
+  if (el.type) {
+    return (
+      (el.type == Inputs.FILE.type || el.type == Inputs.FOLDER.type) &&
+      el.userdefined
+    );
+  }
+  return (
+    (el[Inputs.FILE.type] || el[Inputs.FOLDER.type]) &&
+    el[Object.keys(el)[0]].userdefined
+  );
 };
 
 const maxWidth = 650;
@@ -18,7 +38,7 @@ export const computeTitleLength = el => {
 
 export const computeBoxWidth = el => {
   const paramNameLength = el.params
-    .filter(x => isPortInput(x))
+    .filter(x => isParamInput(x))
     .map(param => (param.name ? param.name.length : 0));
 
   const inputDefaultWidth = Math.max(...paramNameLength) * 25;
@@ -32,7 +52,7 @@ const paramHeight = 55;
 
 export const computeBoxHeight = el => {
   const inputsHeight =
-    el.params.filter(x => isNonPortInput(x)).length * paramHeight;
+    el.params.filter(x => isParamInput(x)).length * paramHeight;
 
   const inPorts = el.ports.items.length
     ? el.ports.items.filter(x => x.group == "in")
