@@ -1,3 +1,8 @@
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+
+@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "~@fortawesome/fontawesome-free/scss/solid.scss";
+
 .algo-item {
   background: red;
   margin-top: 1px;
@@ -6,6 +11,12 @@
   &:hover {
     background: white;
     cursor: pointer;
+  }
+  @extend %fa-icon;
+  @extend .fab;
+
+  &:before {
+    content: fa-content($fa-var-stream);
   }
 }
 
@@ -18,8 +29,13 @@
   text-transform: uppercase;
   width: 100%;
   text-align: center;
-  background: lightgrey;
+  // background: lightgrey;
   margin: 1px 0;
   border-radius: 0;
   padding: 1rem 0.3rem;
+  color: white;
+
+  &.active {
+    background: black;
+  }
 }

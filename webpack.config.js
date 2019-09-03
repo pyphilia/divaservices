@@ -58,7 +58,18 @@ module.exports = {
             use: [
                'file-loader'
             ]
-         }
+         },
+         {
+            test: /.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/, // For Font Awesome 
+            use: [{
+               loader: 'file-loader',
+               options: {
+                  name: '[name].[ext]',
+                  outputPath: 'fonts/',    // where the fonts will go
+                  //publicPath: '../'       // override the default path
+               }
+            }]
+         },
       ]
    },
    devServer: {
@@ -66,6 +77,7 @@ module.exports = {
       hot: true,
       inline: true,
       watchContentBase: true,
+      port: 3000,
    },
    node: {
       fs: "empty"

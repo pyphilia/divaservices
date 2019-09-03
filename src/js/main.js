@@ -1,7 +1,7 @@
 import { buildLeftSidebar } from "./leftSidebar";
-// import { buildRightSidebar } from "./rightSidebar";
+import { buildRightSidebar } from "./rightSidebar";
 import { buildGraph } from "./interface";
 // main js here
 buildLeftSidebar();
-// buildRightSidebar();
+buildRightSidebar();
 buildGraph(true); //@TODO to change

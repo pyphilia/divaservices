@@ -1,1 +1,20 @@
 $fontColor: white;
+
+$category-colors: (
+  "activelearning": #ddcb77,
+  "binarization": #d38e7d,
+  "enhancement": #d37592,
+  "evaluation": #9b7898,
+  "graph": #6f69a2,
+  "imageprocessing": #76a6d6,
+  "kws": #6dacb4,
+  "objectdetection": #6baa9a,
+  "ocr": #a7ca78,
+  "segmentation": #e0e47c
+);
+
+@each $category, $color in $category-colors {
+  .#{$category} {
+    background-color: $color;
+  }
+}

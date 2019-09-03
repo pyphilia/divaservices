@@ -9,7 +9,8 @@ const addWebservice = async (webservices, name) => {
   const algo = webservices.filter(service => service.name == name);
   if (algo.length) {
     const url = algo[0].url;
-    await addElementToGraph(url);
+    const category = algo[0].type;
+    await addElementToGraph(url, category);
   } else {
     console.error(`${name} doesnt exist`);
   }
@@ -26,7 +27,7 @@ export const buildLeftSidebar = async () => {
 
   for (let service of Object.keys(servicesPerCategory).sort()) {
     // create tab menu
-    const menuItem = $(`<a class="nav-link" id="v-pills-${service}-tab" data-toggle="pill" href="#v-pills-${service}" role="tab"
+    const menuItem = $(`<a class="nav-link ${service}" id="v-pills-${service}-tab" data-toggle="pill" href="#v-pills-${service}" role="tab"
         aria-controls="v-pills-${service}" aria-selected="false"></a>`).text(
       categoryName[service]
     );

@@ -2,7 +2,6 @@
 import "select2";
 import * as $ from "jquery";
 import * as joint from "jointjs";
-import { saveWorkflow } from "./saveWorkflow";
 import {
   TOOLTIP_HTML,
   THEME,
@@ -46,7 +45,7 @@ import {
 
 let paper;
 const graph = new joint.dia.Graph();
-let currentScale = 1;
+let lastTranslate = { tx: 0, ty: 0 };
 
 const setSelectValueInElement = (element, select) => {
   const selectedValue = select.find(":selected").attr("value");
@@ -58,9 +57,11 @@ const setInputValueInElement = (element, input) => {
   element.attributes.params[input.attr("name")] = value;
 };
 
-const createBox = (e, id) => {
-  const margin = 30;
+export const getGraph = () => {
+  return graph;
+};
 
+const createBox = (e, id) => {
   const size = {
     width: computeBoxWidth(e),
     height: computeBoxHeight(e)
@@ -74,7 +75,7 @@ const createBox = (e, id) => {
   }" height="${size.height + titleHeight}">
   <body xmlns="http://www.w3.org/1999/xhtml">
   <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
-  <div class="${TITLE_ROW_CLASS} row">
+  <div class="${TITLE_ROW_CLASS} ${e.category} row">
   <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${
     e.label
   }</${BOX_TITLE_HTML_TAG}>
@@ -83,8 +84,14 @@ const createBox = (e, id) => {
   </body>
   </foreignObject>`;
 
-  const paperPosition = paper.translate();
-  const position = { x: -paperPosition.tx + 100, y: -paperPosition.ty + 100 };
+  const bcr = paper.svg.getBoundingClientRect();
+  const paperLocalRect = paper.clientToLocalRect({
+    x: bcr.left,
+    y: bcr.top,
+    width: bcr.width,
+    height: bcr.height
+  });
+  const position = { x: paperLocalRect.x + 100, y: paperLocalRect.y + 100 };
 
   return joint.shapes.basic.Rect.define(
     e.label,
@@ -236,13 +243,19 @@ const addElement = e => {
           .addClass(`${PARAM_NAME_CLASS} ${NAME_COL}`)
           .text(name);
 
+        const options = param.options;
         // param input
         const inputEl = $(`<${Inputs.NUMBER.tag} />`)
-          .addClass(PARAM_COL)
+          .addClass(`${PARAM_COL} form-control`)
           .prop("disabled", !param.userdefined)
+          .prop("required", options.required)
           .attr("type", "text")
           .attr("name", name)
-          .attr("value", param.options.default);
+          .attr("data-min", options.min)
+          .attr("data-max", options.max)
+          .attr("data-steps", options.steps)
+          .attr("data-default", options.default)
+          .attr("value", options.default);
 
         // reset
         const resetButtonNumber = resetButton.clone(true);
@@ -331,12 +344,35 @@ const addElement = e => {
     // update param
     $(this).on("blur", function() {
       setInputValueInElement(element, $(this));
+
+      // check value
+      const currentVal = $(this).val();
+      const currentMin = $(this).data("min");
+      const currentMax = $(this).data("max");
+      const currentSteps = $(this).data("steps");
+
+      const minCondition = currentMin ? currentVal >= currentMin : true;
+      const maxCondition = currentMax ? currentVal <= currentMax : true;
+      const stepCondition = currentSteps
+        ? Number.isInteger(currentVal / currentSteps)
+        : true;
+
+      const isValid = minCondition && maxCondition && stepCondition;
+
+      $(this).toggleClass("is-invalid", !isValid);
     });
 
     $(this).click(function() {
       $(this).select();
     });
   });
+};
+
+export const fitContent = () => {
+  paper.scaleContentToFit({
+    padding: 20
+  });
+  lastTranslate = paper.translate();
 };
 
 const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
@@ -376,15 +412,34 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
   return true;
 };
 
-const changeZoom = scale => {
-  /** 
-        var bcr = paper.svg.getBoundingClientRect();
-        var localRect1 = paper.clientToLocalRect({ x: bcr.left, y: bcr.top, width: bcr.width, height: bcr.height });*/
-  const paperPosition = paper.translate();
-  let tx = -paperPosition.tx + 400 * currentScale;
-  let ty = -paperPosition.ty + 400 * currentScale;
-  paper.scale(scale, scale, tx, ty);
-  currentScale = scale;
+export const resetZoom = () => {
+  const bcr = paper.svg.getBoundingClientRect();
+  const paperLocalRect = paper.clientToLocalRect({
+    x: bcr.left,
+    y: bcr.top,
+    width: bcr.width,
+    height: bcr.height
+  });
+  changeZoom(
+    1,
+    paperLocalRect.x + paperLocalRect.width / 2,
+    paperLocalRect.y + paperLocalRect.height / 2,
+    true
+  );
+};
+
+const changeZoom = (delta, x, y, reset) => {
+  let newScale;
+  if (!reset) {
+    newScale = paper.scale().sx + delta / 35; // the current paper scale changed by delta
+  } else {
+    newScale = 1;
+  }
+  if (newScale <= 1) {
+    // newScale > 0.4 &&
+    paper.translate(lastTranslate.tx, lastTranslate.ty);
+    paper.scale(newScale, newScale, x, y);
+  }
 };
 
 const initPaper = () => {
@@ -422,19 +477,13 @@ const initPaper = () => {
 
   /**********ZOOM*/
 
-  const onMouseWheel = e => {
-    e.preventDefault();
-    e = e.originalEvent;
+  paper.on("blank:mousewheel", (evt, x, y, delta) => {
+    changeZoom(delta, x, y);
+  });
 
-    var delta = Math.max(-1, Math.min(1, e.wheelDelta || -e.detail)) / 50;
-    var newScale = currentScale + delta; // the current paper scale changed by delta
-
-    if (newScale > 0.4 && newScale < 1) {
-      // paper.setOrigin(-paper.translate().tx, -paper.translate().ty); // reset the previous viewport translation
-      changeZoom(newScale);
-    }
-  };
-  paper.$el.on("mousewheel DOMMouseScroll", onMouseWheel);
+  paper.on("element:mousewheel", (e, evt, x, y, delta) => {
+    changeZoom(delta, x, y);
+  });
 
   /*------------PAN */
   let move = false;
@@ -446,14 +495,16 @@ const initPaper = () => {
   });
 
   paper.on("cell:pointerup blank:pointerup", () => {
+    lastTranslate = paper.translate();
     move = false;
   });
 
   $(INTERFACE_ROOT).mousemove(event => {
     if (move) {
-      const newX = event.offsetX / currentScale - dragStartPosition.x;
-      const newY = event.offsetY / currentScale - dragStartPosition.y;
-      paper.translate(newX * currentScale, newY * currentScale);
+      const currentScale = paper.scale();
+      const newX = event.offsetX / currentScale.sx - dragStartPosition.x;
+      const newY = event.offsetY / currentScale.sy - dragStartPosition.y;
+      paper.translate(newX * currentScale.sx, newY * currentScale.sy);
     }
   });
 
@@ -487,9 +538,7 @@ const initPaper = () => {
 
   // unfocus inputs when clicks
   paper.on("blank:pointerdown", () => {
-    $("input").each(function() {
-      $(this).blur();
-    });
+    $("input:focus").blur();
   });
 
   /*-----------------------*/
@@ -512,10 +561,6 @@ const buildGraph = async workflow => {
     });
   }
 
-  $("#save").click(() => saveWorkflow(graph.toJSON()));
-  $("#clear").click(() => clearWorkflow());
-  $("#resetZoom").click(() => changeZoom(1));
-
   console.log($(INTERFACE_ROOT));
 };
 
@@ -529,9 +574,9 @@ const createPort = (param, group) => {
     let type;
 
     // folder case
-    if (param.folder) {
-      typeAllowed = ["folder"]; // use options allowed types, otherwise it is a folder
-      type = "folder";
+    if (param[Inputs.FOLDER.type]) {
+      typeAllowed = [Inputs.FOLDER.type]; // use options allowed types, otherwise it is a folder
+      type = Inputs.FOLDER.type;
     } else {
       // @TODO display !userdefined ports ?
       typeAllowed = obj.options.mimeTypes.allowed;
@@ -544,6 +589,7 @@ const createPort = (param, group) => {
 
     port = {
       group,
+      name: obj.name,
       attrs: {
         [PORT_SELECTOR]: {
           fill: colorType(type),
@@ -557,7 +603,7 @@ const createPort = (param, group) => {
   return port;
 };
 
-export const transformWebserviceForGraph = webservice => {
+export const transformWebserviceForGraph = (webservice, category) => {
   if (!webservice.general) return {};
 
   const label = webservice.general.name;
@@ -606,16 +652,20 @@ export const transformWebserviceForGraph = webservice => {
     label,
     params,
     ports,
-    information
+    information,
+    category
   };
   console.log("webservice", webservice);
   console.log("return", ret);
   return ret;
 };
 
-const addElementToGraph = async url => {
+const addElementToGraph = async (url, category) => {
   const webservice = await getWebServiceFromUrl(url);
-  const transformedWebservice = transformWebserviceForGraph(webservice);
+  const transformedWebservice = transformWebserviceForGraph(
+    webservice,
+    category
+  );
   addElement(transformedWebservice);
 };
 

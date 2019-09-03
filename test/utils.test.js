@@ -1,4 +1,4 @@
-import { isParamInput, isPort } from "../src/js/utils";
+import { isParamInput, isPort, isPortUserdefined } from "../src/js/utils";
 import { Inputs } from "../src/js/constants";
 
 const fileUserdefinedTrue = { type: Inputs.FILE.type, userdefined: true };
@@ -59,20 +59,50 @@ describe("isPort", () => {
   ])("returns false for params", e => {
     expect(isPort(e)).toBeFalsy();
   });
+
+  test.each([
+    fileUserdefinedFalse,
+    webserviceFileUserdefinedFalse,
+    folderUserdefinedFalse,
+    webserviceFolderUserdefinedFalse,
+    fileUserdefinedTrue,
+    webserviceFileUserdefinedTrue,
+    folderUserdefinedTrue,
+    webserviceFolderUserdefinedTrue
+  ])("returns true for ports", e => {
+    expect(isPort(e)).toBeTruthy();
+  });
+});
+
+describe("isPortUserdefined", () => {
+  test.each([
+    selectUserdefinedFalse,
+    webserviceSelectUserdefinedFalse,
+    numberUserdefinedFalse,
+    webserviceNumberUserdefinedFalse,
+    selectUserdefinedTrue,
+    webserviceSelectUserdefinedTrue,
+    numberUserdefinedTrue,
+    webserviceNumberUserdefinedTrue
+  ])("returns false for params", e => {
+    expect(isPortUserdefined(e)).toBeFalsy();
+  });
+
   test.each([
     fileUserdefinedFalse,
     webserviceFileUserdefinedFalse,
     folderUserdefinedFalse,
     webserviceFolderUserdefinedFalse
   ])("returns false for non userdefined ports", e => {
-    expect(isPort(e)).toBeFalsy();
+    expect(isPortUserdefined(e)).toBeFalsy();
   });
+
   test.each([
     fileUserdefinedTrue,
     webserviceFileUserdefinedTrue,
     folderUserdefinedTrue,
     webserviceFolderUserdefinedTrue
   ])("returns true for userdefined ports", e => {
-    expect(isPort(e)).toBeTruthy();
+    expect(isPortUserdefined(e)).toBeTruthy();
   });
 });

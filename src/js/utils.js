@@ -49,6 +49,7 @@ export const computeBoxWidth = el => {
 };
 
 const paramHeight = 55;
+const defaultHeight = 40;
 
 export const computeBoxHeight = el => {
   const inputsHeight =
@@ -63,7 +64,7 @@ export const computeBoxHeight = el => {
 
   const maxPortEntry = Math.max(inPorts.length, outPorts.length);
   // @TODO count input + output port
-  return Math.max(maxPortEntry * 50, inputsHeight);
+  return Math.max(defaultHeight, maxPortEntry * 50, inputsHeight);
 };
 
 export const getWebServices = async () => {

@@ -1,4 +1,6 @@
 import $ from "jquery";
+import { saveWorkflow } from "./saveWorkflow";
+import { getGraph, resetZoom, fitContent } from "./interface";
 
 const newWorkflow = () => {
   console.log("newWorkflow");
@@ -8,8 +10,9 @@ const openWorkflow = () => {
   console.log("openWorkflow");
 };
 
-const saveWorkflow = () => {
+const save = () => {
   console.log("saveWorkflow");
+  saveWorkflow(getGraph().toJSON());
 };
 
 const installWorkflow = () => {
@@ -18,6 +21,7 @@ const installWorkflow = () => {
 
 const clearWorkflow = () => {
   console.log("clearWorkflow");
+  getGraph().clear();
 };
 
 const openSettings = () => {
@@ -42,4 +46,9 @@ export const buildRightSidebar = () => {
     });
     $("#right-sidebar nav").append(menuItemElem);
   }
+
+  $("#save").click(() => save());
+  $("#clear").click(() => clearWorkflow());
+  $("#resetZoom").click(() => resetZoom());
+  $("#fitContent").click(() => fitContent());
 };
