@@ -1,11 +1,17 @@
 export const INTERFACE_ROOT = "#paper-html-elements";
 
+export const PARAMETER_INPUTS = "inputs";
+export const PARAMETER_SELECTS = "selects";
+
 export const TRASH_SELECTOR = "#trash";
 
 export const PORT_SELECTOR = "portBody";
 export const PORT_LABEL_CLASS = "joint-port-label";
 
 export const INFO_TOOLTIP_CLASS = "tooltip-info-button";
+export const TOOLTIP_CLASS = "tooltip-class";
+
+export const NO_PARAMETER_CLASS = "no-parameter";
 
 export const PARAM_NAME_CLASS = "param-name";
 
@@ -22,3 +28,8 @@ export const ATTR_TYPE = "type";
 
 export const OUT_PORT_CLASS = "out";
 export const IN_PORT_CLASS = "in";
+
+export const OPTION_PORT_DETAILS = "option-port-details";
+export const OPTION_PORTS = "option-ports";
+export const OPTION_PARAMETERS = "option-parameters";
+export const OPTION_TOOLTIPS = "option-tooltips";

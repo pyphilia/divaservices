@@ -15,14 +15,12 @@ import {
   PARAM_COL,
   TOOLTIP_BOX_COL,
   TITLE_COL,
-  Inputs
+  Inputs,
+  DEFAULT_OPTIONS
 } from "./constants";
 import {
   getWebServiceFromUrl,
-  computeBoxWidth,
-  computeBoxHeight,
   objectToString,
-  computeTitleLength,
   isParamInput,
   isPort,
   isPortUserdefined
@@ -37,24 +35,173 @@ import {
   RESET_BUTTON_CLASS,
   IN_PORT_CLASS,
   OUT_PORT_CLASS,
-  PORT_LABEL_CLASS
+  TOOLTIP_CLASS,
+  NO_PARAMETER_CLASS,
+  OPTION_PORT_DETAILS,
+  OPTION_PARAMETERS,
+  OPTION_PORTS,
+  OPTION_TOOLTIPS,
+  PARAMETER_SELECTS,
+  PARAMETER_INPUTS
 } from "./selectors";
 import { getPaper, getGraph } from "./interface";
 
-export const setThemeOptions = () => {
-  $("#show-port-details").change(function() {
-    changePortDetails(this);
-  });
+let {
+  showPortDetails,
+  showParameters,
+  showPorts,
+  showTooltips
+} = DEFAULT_OPTIONS;
+
+const maxWidth = 650;
+const titleFontSize = 18;
+const paramHeight = 55;
+const defaultHeight = 40;
+
+export const computeTitleLength = (el, fromSVG = false) => {
+  let titleLength;
+  if (fromSVG) {
+    titleLength = el.attributes.type.length;
+  } else {
+    titleLength = el.label.length;
+  }
+  const value = Math.min(titleLength * titleFontSize, maxWidth);
+  return {
+    value,
+    titleHeight: titleLength * titleFontSize > maxWidth ? 80 : 60
+  };
 };
 
-const changePortDetails = el => {
-  if ($(el).prop("checked")) {
+const computeBoxWidth = (el, fromSVG = false) => {
+  let getNameLengths;
+  if (fromSVG) {
+    getNameLengths = Object.keys(el.attributes.params).map(name => name.length);
+  } else {
+    getNameLengths = el.params
+      .filter(x => isParamInput(x))
+      .map(param => (param.name ? param.name.length : 0));
+  }
+  const paramNameLength = showParameters ? getNameLengths : [0];
+
+  const inputDefaultWidth = Math.max(...paramNameLength) * 25;
+
+  const nameLength = computeTitleLength(el, fromSVG).value;
+
+  return Math.min(Math.max(nameLength, inputDefaultWidth) + 200, maxWidth); // 200 = button and stuff width
+};
+
+const computeBoxHeight = (el, fromSVG = false) => {
+  let nbParam;
+  let ports;
+  if (fromSVG) {
+    nbParam = Object.keys(el.attributes.params).length;
+    ports = el.attributes.ports.items;
+  } else {
+    nbParam = el.params.filter(x => isParamInput(x)).length;
+    ports = el.ports.items;
+  }
+  const inputsHeight = showParameters ? nbParam * paramHeight : 0;
+
+  const inPorts = ports.length
+    ? ports.filter(x => x.group == IN_PORT_CLASS)
+    : [];
+  const outPorts = ports.length
+    ? ports.filter(x => x.group == OUT_PORT_CLASS)
+    : [];
+
+  const maxPortEntry = Math.max(inPorts.length, outPorts.length);
+  // @TODO count input + output port
+  return Math.max(defaultHeight, maxPortEntry * 50, inputsHeight);
+};
+
+const changePortDetails = () => {
+  if (showPortDetails) {
     // show prop details
-    $(`.${PORT_LABEL_CLASS}`).css("display", "block");
+    for (const el of getGraph().getElements()) {
+      for (const port of el.getPorts()) {
+        el.portProp(port.id, "attrs/text/display", "block");
+      }
+    }
   } else {
     // hide prop details
-    $(`.${PORT_LABEL_CLASS}`).css("display", "none");
+    for (const el of getGraph().getElements()) {
+      for (const port of el.getPorts()) {
+        el.portProp(port.id, "attrs/text/display", "none");
+      }
+    }
   }
+};
+
+const changePorts = () => {
+  if (showPorts) {
+    // show prop details
+    for (const el of getGraph().getElements()) {
+      for (const port of el.getPorts()) {
+        el.portProp(port.id, "attrs/circle/display", "block");
+      }
+    }
+  } else {
+    // hide prop details
+    for (const el of getGraph().getElements()) {
+      for (const port of el.getPorts()) {
+        el.portProp(port.id, "attrs/circle/display", "none");
+      }
+    }
+  }
+};
+
+const changeTooltips = () => {
+  if (showTooltips) {
+    // show prop details
+    $(`.${TOOLTIP_CLASS}`).show();
+  } else {
+    // hide prop details
+    $(`.${TOOLTIP_CLASS}`).hide();
+  }
+};
+
+const changeParameters = el => {
+  if (showParameters) {
+    $(`.${PARAMETER_INPUTS}`).show();
+    $(`.${PARAMETER_SELECTS}`).show();
+    $(`.${NO_PARAMETER_CLASS}`).show();
+  } else {
+    $(`.${PARAMETER_INPUTS}`).hide();
+    $(`.${PARAMETER_SELECTS}`).hide();
+    $(`.${NO_PARAMETER_CLASS}`).hide();
+  }
+  for (const e of getGraph().getElements()) {
+    const newWidth = computeBoxWidth(e, true);
+    const newHeight = computeBoxHeight(e, true);
+    e.resize(newWidth, newHeight);
+    $(`g[model-id=${e.id}] foreignObject`)
+      .attr("width", newWidth)
+      .attr("height", newHeight + computeTitleLength(e, true).titleHeight);
+  }
+};
+
+export const setThemeOptions = () => {
+  $(`#${OPTION_PORT_DETAILS}`).prop("checked", showPortDetails);
+  $(`#${OPTION_PORT_DETAILS}`).change(function() {
+    showPortDetails = $(this).prop("checked");
+    changePortDetails();
+  });
+
+  $(`#${OPTION_PARAMETERS}`).prop("checked", showParameters);
+  $(`#${OPTION_PARAMETERS}`).change(function() {
+    showParameters = $(this).prop("checked");
+    changeParameters();
+  });
+  $(`#${OPTION_PORTS}`).prop("checked", showPorts);
+  $(`#${OPTION_PORTS}`).change(function() {
+    showPorts = $(this).prop("checked");
+    changePorts();
+  });
+  $(`#${OPTION_TOOLTIPS}`).prop("checked", showTooltips);
+  $(`#${OPTION_TOOLTIPS}`).change(function() {
+    showTooltips = $(this).prop("checked");
+    changeTooltips();
+  });
 };
 
 export const setPaperEvents = paper => {
@@ -64,36 +211,14 @@ export const setPaperEvents = paper => {
   });
 };
 
-function resetValue(event) {
-  const el = event.target;
-  const defaultValue = el.dataset.value;
-  switch (el.dataset.parent) {
-    case Inputs.SELECT.tag: {
-      const select = el.parentNode.getElementsByTagName(Inputs.SELECT.tag)[0];
-      $(select)
-        .val(defaultValue)
-        .trigger("change");
-      break;
-    }
-    case Inputs.NUMBER.tag:
-      el.parentNode.getElementsByTagName(
-        Inputs.NUMBER.tag
-      )[0].value = defaultValue;
-      break;
-    default:
-      alert("error");
-  }
-}
-
 const createBox = (e, id) => {
   const size = {
     width: computeBoxWidth(e),
     height: computeBoxHeight(e)
   };
+  const { titleHeight } = computeTitleLength(e);
 
-  const titleHeight = computeTitleLength(e).isCut ? 85 : 60;
-
-  const template = `<rect></rect>
+  const template = `<g class="scalable"><rect></rect></g>
     <foreignObject class="${FOREIGN_CLASS}" id="${id}" x="0" y="-${titleHeight}" width="${
     size.width
   }" height="${size.height + titleHeight}">
@@ -172,27 +297,49 @@ const setInputValueInElement = (element, input) => {
   element.attributes.params[input.attr("name")] = value;
 };
 
+function resetValue(event) {
+  const el = event.target;
+  const defaultValue = el.dataset.value;
+  switch (el.dataset.parent) {
+    case Inputs.SELECT.tag: {
+      const select = el.parentNode.getElementsByTagName(Inputs.SELECT.tag)[0];
+      $(select)
+        .val(defaultValue)
+        .trigger("change");
+      break;
+    }
+    case Inputs.NUMBER.tag:
+      el.parentNode.getElementsByTagName(
+        Inputs.NUMBER.tag
+      )[0].value = defaultValue;
+      break;
+    default:
+      alert("error");
+  }
+}
+
 // Create a custom element.
 // ------------------------
 export const addElement = e => {
   const id = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
   const Box = createBox(e, id);
   const element = new Box();
+
   element.addTo(getGraph());
 
   // add params
-  const selects = $("<div></div>").addClass("selects");
-  const inputs = $("<div></div>").addClass("inputs");
+  const selects = $("<div></div>").addClass(PARAMETER_SELECTS);
+  const inputs = $("<div></div>").addClass(PARAMETER_INPUTS);
 
   const resetButton = $("<button></button>")
     .addClass(`${RESET_BUTTON_CLASS} btn ${RESET_COL}`)
     .text("Reset")
     .on("click", resetValue);
 
-  e.params.forEach(param => {
+  for (const param of e.params) {
     const name = param.name;
     const defaultTooltip = $(TOOLTIP_HTML)
-      .addClass(`${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
+      .addClass(`${TOOLTIP_CLASS} ${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
       .data("id", name)
       .data("param", e.label)
       .data("toggle", "tooltip")
@@ -216,13 +363,13 @@ export const addElement = e => {
           .text(name);
 
         // param options
-        param.options.values.forEach((values, i) => {
+        for (const [i, values] of param.options.values.entries()) {
           $("<option></option>")
             .text(values)
             .attr("value", values)
             .prop("selected", i == param.options.default)
             .appendTo(selectEl);
-        });
+        }
 
         newSelect
           .append(nameEl)
@@ -297,20 +444,35 @@ export const addElement = e => {
         break;
       }
       default:
+        alert("not handled type : ", param.type);
     }
-  });
+  }
 
   // add params to boxes
   const foreignObject = $(`foreignObject#${id} body`);
-  foreignObject
+  const container = foreignObject
     .find(`.${BOX_CONTAINER_CLASS}`)
     .append(inputs)
     .append(selects);
 
+  let noParameter = $();
+  if (inputs.children().length + selects.children().length == 0) {
+    noParameter = $(`<div class="${NO_PARAMETER_CLASS}"></div>`)
+      .text("No parameter")
+      .appendTo(container);
+  }
+
+  // hide parameters depending on theme options
+  if (!showParameters) {
+    selects.hide();
+    inputs.hide();
+    noParameter.hide();
+  }
+
   // main tooltip
   if (e.description) {
     $(TOOLTIP_HTML)
-      .addClass(`tooltip-box ${TOOLTIP_BOX_COL}`)
+      .addClass(`${TOOLTIP_CLASS} tooltip-box ${TOOLTIP_BOX_COL}`)
       .data("title", e.description)
       .data("toggle", "tooltip")
       .data("placement", "right")
@@ -414,7 +576,10 @@ const createPort = (param, group) => {
           type,
           typeAllowed
         },
-        text: { text: `${obj.name}\n${typeAllowed}` }
+        text: {
+          text: `${obj.name}\n${typeAllowed}`,
+          display: showParameters ? "block" : "none"
+        }
       }
     };
   }

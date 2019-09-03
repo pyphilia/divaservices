@@ -39,12 +39,12 @@ export const buildLeftSidebar = async () => {
     );
     $(`#algo-items`).append(currentTab);
 
-    servicesPerCategory[service].forEach(({ name }) => {
+    for (const { name } of servicesPerCategory[service]) {
       const algoItem = $('<div class="algo-item"></div>').text(name);
       algoItem.on("click", function() {
         addWebservice(webservices, name);
       });
       currentTab.append(algoItem);
-    });
+    }
   }
 };

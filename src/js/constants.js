@@ -79,6 +79,9 @@ export const THEME = {
           r: 12,
           fill: "darkblue",
           stroke: "black"
+        },
+        text: {
+          // display:'none',
         }
       },
       z: 5,
@@ -101,11 +104,16 @@ export const THEME = {
       z: 5,
       label: {
         position: {
-          name: "right",
-          fill: "#123456",
-          textAnchor: "middle"
+          name: "right"
         }
       }
     }
   }
+};
+
+export const DEFAULT_OPTIONS = {
+  showParameters: true,
+  showPortDetails: true,
+  showPorts: true,
+  showTooltips: true
 };
