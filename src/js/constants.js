@@ -51,6 +51,8 @@ export const colorType = type => {
   }
 };
 
+export const THEMES = {};
+
 export const THEME = {
   magnetAvailabilityHighlighter: {
     name: "stroke",

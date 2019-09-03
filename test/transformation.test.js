@@ -1,5 +1,5 @@
 import { IN_PORT_CLASS, OUT_PORT_CLASS } from "../src/js/selectors";
-import { transformWebserviceForGraph } from "../src/js/interface";
+import { transformWebserviceForGraph } from "../src/js/theme";
 
 const none = {};
 const empty = {

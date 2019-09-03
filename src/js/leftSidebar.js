@@ -3,7 +3,7 @@ import $ from "jquery";
 import groupBy from "lodash.groupby";
 import { categoryName } from "./constants";
 import { getWebServices } from "./utils";
-import { addElementToGraph } from "./interface";
+import { addElementToGraph } from "./theme";
 
 const addWebservice = async (webservices, name) => {
   const algo = webservices.filter(service => service.name == name);

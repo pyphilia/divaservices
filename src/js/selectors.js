@@ -3,6 +3,7 @@ export const INTERFACE_ROOT = "#paper-html-elements";
 export const TRASH_SELECTOR = "#trash";
 
 export const PORT_SELECTOR = "portBody";
+export const PORT_LABEL_CLASS = "joint-port-label";
 
 export const INFO_TOOLTIP_CLASS = "tooltip-info-button";
 
