@@ -55,9 +55,14 @@ module.exports = {
          },
          {
             test: /\.(png|svg|jpg|gif)$/,
-            use: [
-               'file-loader'
-            ]
+            use: [{
+               loader: 'file-loader',
+               options: {
+                  name: '[name].[ext]',
+                  outputPath: 'images/',    // where the fonts will go
+                  publicPath: './images/'       // override the default path
+               }
+            }]
          },
          {
             test: /.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/, // For Font Awesome 
@@ -66,7 +71,7 @@ module.exports = {
                options: {
                   name: '[name].[ext]',
                   outputPath: 'fonts/',    // where the fonts will go
-                  //publicPath: '../'       // override the default path
+                  publicPath: '../fonts/'       // override the default path
                }
             }]
          },

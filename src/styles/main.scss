@@ -1,6 +1,12 @@
 @import "~bootstrap/scss/bootstrap";
 @import "~jointjs/dist/joint.css";
 @import "~select2/dist/css/select2.css";
+
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+
+@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "~@fortawesome/fontawesome-free/scss/solid.scss";
+
 @import "./theme";
 
 @import "./header.scss";
@@ -10,7 +16,7 @@
 body,
 html {
   background: white;
-  font-family: arial;
+  font-family: $font-primary;
   height: 100%;
   overflow: hidden;
 }

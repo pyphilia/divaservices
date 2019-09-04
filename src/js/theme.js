@@ -13,6 +13,7 @@ import {
   RESET_COL,
   TOOLTIP_COL,
   PARAM_COL,
+  ICON_COL,
   TOOLTIP_BOX_COL,
   TITLE_COL,
   Inputs,
@@ -57,6 +58,8 @@ const maxWidth = 650;
 const titleFontSize = 18;
 const paramHeight = 55;
 const defaultHeight = 40;
+const titleHeightOneLine = 60;
+const titleHeightTwoLine = 80;
 
 export const computeTitleLength = (el, fromSVG = false) => {
   let titleLength;
@@ -68,7 +71,10 @@ export const computeTitleLength = (el, fromSVG = false) => {
   const value = Math.min(titleLength * titleFontSize, maxWidth);
   return {
     value,
-    titleHeight: titleLength * titleFontSize > maxWidth ? 80 : 60
+    titleHeight:
+      titleLength * titleFontSize > maxWidth
+        ? titleHeightTwoLine
+        : titleHeightOneLine
   };
 };
 
@@ -162,21 +168,22 @@ const changeTooltips = () => {
 
 const changeParameters = el => {
   if (showParameters) {
-    $(`.${PARAMETER_INPUTS}`).show();
-    $(`.${PARAMETER_SELECTS}`).show();
-    $(`.${NO_PARAMETER_CLASS}`).show();
+    $(
+      `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
+    ).show();
   } else {
-    $(`.${PARAMETER_INPUTS}`).hide();
-    $(`.${PARAMETER_SELECTS}`).hide();
-    $(`.${NO_PARAMETER_CLASS}`).hide();
+    $(
+      `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
+    ).hide();
   }
   for (const e of getGraph().getElements()) {
     const newWidth = computeBoxWidth(e, true);
     const newHeight = computeBoxHeight(e, true);
     e.resize(newWidth, newHeight);
-    $(`g[model-id=${e.id}] foreignObject`)
-      .attr("width", newWidth)
-      .attr("height", newHeight + computeTitleLength(e, true).titleHeight);
+    $(`g[model-id=${e.id}] foreignObject`).attr({
+      width: newWidth,
+      height: newHeight + computeTitleLength(e, true).titleHeight
+    });
   }
 };
 
@@ -184,6 +191,7 @@ export const setThemeOptions = () => {
   $(`#${OPTION_PORT_DETAILS}`).prop("checked", showPortDetails);
   $(`#${OPTION_PORT_DETAILS}`).change(function() {
     showPortDetails = $(this).prop("checked");
+    console.log("TCL: setThemeOptions -> showPortDetails", showPortDetails);
     changePortDetails();
   });
 
@@ -224,7 +232,10 @@ const createBox = (e, id) => {
   }" height="${size.height + titleHeight}">
     <body xmlns="http://www.w3.org/1999/xhtml">
     <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
-    <div class="${TITLE_ROW_CLASS} ${e.category} row">
+    <div class="${TITLE_ROW_CLASS} ${
+    e.category
+  } row justify-content-start" style="height:${titleHeight}px">
+    <div class="${ICON_COL} icon"></div>
     <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${
     e.label
   }</${BOX_TITLE_HTML_TAG}>
@@ -340,10 +351,12 @@ export const addElement = e => {
     const name = param.name;
     const defaultTooltip = $(TOOLTIP_HTML)
       .addClass(`${TOOLTIP_CLASS} ${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
-      .data("id", name)
-      .data("param", e.label)
-      .data("toggle", "tooltip")
-      .data("placement", "right");
+      .data({
+        id: name,
+        param: e.label,
+        toggle: "tooltip",
+        placement: "right"
+      });
 
     switch (param.type) {
       case Inputs.SELECT.type: {
@@ -371,16 +384,15 @@ export const addElement = e => {
             .appendTo(selectEl);
         }
 
-        newSelect
-          .append(nameEl)
-          .append(selectEl)
-          .appendTo(selects);
+        newSelect.append(nameEl, selectEl).appendTo(selects);
 
         // reset
         resetButton
           .clone(true)
-          .attr("data-parent", "select")
-          .attr("data-value", param.options.values[param.options.default])
+          .attr({
+            "data-parent": "select",
+            "data-value": param.options.values[param.options.default]
+          })
           .appendTo(newSelect);
 
         // add tooltip
@@ -408,27 +420,25 @@ export const addElement = e => {
         // param input
         const inputEl = $(`<${Inputs.NUMBER.tag} />`)
           .addClass(`${PARAM_COL} form-control`)
-          .prop("disabled", !param.userdefined)
-          .prop("required", options.required)
-          .attr("type", "text")
-          .attr("name", name)
-          .attr("data-min", options.min)
-          .attr("data-max", options.max)
-          .attr("data-steps", options.steps)
-          .attr("data-default", options.default)
-          .attr("value", options.default);
+          .prop({ disabled: !param.userdefined, required: options.required })
+          .attr({
+            type: "text",
+            name: name,
+            "data-min": options.min,
+            "data-max": options.max,
+            "data-steps": options.steps,
+            "data-default": options.default,
+            value: options.default
+          });
 
         // reset
         const resetButtonNumber = resetButton.clone(true);
-        resetButtonNumber
-          .attr("data-parent", "input")
-          .attr("data-value", param.options.default);
+        resetButtonNumber.attr({
+          "data-parent": "input",
+          "data-value": param.options.default
+        });
 
-        newInput
-          .append(nameEl)
-          .append(inputEl)
-          .append(resetButtonNumber)
-          .appendTo(inputs);
+        newInput.append(nameEl, inputEl, resetButtonNumber).appendTo(inputs);
 
         // add tooltip
         if (param.description || param.options.length) {
@@ -452,8 +462,7 @@ export const addElement = e => {
   const foreignObject = $(`foreignObject#${id} body`);
   const container = foreignObject
     .find(`.${BOX_CONTAINER_CLASS}`)
-    .append(inputs)
-    .append(selects);
+    .append(inputs, selects);
 
   let noParameter = $();
   if (inputs.children().length + selects.children().length == 0) {
@@ -473,9 +482,7 @@ export const addElement = e => {
   if (e.description) {
     $(TOOLTIP_HTML)
       .addClass(`${TOOLTIP_CLASS} tooltip-box ${TOOLTIP_BOX_COL}`)
-      .data("title", e.description)
-      .data("toggle", "tooltip")
-      .data("placement", "right")
+      .data({ title: e.description, toggle: "tooltip", placement: "right" })
       .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`))
       .tooltip(TOOLTIP_OPTIONS);
   }
@@ -523,15 +530,11 @@ export const addElement = e => {
 
       // check value
       const currentVal = $(this).val();
-      const currentMin = $(this).data("min");
-      const currentMax = $(this).data("max");
-      const currentSteps = $(this).data("steps");
+      const { min, max, steps } = $(this).data();
 
-      const minCondition = currentMin ? currentVal >= currentMin : true;
-      const maxCondition = currentMax ? currentVal <= currentMax : true;
-      const stepCondition = currentSteps
-        ? Number.isInteger(currentVal / currentSteps)
-        : true;
+      const minCondition = min ? currentVal >= min : true;
+      const maxCondition = max ? currentVal <= max : true;
+      const stepCondition = steps ? Number.isInteger(currentVal / steps) : true;
 
       const isValid = minCondition && maxCondition && stepCondition;
 
@@ -578,7 +581,7 @@ const createPort = (param, group) => {
         },
         text: {
           text: `${obj.name}\n${typeAllowed}`,
-          display: showParameters ? "block" : "none"
+          display: showPortDetails ? "block" : "none"
         }
       }
     };
@@ -587,11 +590,12 @@ const createPort = (param, group) => {
 };
 
 export const transformWebserviceForGraph = (webservice, category) => {
-  if (!webservice.general) return {};
+  if (!webservice.general) {
+    alert("problem with ", webservice);
+    return {};
+  }
 
-  const label = webservice.general.name;
-  const description = webservice.general.description;
-  const information = webservice.general;
+  const { name: label, description } = webservice.general;
 
   // handle ports
   const ports = { items: [] };
@@ -619,13 +623,9 @@ export const transformWebserviceForGraph = (webservice, category) => {
     .filter(input => isParamInput(input))
     .forEach(input => {
       const type = Object.keys(input)[0];
-      const obj = input[type];
       const param = {
-        type: type,
-        name: obj.name,
-        options: obj.options,
-        description: obj.description,
-        userdefined: obj.userdefined
+        type,
+        ...input[type]
       };
       params.push(param);
     });
@@ -635,7 +635,7 @@ export const transformWebserviceForGraph = (webservice, category) => {
     label,
     params,
     ports,
-    information,
+    information: webservice.general,
     category
   };
   console.log("webservice", webservice);

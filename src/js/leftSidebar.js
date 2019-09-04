@@ -8,8 +8,7 @@ import { addElementToGraph } from "./theme";
 const addWebservice = async (webservices, name) => {
   const algo = webservices.filter(service => service.name == name);
   if (algo.length) {
-    const url = algo[0].url;
-    const category = algo[0].type;
+    const { url, type: category } = algo[0];
     await addElementToGraph(url, category);
   } else {
     console.error(`${name} doesnt exist`);
@@ -21,30 +20,38 @@ export const buildLeftSidebar = async () => {
 
   // get categories => algorithms
   let servicesPerCategory = webservices.map(service => {
-    return { type: service.type, name: service.name };
+    const { type, name } = service;
+    return { type, name };
   });
   servicesPerCategory = groupBy(servicesPerCategory, "type");
 
+  const menuItems = [];
+  const tabs = [];
   for (let service of Object.keys(servicesPerCategory).sort()) {
     // create tab menu
     const menuItem = $(`<a class="nav-link ${service}" id="v-pills-${service}-tab" data-toggle="pill" href="#v-pills-${service}" role="tab"
-        aria-controls="v-pills-${service}" aria-selected="false"></a>`).text(
-      categoryName[service]
-    );
-    $("#algo-categories").append(menuItem);
+        aria-controls="v-pills-${service}" aria-selected="false"><div class="icon"></div>${categoryName[service]}</a>`);
+
+    menuItems.push(menuItem);
 
     // create tab content and its items
     const currentTab = $(
       `<div class="tab-pane fade" id="v-pills-${service}" role="tabpanel" aria-labelledby="v-pills-${service}-tab"></div>`
     );
-    $(`#algo-items`).append(currentTab);
+    tabs.push(currentTab);
 
+    const algoItems = [];
     for (const { name } of servicesPerCategory[service]) {
-      const algoItem = $('<div class="algo-item"></div>').text(name);
+      const algoItem = $(
+        `<div class="algo-item ${service}"><span class="icon"></span>${name}</div>`
+      );
       algoItem.on("click", function() {
         addWebservice(webservices, name);
       });
-      currentTab.append(algoItem);
+      algoItems.push(algoItem);
     }
+    currentTab.append(algoItems);
   }
+  $(`#algo-items`).append(tabs);
+  $("#algo-categories").append(menuItems);
 };

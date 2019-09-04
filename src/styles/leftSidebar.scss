@@ -1,22 +1,23 @@
-$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
-
-@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
-@import "~@fortawesome/fontawesome-free/scss/solid.scss";
-
 .algo-item {
-  background: red;
   margin-top: 1px;
   padding: 0.3rem;
+  border-bottom: 1px lightgrey solid;
 
   &:hover {
-    background: white;
+    color: black !important;
     cursor: pointer;
   }
-  @extend %fa-icon;
-  @extend .fab;
 
-  &:before {
-    content: fa-content($fa-var-stream);
+  @each $category, $properties in $category-properties {
+    &.#{$category} {
+      color: map-get($properties, "color");
+      background: none;
+
+      .icon {
+        @include add-icon($properties);
+        margin-right: 5px;
+      }
+    }
   }
 }
 
@@ -36,6 +37,18 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
   color: white;
 
   &.active {
-    background: black;
+    background: black !important;
+  }
+
+  @each $category, $properties in $category-properties {
+    &.#{$category} {
+      background-color: map-get($properties, "color");
+
+      .icon {
+        @include add-icon($properties, 25px);
+        display: block;
+        font-size: 2em;
+      }
+    }
   }
 }

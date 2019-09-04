@@ -33,7 +33,8 @@ export const NAME_COL = "col-5";
 export const PARAM_COL = "col-4";
 export const RESET_COL = "col-2";
 
-export const TITLE_COL = "col-10";
+export const ICON_COL = "col-1";
+export const TITLE_COL = "col-9";
 export const TOOLTIP_BOX_COL = "col-2";
 
 export const colorType = type => {

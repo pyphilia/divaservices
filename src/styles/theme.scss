@@ -1,20 +1,82 @@
 $fontColor: white;
+$font-primary: arial;
 
-$category-colors: (
-  "activelearning": #ddcb77,
-  "binarization": #d38e7d,
-  "enhancement": #d37592,
-  "evaluation": #9b7898,
-  "graph": #6f69a2,
-  "imageprocessing": #76a6d6,
-  "kws": #6dacb4,
-  "objectdetection": #6baa9a,
-  "ocr": #a7ca78,
-  "segmentation": #e0e47c
-);
+$binarizationIcon: "../images/binaryicon.png";
 
-@each $category, $color in $category-colors {
-  .#{$category} {
-    background-color: $color;
+@mixin add-icon($icon, $size: 25px) {
+  @if map-get($icon, "type") == "icon" {
+    @extend .fas;
+    &:before {
+      content: fa-content(map-get($icon, "icon"));
+    }
+  }
+  @if map-get($icon, "type") == "image" {
+    &:before {
+      content: "";
+      background: url(map-get($icon, "icon"));
+      background-size: cover;
+      display: inline-block;
+      vertical-align: middle;
+      width: $size;
+      height: $size;
+    }
   }
 }
+
+$category-properties: (
+  "activelearning": (
+    color: #ddcb77,
+    type: "icon",
+    icon: $fa-var-stream
+  ),
+  "binarization": (
+    color: #d38e7d,
+    type: "image",
+    icon: $binarizationIcon
+  ),
+  "enhancement": (
+    color: #d37592,
+    type: "icon",
+    icon: $fa-var-filter
+  ),
+  "evaluation": (
+    color: #9b7898,
+    type: "icon",
+    icon: $fa-var-chart-pie
+  ),
+  "graph": (
+    color: #6f69a2,
+    type: "icon",
+    icon: $fa-var-bezier-curve
+  ),
+  "imageprocessing": (
+    color: #76a6d6,
+    type: "icon",
+    icon: $fa-var-file-image
+  ),
+  "kws": (
+    color: #6dacb4,
+    type: "icon",
+    icon: $fa-var-stream
+  ),
+  "objectdetection": (
+    color: #6baa9a,
+    type: "icon",
+    icon: $fa-var-search
+  ),
+  "ocr": (
+    color: #a7ca78,
+    type: "icon",
+    icon: $fa-var-stream
+  ),
+  "segmentation": (
+    color: #e0e47c,
+    type: "icon",
+    icon: $fa-var-cut
+  )
+);
+// @each $category, $color in $category-colors {
+//   .#{$category} {
+//     background-color: $color;
+//   }
+// }

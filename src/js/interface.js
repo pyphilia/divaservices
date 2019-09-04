@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable no-unused-vars */
 import "select2";
 import * as $ from "jquery";
 import * as joint from "jointjs";

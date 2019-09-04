@@ -13,6 +13,29 @@
 
   .title-box {
     font-size: 2em;
+    align-items: center;
+    justify-content: center;
+
+    @each $category, $properties in $category-properties {
+      &.#{$category} {
+        background-color: map-get($properties, "color");
+      }
+    }
+
+    h3 {
+      margin: 0;
+    }
+
+    .tooltip-box {
+      display: block;
+      margin: auto 0 auto auto;
+    }
+
+    @each $category, $properties in $category-properties {
+      &.#{$category} .icon {
+        @include add-icon($properties);
+      }
+    }
   }
 
   .param-name {

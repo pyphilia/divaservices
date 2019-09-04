@@ -43,7 +43,7 @@ export const getWebServiceFromUrl = async url => {
 export const objectToString = obj => {
   let str = "";
   for (let p in obj) {
-    str += "- " + p + ":" + obj[p] + TOOLTIP_BREAK_LINE;
+    str += "- " + p + " : " + obj[p] + TOOLTIP_BREAK_LINE;
   }
   return str;
 };
