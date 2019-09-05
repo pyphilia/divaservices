@@ -1,6 +1,10 @@
-/* eslint-disable */
+/* eslint-disable no-unused-vars */
+// we import jquery as below for test to work
+import jQuery from "jquery";
+const $ = jQuery;
+global.$ = global.jQuery = $;
+
 import "select2";
-import * as $ from "jquery";
 import * as joint from "jointjs";
 import {
   TOOLTIP_HTML,
@@ -78,14 +82,17 @@ export const computeTitleLength = (el, fromSVG = false) => {
   };
 };
 
-const computeBoxWidth = (el, fromSVG = false) => {
+export const computeBoxWidth = (el, fromSVG = false) => {
+  const { attributes, params } = el;
   let getNameLengths;
   if (fromSVG) {
-    getNameLengths = Object.keys(el.attributes.params).map(name => name.length);
+    getNameLengths = Object.keys(attributes.params).map(name => name.length);
   } else {
-    getNameLengths = el.params
-      .filter(x => isParamInput(x))
-      .map(param => (param.name ? param.name.length : 0));
+    getNameLengths = params
+      ? params
+          .filter(x => isParamInput(x))
+          .map(param => (param.name ? param.name.length : 0))
+      : [0];
   }
   const paramNameLength = showParameters ? getNameLengths : [0];
 
@@ -97,22 +104,24 @@ const computeBoxWidth = (el, fromSVG = false) => {
 };
 
 const computeBoxHeight = (el, fromSVG = false) => {
+  const { attributes, params, ports } = el;
+
   let nbParam;
-  let ports;
+  let portsItems;
   if (fromSVG) {
-    nbParam = Object.keys(el.attributes.params).length;
-    ports = el.attributes.ports.items;
+    nbParam = Object.keys(attributes.params).length;
+    portsItems = attributes.ports.items;
   } else {
-    nbParam = el.params.filter(x => isParamInput(x)).length;
-    ports = el.ports.items;
+    nbParam = params.filter(x => isParamInput(x)).length;
+    portsItems = ports.items;
   }
   const inputsHeight = showParameters ? nbParam * paramHeight : 0;
 
-  const inPorts = ports.length
-    ? ports.filter(x => x.group == IN_PORT_CLASS)
+  const inPorts = portsItems.length
+    ? portsItems.filter(x => x.group == IN_PORT_CLASS)
     : [];
-  const outPorts = ports.length
-    ? ports.filter(x => x.group == OUT_PORT_CLASS)
+  const outPorts = portsItems.length
+    ? portsItems.filter(x => x.group == OUT_PORT_CLASS)
     : [];
 
   const maxPortEntry = Math.max(inPorts.length, outPorts.length);
@@ -124,15 +133,15 @@ const changePortDetails = () => {
   if (showPortDetails) {
     // show prop details
     for (const el of getGraph().getElements()) {
-      for (const port of el.getPorts()) {
-        el.portProp(port.id, "attrs/text/display", "block");
+      for (const { id } of el.getPorts()) {
+        el.portProp(id, "attrs/text/display", "block");
       }
     }
   } else {
     // hide prop details
     for (const el of getGraph().getElements()) {
-      for (const port of el.getPorts()) {
-        el.portProp(port.id, "attrs/text/display", "none");
+      for (const { id } of el.getPorts()) {
+        el.portProp(id, "attrs/text/display", "none");
       }
     }
   }
@@ -142,15 +151,15 @@ const changePorts = () => {
   if (showPorts) {
     // show prop details
     for (const el of getGraph().getElements()) {
-      for (const port of el.getPorts()) {
-        el.portProp(port.id, "attrs/circle/display", "block");
+      for (const { id } of el.getPorts()) {
+        el.portProp(id, "attrs/circle/display", "block");
       }
     }
   } else {
     // hide prop details
     for (const el of getGraph().getElements()) {
-      for (const port of el.getPorts()) {
-        el.portProp(port.id, "attrs/circle/display", "none");
+      for (const { id } of el.getPorts()) {
+        el.portProp(id, "attrs/circle/display", "none");
       }
     }
   }
@@ -166,7 +175,7 @@ const changeTooltips = () => {
   }
 };
 
-const changeParameters = el => {
+const changeParameters = () => {
   if (showParameters) {
     $(
       `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
@@ -191,7 +200,6 @@ export const setThemeOptions = () => {
   $(`#${OPTION_PORT_DETAILS}`).prop("checked", showPortDetails);
   $(`#${OPTION_PORT_DETAILS}`).change(function() {
     showPortDetails = $(this).prop("checked");
-    console.log("TCL: setThemeOptions -> showPortDetails", showPortDetails);
     changePortDetails();
   });
 
@@ -219,7 +227,12 @@ export const setPaperEvents = paper => {
   });
 };
 
-const createBox = (e, id) => {
+const createBox = (e, id, position) => {
+  const {
+    category,
+    label,
+    ports: { items }
+  } = e;
   const size = {
     width: computeBoxWidth(e),
     height: computeBoxHeight(e)
@@ -227,35 +240,21 @@ const createBox = (e, id) => {
   const { titleHeight } = computeTitleLength(e);
 
   const template = `<g class="scalable"><rect></rect></g>
-    <foreignObject class="${FOREIGN_CLASS}" id="${id}" x="0" y="-${titleHeight}" width="${
+      <foreignObject class="${FOREIGN_CLASS}" id="${id}" x="0" y="-${titleHeight}" width="${
     size.width
   }" height="${size.height + titleHeight}">
-    <body xmlns="http://www.w3.org/1999/xhtml">
-    <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
-    <div class="${TITLE_ROW_CLASS} ${
-    e.category
-  } row justify-content-start" style="height:${titleHeight}px">
-    <div class="${ICON_COL} icon"></div>
-    <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${
-    e.label
-  }</${BOX_TITLE_HTML_TAG}>
-    </div>
-    </div>
-    </body>
-    </foreignObject>`;
+      <body xmlns="http://www.w3.org/1999/xhtml">
+      <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
+      <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start" style="height:${titleHeight}px">
+      <div class="${ICON_COL} icon"></div>
+      <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${label}</${BOX_TITLE_HTML_TAG}>
+      </div>
+      </div>
+      </body>
+      </foreignObject>`;
 
-  const paper = getPaper();
-  const bcr = paper.svg.getBoundingClientRect();
-  const paperLocalRect = paper.clientToLocalRect({
-    x: bcr.left,
-    y: bcr.top,
-    width: bcr.width,
-    height: bcr.height
-  });
-  const position = { x: paperLocalRect.x + 100, y: paperLocalRect.y + 100 };
-
-  return joint.shapes.basic.Rect.define(
-    e.label,
+  const Box = joint.shapes.basic.Rect.define(
+    label,
     {
       markup: template,
       attrs: {
@@ -269,7 +268,7 @@ const createBox = (e, id) => {
       size,
       ports: {
         groups: THEME.groups,
-        items: e.ports.items
+        items
       },
       params: {}
     },
@@ -296,6 +295,10 @@ const createBox = (e, id) => {
       }
     }
   );
+
+  const element = new Box();
+  element.addTo(getGraph());
+  return element;
 };
 
 const setSelectValueInElement = (element, select) => {
@@ -329,134 +332,188 @@ function resetValue(event) {
   }
 }
 
+const createSelect = (
+  param,
+  resetButton,
+  defaultTooltip,
+  defaultValue = null
+) => {
+  const { name, userdefined, options, description } = param;
+  const { default: defaultOption, values } = options;
+
+  // wrapper
+  const newSelect = $("<div/>", {
+    name,
+    class: "select row"
+  });
+
+  // select
+  const selectEl = $(`<${Inputs.SELECT.tag}/>`, {
+    class: PARAM_COL,
+    prop: {
+      disabled: !userdefined
+    }
+  });
+
+  // param name
+  const nameEl = $("<span/>", {
+    class: `${PARAM_NAME_CLASS} ${NAME_COL}`,
+    text: name
+  });
+
+  // param options, select the default value or the read value of the workflow
+  let selectedId;
+  if (defaultValue) {
+    selectedId = param.options.values.indexOf(defaultValue);
+    if (selectedId < 0) {
+      alert("an error in field ", name, " with value ", defaultValue);
+    }
+  } else {
+    selectedId = defaultOption;
+  }
+
+  const valuesEls = [];
+  for (const [i, value] of values.entries()) {
+    const valueEl = $("<option/>", {
+      text: value,
+      attr: { value },
+      prop: { selected: i == selectedId }
+    });
+    valuesEls.push(valueEl);
+  }
+  selectEl.append(valuesEls);
+
+  // reset
+  const reset = resetButton.clone(true).attr({
+    "data-parent": "select",
+    "data-value": values[defaultOption]
+  });
+
+  // add tooltip
+  let tooltip = $();
+  if (description) {
+    tooltip = defaultTooltip.clone(true).data("title", description);
+  }
+
+  newSelect.append(nameEl, selectEl, reset, tooltip);
+  return newSelect;
+};
+
+const createInput = (param, resetButton, defaultTooltip, defaultValue) => {
+  const { name, options, userdefined, description } = param;
+
+  // wrapper
+  const newInput = $("<div/>", { class: "input row" });
+
+  // param name
+  const nameEl = $("<span/>", {
+    class: `${PARAM_NAME_CLASS} ${NAME_COL}`,
+    text: name
+  });
+
+  // param input
+  const { required, min, max, steps, default: defaultOption } = options;
+  const inputEl = $(`<${Inputs.NUMBER.tag} />`, {
+    class: `${PARAM_COL} form-control`,
+    prop: { disabled: !userdefined, required },
+    attr: {
+      type: "text",
+      name,
+      "data-min": min,
+      "data-max": max,
+      "data-steps": steps,
+      "data-default": defaultOption,
+      value: defaultValue ? defaultValue : defaultOption
+    }
+  });
+
+  // reset
+  const resetButtonNumber = resetButton.clone(true).attr({
+    "data-parent": "input",
+    "data-value": defaultOption
+  });
+
+  // add tooltip
+  let tooltip = $();
+  if (description || options.length) {
+    const tooltipText = `${description}${TOOLTIP_BREAK_LINE}${objectToString(
+      options
+    )}`;
+    tooltip = defaultTooltip.data("title", tooltipText);
+  }
+  newInput.append(nameEl, inputEl, resetButtonNumber, tooltip);
+  return newInput;
+};
+
 // Create a custom element.
 // ------------------------
-export const addElement = e => {
+export const addElement = (e, position, graph, defaultParams = {}) => {
+  const { label, params } = e;
+
+  if (!label) {
+    return;
+  }
+
   const id = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-  const Box = createBox(e, id);
-  const element = new Box();
+  const element = createBox(e, id, position);
 
-  element.addTo(getGraph());
+  const selectsArr = [];
+  const inputsArr = [];
 
-  // add params
-  const selects = $("<div></div>").addClass(PARAMETER_SELECTS);
-  const inputs = $("<div></div>").addClass(PARAMETER_INPUTS);
+  const resetButton = $("<button/>", {
+    class: `${RESET_BUTTON_CLASS} btn ${RESET_COL}`,
+    text: "Reset",
+    click: resetValue
+  });
 
-  const resetButton = $("<button></button>")
-    .addClass(`${RESET_BUTTON_CLASS} btn ${RESET_COL}`)
-    .text("Reset")
-    .on("click", resetValue);
+  for (const param of params) {
+    const { name: paramName, type } = param;
 
-  for (const param of e.params) {
-    const name = param.name;
     const defaultTooltip = $(TOOLTIP_HTML)
       .addClass(`${TOOLTIP_CLASS} ${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
       .data({
-        id: name,
-        param: e.label,
+        id: paramName,
+        param: label,
         toggle: "tooltip",
         placement: "right"
       });
 
-    switch (param.type) {
+    const defaultValue = defaultParams.params
+      ? defaultParams.params[paramName]
+      : null;
+
+    switch (type) {
       case Inputs.SELECT.type: {
-        // wrapper
-        const newSelect = $("<div></div>")
-          .addClass("select row")
-          .attr("name", name);
-
-        // select
-        const selectEl = $(`<${Inputs.SELECT.tag}/>`)
-          .addClass(PARAM_COL)
-          .prop("disabled", !param.userdefined);
-
-        // param name
-        const nameEl = $("<span></span>")
-          .addClass(`${PARAM_NAME_CLASS} ${NAME_COL}`)
-          .text(name);
-
-        // param options
-        for (const [i, values] of param.options.values.entries()) {
-          $("<option></option>")
-            .text(values)
-            .attr("value", values)
-            .prop("selected", i == param.options.default)
-            .appendTo(selectEl);
-        }
-
-        newSelect.append(nameEl, selectEl).appendTo(selects);
-
-        // reset
-        resetButton
-          .clone(true)
-          .attr({
-            "data-parent": "select",
-            "data-value": param.options.values[param.options.default]
-          })
-          .appendTo(newSelect);
-
-        // add tooltip
-        if (param.description) {
-          defaultTooltip
-            .clone(true)
-            .data("title", param.description)
-            .appendTo(newSelect)
-            .tooltip(TOOLTIP_OPTIONS);
-        }
+        const newSelect = createSelect(
+          param,
+          resetButton,
+          defaultTooltip,
+          defaultValue
+        );
+        selectsArr.push(newSelect);
         break;
       }
       case Inputs.NUMBER.type: {
-        // wrapper
-        const newInput = $("<div></div>")
-          .addClass("input row")
-          .appendTo(inputs);
-
-        // param name
-        const nameEl = $("<span></span>")
-          .addClass(`${PARAM_NAME_CLASS} ${NAME_COL}`)
-          .text(name);
-
-        const options = param.options;
-        // param input
-        const inputEl = $(`<${Inputs.NUMBER.tag} />`)
-          .addClass(`${PARAM_COL} form-control`)
-          .prop({ disabled: !param.userdefined, required: options.required })
-          .attr({
-            type: "text",
-            name: name,
-            "data-min": options.min,
-            "data-max": options.max,
-            "data-steps": options.steps,
-            "data-default": options.default,
-            value: options.default
-          });
-
-        // reset
-        const resetButtonNumber = resetButton.clone(true);
-        resetButtonNumber.attr({
-          "data-parent": "input",
-          "data-value": param.options.default
-        });
-
-        newInput.append(nameEl, inputEl, resetButtonNumber).appendTo(inputs);
-
-        // add tooltip
-        if (param.description || param.options.length) {
-          const tooltipText = `${
-            param.description
-          }${TOOLTIP_BREAK_LINE}${objectToString(param.options)}`;
-          defaultTooltip
-            .data("title", tooltipText)
-            .appendTo(newInput)
-            .tooltip(TOOLTIP_OPTIONS);
-        }
-
+        const newInput = createInput(
+          param,
+          resetButton,
+          defaultTooltip,
+          defaultValue
+        );
+        inputsArr.push(newInput);
         break;
       }
       default:
-        alert("not handled type : ", param.type);
+        alert("not handled type : ", type);
     }
   }
+
+  // append selects and inputs
+  // add params
+  const selects = $("<div/>", { class: PARAMETER_SELECTS });
+  const inputs = $("<div/>", { class: PARAMETER_INPUTS });
+  selects.append(selectsArr);
+  inputs.append(inputsArr);
 
   // add params to boxes
   const foreignObject = $(`foreignObject#${id} body`);
@@ -466,9 +523,10 @@ export const addElement = e => {
 
   let noParameter = $();
   if (inputs.children().length + selects.children().length == 0) {
-    noParameter = $(`<div class="${NO_PARAMETER_CLASS}"></div>`)
-      .text("No parameter")
-      .appendTo(container);
+    noParameter = $(`<div />`, {
+      class: NO_PARAMETER_CLASS,
+      text: "No parameter"
+    }).appendTo(container);
   }
 
   // hide parameters depending on theme options
@@ -483,8 +541,7 @@ export const addElement = e => {
     $(TOOLTIP_HTML)
       .addClass(`${TOOLTIP_CLASS} tooltip-box ${TOOLTIP_BOX_COL}`)
       .data({ title: e.description, toggle: "tooltip", placement: "right" })
-      .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`))
-      .tooltip(TOOLTIP_OPTIONS);
+      .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`));
   }
 
   // SELECT EVENTS
@@ -492,19 +549,20 @@ export const addElement = e => {
 
   // add select2 on elements
   // avoid select click bug
-  allSelects.each(function() {
-    $(this).select2({
+  for (const select of allSelects) {
+    const s = $(select);
+    s.select2({
       minimumResultsForSearch: -1 // hide search box
     });
 
     // set default value
-    setSelectValueInElement(element, $(this));
+    setSelectValueInElement(element, s);
 
     // update param
-    $(this).on("change", function() {
-      setSelectValueInElement(element, $(this));
+    s.on("change", function() {
+      setSelectValueInElement(element, s);
     });
-  });
+  }
 
   // When the user clicks on a select and moves the bloc
   // the select dropdown is still displayed
@@ -520,17 +578,19 @@ export const addElement = e => {
 
   // on input click, select all text
   // avoid select problem for inputs
-  allInputs.each(function() {
+  for (const inputEl of allInputs) {
     // set default value
-    setInputValueInElement(element, $(this));
+    const input = $(inputEl);
+
+    setInputValueInElement(element, input);
 
     // update param
-    $(this).on("blur", function() {
-      setInputValueInElement(element, $(this));
+    input.on("blur", function() {
+      setInputValueInElement(element, input);
 
       // check value
-      const currentVal = $(this).val();
-      const { min, max, steps } = $(this).data();
+      const currentVal = input.val();
+      const { min, max, steps } = input.data();
 
       const minCondition = min ? currentVal >= min : true;
       const maxCondition = max ? currentVal <= max : true;
@@ -538,19 +598,27 @@ export const addElement = e => {
 
       const isValid = minCondition && maxCondition && stepCondition;
 
-      $(this).toggleClass("is-invalid", !isValid);
+      input.toggleClass("is-invalid", !isValid);
     });
 
-    $(this).click(function() {
-      $(this).select();
+    input.click(function() {
+      input.select();
     });
-  });
+  }
+
+  // tooltips js
+  for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
+    $(tooltip).tooltip(TOOLTIP_OPTIONS);
+  }
+
+  return element;
 };
 
 const createPort = (param, group) => {
   let port = {};
   const obj = param[Object.keys(param)[0]];
-  if (group == OUT_PORT_CLASS || obj.userdefined) {
+  const { userdefined, options, name } = obj;
+  if (group == OUT_PORT_CLASS || userdefined) {
     // always create out port, check userdefined for inputs
 
     let typeAllowed;
@@ -562,7 +630,7 @@ const createPort = (param, group) => {
       type = Inputs.FOLDER.type;
     } else {
       // @TODO display !userdefined ports ?
-      typeAllowed = obj.options.mimeTypes.allowed;
+      typeAllowed = options.mimeTypes.allowed;
       type = typeAllowed[0].substr(
         //@TODO diff types ?
         0,
@@ -572,7 +640,7 @@ const createPort = (param, group) => {
 
     port = {
       group,
-      name: obj.name,
+      name,
       attrs: {
         [PORT_SELECTOR]: {
           fill: colorType(type),
@@ -580,7 +648,7 @@ const createPort = (param, group) => {
           typeAllowed
         },
         text: {
-          text: `${obj.name}\n${typeAllowed}`,
+          text: `${name}\n${typeAllowed}`,
           display: showPortDetails ? "block" : "none"
         }
       }
@@ -594,24 +662,24 @@ export const transformWebserviceForGraph = (webservice, category) => {
     alert("problem with ", webservice);
     return {};
   }
-
-  const { name: label, description } = webservice.general;
+  const { general, output, input } = webservice;
+  const { name: label, description } = general;
 
   // handle ports
   const ports = { items: [] };
-  webservice.input
-    .filter(input => isPortUserdefined(input))
-    .forEach(input => {
-      const port = createPort(input, IN_PORT_CLASS);
+  input
+    .filter(inp => isPortUserdefined(inp))
+    .forEach(inp => {
+      const port = createPort(inp, IN_PORT_CLASS);
       if (port.group) {
         ports.items.push(port);
       }
     });
 
-  webservice.output
-    .filter(output => isPort(output))
-    .forEach(output => {
-      const port = createPort(output, OUT_PORT_CLASS);
+  output
+    .filter(out => isPort(out))
+    .forEach(out => {
+      const port = createPort(out, OUT_PORT_CLASS);
       if (port.group) {
         ports.items.push(port);
       }
@@ -619,23 +687,21 @@ export const transformWebserviceForGraph = (webservice, category) => {
 
   // handle params
   const params = [];
-  webservice.input
-    .filter(input => isParamInput(input))
-    .forEach(input => {
-      const type = Object.keys(input)[0];
-      const param = {
-        type,
-        ...input[type]
-      };
-      params.push(param);
-    });
+  for (const inp of input.filter(inp => isParamInput(inp))) {
+    const type = Object.keys(inp)[0];
+    const param = {
+      type,
+      ...inp[type]
+    };
+    params.push(param);
+  }
 
   const ret = {
     description,
     label,
     params,
     ports,
-    information: webservice.general,
+    information: general,
     category
   };
   console.log("webservice", webservice);
@@ -643,11 +709,38 @@ export const transformWebserviceForGraph = (webservice, category) => {
   return ret;
 };
 
-export const addElementToGraph = async (url, category) => {
-  const webservice = await getWebServiceFromUrl(url);
+export const addElementToGraph = (webservice, category, defaultParams = {}) => {
   const transformedWebservice = transformWebserviceForGraph(
     webservice,
     category
   );
-  addElement(transformedWebservice);
+
+  const paper = getPaper();
+  const bcr = paper.svg.getBoundingClientRect();
+  const paperLocalRect = paper.clientToLocalRect({
+    x: bcr.left,
+    y: bcr.top,
+    width: bcr.width,
+    height: bcr.height
+  });
+
+  let { position } = defaultParams;
+  if (!position) {
+    position = { x: paperLocalRect.x + 100, y: paperLocalRect.y + 100 };
+  }
+
+  const element = addElement(
+    transformedWebservice,
+    position,
+    getGraph(),
+    defaultParams
+  );
+  return element;
+};
+
+export const addLinkToGraph = link => {
+  console.log("TCL: addLinkToGraph -> link", link);
+  const linkEl = new joint.shapes.standard.Link(link);
+
+  linkEl.addTo(getGraph());
 };

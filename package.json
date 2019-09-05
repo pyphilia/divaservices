@@ -21,8 +21,12 @@
     "@fortawesome/free-solid-svg-icons": "^5.10.2",
     "ajv": "^6.10.2",
     "bootstrap": "^4.3.1",
+    "browserify-fs": "^1.0.0",
+    "file-saver": "^2.0.2",
+    "fs": "^0.0.1-security",
     "jointjs": "^3.0.4",
     "jquery": "^3.4.1",
+    "jsdom": "^15.1.1",
     "lodash.groupby": "^4.6.0",
     "node-fetch": "^2.6.0",
     "path": "^0.12.7",
@@ -60,5 +64,10 @@
       "pre-commit": "yarn pre-commit",
       "pre-push": "yarn pre-push"
     }
+  },
+  "jest": {
+    "setupFiles": [
+      "./test/setup-jest.js"
+    ]
   }
 }

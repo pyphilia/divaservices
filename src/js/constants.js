@@ -1,5 +1,7 @@
 import { PORT_SELECTOR } from "./selectors";
 
+export const HOST = "";
+
 export const DIVA_SERVICES_API_URL = "http://divaservices.unifr.ch/api/v2/";
 
 export const categoryName = {
@@ -81,9 +83,7 @@ export const THEME = {
           fill: "darkblue",
           stroke: "black"
         },
-        text: {
-          // display:'none',
-        }
+        text: {}
       },
       z: 5,
       label: {

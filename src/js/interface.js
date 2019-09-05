@@ -45,7 +45,7 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
 
   // input accept only one source
   const usedInPorts = vT.model.getUsedInPorts();
-  const matchId = usedInPorts.find(port => port.id === mT.getAttribute("port"));
+  const matchId = usedInPorts.find(({ id }) => id === mT.getAttribute("port"));
   if (matchId) {
     return false;
   }

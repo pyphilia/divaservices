@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { saveWorkflow } from "./saveWorkflow";
 import { getGraph, resetZoom, fitContent } from "./interface";
+import { readWorkflow } from "./readWorkflow";
 
 const newWorkflow = () => {
   console.log("newWorkflow");
@@ -51,4 +52,5 @@ export const buildRightSidebar = () => {
   $("#clear").click(() => clearWorkflow());
   $("#resetZoom").click(() => resetZoom());
   $("#fitContent").click(() => fitContent());
+  $("#read").click(() => readWorkflow());
 };

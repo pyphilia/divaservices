@@ -1,70 +1,73 @@
 import xml2js from "xml2js";
+// import { saveAs } from "file-saver";
 
 export const saveWorkflow = jsonGraph => {
   const allPorts = {};
 
-  const steps = { step: [] };
+  const Steps = { Step: [] };
   // NODE
   jsonGraph.cells
     .filter(cell => cell.type != "standard.Link")
     .forEach((box, i) => {
-      const id = box.id;
-      const no = i;
-      const name = box.type;
-      const service = "";
-      const params = { parameter: [], data: [] };
-      for (const param in box.params) {
-        const p = {
-          name: param,
-          value: box.params[param]
-        };
-        params.parameter.push(p);
+      const { id: Id, type: Name, params, ports } = box;
+      const No = i;
+      const Service = "";
+      const Inputs = { Parameter: [], Data: [] };
+      for (const [Name, Value] of Object.entries(params)) {
+        Inputs.Parameter.push({
+          Name,
+          Value
+        });
       }
 
-      box.ports.items.forEach(port => {
+      ports.items.forEach(port => {
         allPorts[port.id] = {
-          boxId: box.id,
+          boxId: Id,
           boxNo: i,
           name: port.name
         };
       });
 
-      const step = { id, no, name, service, inputs: params };
-      steps.step.push(step);
+      const step = { Id, No, Name, Service, Inputs };
+      Steps.Step.push(step);
     });
 
   // LINK
   jsonGraph.cells
     .filter(cell => cell.type == "standard.Link")
     .forEach(link => {
-      const targetPort = link.target.port;
+      const {
+        source: { port: sourcePort },
+        target: { port: targetPort }
+      } = link;
       const targetBox = allPorts[targetPort];
-      const targetWebservice = steps.step.filter(
-        step => step.id == targetBox.boxId
+      const targetWebservice = Steps.Step.filter(
+        step => step.Id == targetBox.boxId
       )[0];
 
-      const sourcePort = link.source.port;
-      const sourceBox = allPorts[sourcePort];
+      const { boxId: Ref, name: ServiceOutputName } = allPorts[sourcePort];
       const p = {
-        name: sourceBox.name,
-        value: {
-          workflowStep: {
-            ref: sourceBox.boxNo,
-            ServiceOutputName: sourceBox.name
+        Name: targetBox.name,
+        Value: {
+          WorkflowStep: {
+            Ref,
+            ServiceOutputName
           }
         }
       };
-      targetWebservice.inputs.data.push(p);
+      targetWebservice.Inputs.Data.push(p);
     });
 
-  const id = 1;
-  const information = "";
-  const result = { id, information, steps };
+  const Id = 1; // workflow id
+  const Information = "";
+  const result = { Id, Information, Steps };
 
-  const builder = new xml2js.Builder();
+  const builder = new xml2js.Builder({ rootName: "WorkflowDefinition" });
   const xml = builder.buildObject(result);
 
   //@TODO add xml headers
+  // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
+  // saveAs(blob, "../../tmp/hello.xml");
 
   console.log(xml);
 };

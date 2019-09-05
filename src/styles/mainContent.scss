@@ -26,7 +26,7 @@
       margin: 0;
     }
 
-    .tooltip-box {
+    .tooltip-box svg {
       display: block;
       margin: auto 0 auto auto;
     }
@@ -71,4 +71,10 @@
 }
 
 .joint-port-label {
+  background: green;
+
+  tspan:first-of-type {
+    font-weight: bold;
+    // fill: green;
+  }
 }
