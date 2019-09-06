@@ -1,3 +1,83 @@
 #content-wrapper.row > div {
   border: 1px solid black;
 }
+
+.algo-box {
+  body {
+    background: none;
+  }
+
+  .row {
+    margin: 7px 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  select {
+    height: 100%;
+  }
+
+  .title-box {
+    font-size: 2em;
+    align-items: center;
+    justify-content: center;
+
+    @each $category, $properties in $category-properties {
+      &.#{$category} {
+        background-color: map-get($properties, "color");
+      }
+    }
+
+    h3 {
+      margin: 0;
+    }
+
+    .tooltip-box svg {
+      display: block;
+      margin: auto 0 auto auto;
+    }
+
+    @each $category, $properties in $category-properties {
+      &.#{$category} .icon {
+        @include add-icon($properties);
+      }
+    }
+  }
+
+  .param-name {
+    // display:inline-block;
+    // min-width:
+  }
+
+  .reset-button {
+    background: lightgrey;
+  }
+
+  .tooltip-info-button {
+    padding: 0 10px;
+  }
+
+  .no-parameter {
+    text-align: center;
+  }
+}
+
+// override default styles
+.tooltip-inner {
+  // max-width:400px;
+  text-align: left;
+}
+
+#trash {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  z-index: 20;
+  font-size: 5em;
+}
+
+.joint-port-label {
+  tspan:first-of-type {
+    font-weight: bold;
+  }
+}

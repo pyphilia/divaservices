@@ -4,28 +4,42 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "yarn eslint && webpack",
-    "dist": "yarn eslint && webpack -p",
+    "build": "yarn eslint && yarn webpack",
+    "dist": "yarn eslint && yarn webpack:p",
     "dev": "webpack-dev-server --open",
     "eslint": "eslint src/**/*.js",
-    "prettier:check": "prettier --check \"src/**/*.js\" \"src/**/*.scss\"",
-    "prettier:write": "prettier --write \"src/**/*.js\" \"src/**/*.scss\"",
-    "pre-commit": "yarn prettier:write && yarn eslint && yarn test",
+    "prettier:check": "prettier --check \"src/**/*.js\" \"src/**/*.scss\" \"test/*.js\"",
+    "prettier:write": "prettier --write \"src/**/*.js\" \"src/**/*.scss\" \"test/*.js\"",
+    "pre-commit": "yarn prettier:check && yarn eslint && yarn test",
     "pre-push": "yarn prettier:check && yarn eslint && yarn test",
-    "test": "exit 0"
+    "test": "jest",
+    "webpack": "webpack",
+    "webpack:p": "webpack -p"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.10.2",
+    "@fortawesome/free-solid-svg-icons": "^5.10.2",
+    "ajv": "^6.10.2",
     "bootstrap": "^4.3.1",
+    "file-saver": "^2.0.2",
+    "jointjs": "^3.0.4",
     "jquery": "^3.4.1",
+    "lodash.groupby": "^4.6.0",
+    "node-fetch": "^2.6.0",
     "path": "^0.12.7",
     "popper": "^1.0.1",
-    "popper.js": "^1.15.0"
+    "popper.js": "^1.15.0",
+    "select2": "^4.0.9",
+    "xml2js": "^0.4.19",
+    "xmlbuilder": "^13.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
+    "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
     "babel-core": "^6.26.3",
+    "babel-jest": "^24.9.0",
     "babel-loader": "^8.0.6",
     "css-loader": "^3.2.0",
     "eslint": "^6.1.0",
@@ -33,6 +47,7 @@
     "file-loader": "^4.2.0",
     "html-loader": "^0.5.5",
     "husky": "^3.0.3",
+    "jest": "^24.9.0",
     "node-sass": "^4.12.0",
     "prettier": "^1.18.2",
     "sass-loader": "^7.2.0",
@@ -46,5 +61,10 @@
       "pre-commit": "yarn pre-commit",
       "pre-push": "yarn pre-push"
     }
+  },
+  "jest": {
+    "setupFiles": [
+      "./test/setup-jest.js"
+    ]
   }
 }

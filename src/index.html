@@ -7,6 +7,28 @@
     <title>InnoSuisse Workflow Interface</title>
 </head>
 <body>
+    <!-- Modal for settings -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body"  id="theme-options">
+                    <input type="checkbox" id="option-port-details" checked/> show port details <br>
+                    <input type="checkbox" id="option-parameters" checked/> show parameters <br>
+                    <input type="checkbox" id="option-ports" checked/> show ports <br>
+                    <input type="checkbox" id="option-tooltips" checked/> show tooltips<br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="container-fluid no-gutters h-100">
         <div id="header" class="row">
@@ -14,32 +36,37 @@
         </div>
         <div id="content-wrapper" class="row">
             <div id="left-sidebar" class="col-3 row">
-                <div class="nav flex-column nav-pills col-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                    <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Home</a>
-                    <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#v-pills-profile" role="tab" aria-controls="v-pills-profile" aria-selected="false">Profile</a>
-                    <a class="nav-link" id="v-pills-messages-tab" data-toggle="pill" href="#v-pills-messages" role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</a>
-                    <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</a>
+                <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
+                    
                 </div>
-                <div class="tab-content col" id="v-pills-tabContent">
-                    <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil quas cumque reiciendis culpa officia minima totam! Quae at ducimus reiciendis pariatur exercitationem modi nulla fugit. Aut sunt soluta blanditiis nam!</div>
-                    <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">...</div>
-                    <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">...</div>
-                    <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">...</div>
+                <div class="tab-content col" id="algo-items">
                 </div>
                 
             </div>
-            <div id="main" class="col">main</div>
+            <div id="main" class="col">
+                
+                <!-- trash    -->
+                <div id="trash"><i class="fas fa-trash"></i></div>
+                
+                <!-- content -->
+                <div id="paper-html-elements"></div>
+                
+                <div id="message"></div>
+                
+                
+            </div>
             <div id="right-sidebar" class="col-1">
                 <nav class="nav flex-column">
-                    <a class="nav-link active" href="#">Active</a>
-                    <a class="nav-link" href="#">Link</a>
-                    <a class="nav-link" href="#">Link</a>
-                    <a class="nav-link disabled" href="#">Disabled</a>
-                </nav>
+                    <!-- <button type="button" class="btn btn-primary" name="button" id="save">Save</button> 
+                        <button type="button" class="btn btn-primary" name="button" id="clear">Clear</button> 
+                        <button type="button" class="btn btn-primary" name="button" id="resetZoom">Reset Zoom</button> 
+                        <button type="button" class="btn btn-primary" name="button" id="fitContent">Fit Content</button> 
+                        <button type="button" class="btn btn-primary" name="button" id="read">read</button>  -->
+                    </nav>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <script src="main.js"></script>
-</body>
-</html>
+        <script src="main.js"></script>
+        <script src="css.js"></script>
+    </body>
+    </html>

@@ -1,0 +1,10 @@
+#right-sidebar {
+  background: darkgrey;
+
+  a.nav-link {
+    &:hover {
+      cursor: pointer;
+      opacity: 0.5;
+    }
+  }
+}

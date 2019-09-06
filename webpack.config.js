@@ -6,10 +6,13 @@ const DIST = 'public';
 module.exports = {
    mode: 'development',
    devtool: 'inline-source-map',
-   entry: path.join(__dirname, 'src/index.js'),
+   entry: {
+      "main": ["@babel/polyfill", path.join(__dirname, 'src/index.js')],
+      "css": path.join(__dirname, "src/styles/main.scss"),
+   },
    output: {
       path: path.resolve(__dirname, DIST),
-      filename: 'main.js'
+      filename: '[name].js'
    },
    resolve: {
       extensions: ['.js']
@@ -49,7 +52,29 @@ module.exports = {
          {
             test: /\.html$/,
             use: ['file-loader?name=[name].[ext]', 'extract-loader', 'html-loader'],
-          }
+         },
+         {
+            test: /\.(png|svg|jpg|gif)$/,
+            use: [{
+               loader: 'file-loader',
+               options: {
+                  name: '[name].[ext]',
+                  outputPath: 'images/',    // where the fonts will go
+                  publicPath: './images/'       // override the default path
+               }
+            }]
+         },
+         {
+            test: /.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/, // For Font Awesome 
+            use: [{
+               loader: 'file-loader',
+               options: {
+                  name: '[name].[ext]',
+                  outputPath: 'fonts/',    // where the fonts will go
+                  publicPath: '../fonts/'       // override the default path
+               }
+            }]
+         },
       ]
    },
    devServer: {
@@ -57,5 +82,6 @@ module.exports = {
       hot: true,
       inline: true,
       watchContentBase: true,
+      port: 3000,
    }
 };
