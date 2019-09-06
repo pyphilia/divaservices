@@ -7,14 +7,29 @@
     <title>InnoSuisse Workflow Interface</title>
 </head>
 <body>
+    <!-- Modal for settings -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body"  id="theme-options">
+                    <input type="checkbox" id="option-port-details" checked/> show port details <br>
+                    <input type="checkbox" id="option-parameters" checked/> show parameters <br>
+                    <input type="checkbox" id="option-ports" checked/> show ports <br>
+                    <input type="checkbox" id="option-tooltips" checked/> show tooltips<br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
-<div id="theme-options">
-    <input type="checkbox" id="option-port-details" checked/> show port details <br>
-    <input type="checkbox" id="option-parameters" checked/> show parameters <br>
-    <input type="checkbox" id="option-ports" checked/> show ports <br>
-    <input type="checkbox" id="option-tooltips" checked/> show tooltips<br>
-</div>
-
     <div class="container-fluid no-gutters h-100">
         <div id="header" class="row">
             <h1>Name</h1> <img id="logo" src="http://wuersch.pillo-srv.ch/images/logo.png" alt="divaspotlight logo">
@@ -36,22 +51,22 @@
                 <!-- content -->
                 <div id="paper-html-elements"></div>
                 
-                <button type="button" class="btn btn-primary" name="button" id="save">Save</button> 
-                <button type="button" class="btn btn-primary" name="button" id="clear">Clear</button> 
-                <button type="button" class="btn btn-primary" name="button" id="resetZoom">Reset Zoom</button> 
-                <button type="button" class="btn btn-primary" name="button" id="fitContent">Fit Content</button> 
-                <button type="button" class="btn btn-primary" name="button" id="read">read</button> 
                 <div id="message"></div>
                 
                 
             </div>
-            <!-- <div id="right-sidebar" class="col-1">
+            <div id="right-sidebar" class="col-1">
                 <nav class="nav flex-column">
-                </nav>
-            </div> -->
+                    <!-- <button type="button" class="btn btn-primary" name="button" id="save">Save</button> 
+                        <button type="button" class="btn btn-primary" name="button" id="clear">Clear</button> 
+                        <button type="button" class="btn btn-primary" name="button" id="resetZoom">Reset Zoom</button> 
+                        <button type="button" class="btn btn-primary" name="button" id="fitContent">Fit Content</button> 
+                        <button type="button" class="btn btn-primary" name="button" id="read">read</button>  -->
+                    </nav>
+                </div>
+            </div>
         </div>
-    </div>
-    <script src="main.js"></script>
-    <script src="css.js"></script>
-</body>
-</html>
+        <script src="main.js"></script>
+        <script src="css.js"></script>
+    </body>
+    </html>

@@ -12,6 +12,7 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "./header.scss";
 @import "./mainContent.scss";
 @import "./leftSidebar.scss";
+@import "./rightSidebar.scss";
 
 body,
 html {
@@ -31,12 +32,4 @@ div.select .select2 {
 
 .inputs input {
   width: 130px;
-}
-
-#theme-options {
-  position: absolute;
-  top: 100px;
-  right: 100px;
-  background: lightblue;
-  z-index: 1000;
 }

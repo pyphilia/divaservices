@@ -9,6 +9,12 @@
 
   .row {
     margin: 7px 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  select {
+    height: 100%;
   }
 
   .title-box {
@@ -71,10 +77,7 @@
 }
 
 .joint-port-label {
-  background: green;
-
   tspan:first-of-type {
     font-weight: bold;
-    // fill: green;
   }
 }

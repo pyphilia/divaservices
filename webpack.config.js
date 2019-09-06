@@ -83,8 +83,5 @@ module.exports = {
       inline: true,
       watchContentBase: true,
       port: 3000,
-   },
-   node: {
-      fs: "empty"
    }
 };

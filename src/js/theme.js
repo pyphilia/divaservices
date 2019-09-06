@@ -323,9 +323,9 @@ function resetValue(event) {
       break;
     }
     case Inputs.NUMBER.tag:
-      el.parentNode.getElementsByTagName(
-        Inputs.NUMBER.tag
-      )[0].value = defaultValue;
+      $(el.parentNode.getElementsByTagName(Inputs.NUMBER.tag)[0])
+        .val(defaultValue)
+        .trigger("change");
       break;
     default:
       alert("error");
@@ -443,6 +443,19 @@ const createInput = (param, resetButton, defaultTooltip, defaultValue) => {
   }
   newInput.append(nameEl, inputEl, resetButtonNumber, tooltip);
   return newInput;
+};
+
+const checkInputValue = input => {
+  const currentVal = input.val();
+  const { min, max, steps } = input.data();
+
+  const minCondition = min ? currentVal >= min : true;
+  const maxCondition = max ? currentVal <= max : true;
+  const stepCondition = steps ? Number.isInteger(currentVal / steps) : true;
+
+  const isValid = minCondition && maxCondition && stepCondition;
+
+  input.toggleClass("is-invalid", !isValid);
 };
 
 // Create a custom element.
@@ -585,24 +598,20 @@ export const addElement = (e, position, graph, defaultParams = {}) => {
     setInputValueInElement(element, input);
 
     // update param
-    input.on("blur", function() {
-      setInputValueInElement(element, input);
+    input.on({
+      blur: function() {
+        const el = $(this);
+        setInputValueInElement(element, el);
 
-      // check value
-      const currentVal = input.val();
-      const { min, max, steps } = input.data();
-
-      const minCondition = min ? currentVal >= min : true;
-      const maxCondition = max ? currentVal <= max : true;
-      const stepCondition = steps ? Number.isInteger(currentVal / steps) : true;
-
-      const isValid = minCondition && maxCondition && stepCondition;
-
-      input.toggleClass("is-invalid", !isValid);
-    });
-
-    input.click(function() {
-      input.select();
+        // check value
+        // checkInputValue(el);
+      },
+      click: function() {
+        $(this).select();
+      },
+      change: function() {
+        checkInputValue($(this));
+      }
     });
   }
 
@@ -645,7 +654,8 @@ const createPort = (param, group) => {
         [PORT_SELECTOR]: {
           fill: colorType(type),
           type,
-          typeAllowed
+          typeAllowed,
+          display: showPorts ? "block" : "none"
         },
         text: {
           text: `${name}\n${typeAllowed}`,
