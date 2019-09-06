@@ -39,20 +39,25 @@ export const ICON_COL = "col-1";
 export const TITLE_COL = "col-9";
 export const TOOLTIP_BOX_COL = "col-2";
 
-export const colorType = type => {
-  switch (type) {
-    case "folder":
-      return "lightblue";
-    case "image":
-      return "orange";
-    case "application":
-      return "yellow";
-    case "text":
-      return "blue";
-    default:
-      return "red";
+export const MimeTypes = {
+  folder: {
+    type: "folder",
+    color: "lightblue"
+  },
+  image: {
+    type: "image",
+    color: "orange"
+  },
+  application: {
+    type: "application",
+    color: "yellow"
+  },
+  text: {
+    type: "text",
+    color: "blue"
   }
 };
+Object.freeze(MimeTypes);
 
 export const THEMES = {};
 

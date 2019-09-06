@@ -57,13 +57,11 @@ export const buildRightSidebar = () => {
   };
 
   for (const menuItem in rightSideBar) {
-    console.log("TCL: buildRightSidebar -> menuItem", menuItem);
     const { action, attr } = rightSideBar[menuItem];
-    const attributes = attr ? attr : {};
     const menuItemElem = $(`<a/>`, {
       class: "nav-link",
       text: menuItem,
-      attr: attributes
+      attr: attr ? attr : {}
     });
     menuItemElem.click(e => {
       action(e);
