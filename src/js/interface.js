@@ -2,7 +2,7 @@
 import "select2";
 import * as $ from "jquery";
 import * as joint from "jointjs";
-import { THEME } from "./constants";
+import { THEME, MIN_SCALE, MAX_SCALE } from "./constants";
 import {
   INTERFACE_ROOT,
   PORT_SELECTOR,
@@ -15,7 +15,6 @@ import { setPaperEvents, setThemeOptions } from "./theme";
 
 let paper;
 const graph = new joint.dia.Graph();
-let lastTranslate = { tx: 0, ty: 0 };
 
 export const getGraph = () => {
   return graph;
@@ -29,7 +28,6 @@ export const fitContent = () => {
   paper.scaleContentToFit({
     padding: 20
   });
-  lastTranslate = paper.translate();
 };
 
 const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
@@ -71,31 +69,44 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
 
 export const resetZoom = () => {
   const bcr = paper.svg.getBoundingClientRect();
-  const paperLocalRect = paper.clientToLocalRect({
+  const localRect1 = paper.clientToLocalRect({
     x: bcr.left,
     y: bcr.top,
     width: bcr.width,
     height: bcr.height
   });
-  changeZoom(
-    1,
-    paperLocalRect.x + paperLocalRect.width / 2,
-    paperLocalRect.y + paperLocalRect.height / 2,
-    true
-  );
+  const localCenter = localRect1.center();
+  changeZoom(1, localCenter.x, localCenter.y, true);
 };
 
+// zoom algorithm: https://github.com/clientIO/joint/issues/1027
 const changeZoom = (delta, x, y, reset) => {
-  let newScale;
-  if (!reset) {
-    newScale = paper.scale().sx + delta / 35; // the current paper scale changed by delta
-  } else {
-    newScale = 1;
-  }
-  if (newScale <= 1) {
-    // newScale > 0.4 &&
-    paper.translate(lastTranslate.tx, lastTranslate.ty);
-    paper.scale(newScale, newScale, x, y);
+  const nextScale = !reset
+    ? paper.scale().sx + delta / 75 // the current paper scale changed by delta
+    : 1;
+
+  if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
+    const paper = getPaper();
+    const currentScale = paper.scale().sx;
+
+    const beta = currentScale / nextScale;
+
+    const ax = x - x * beta;
+    const ay = y - y * beta;
+
+    const translate = paper.translate();
+
+    const nextTx = translate.tx - ax * nextScale;
+    const nextTy = translate.ty - ay * nextScale;
+
+    paper.translate(nextTx, nextTy);
+
+    const ctm = paper.matrix();
+
+    ctm.a = nextScale;
+    ctm.d = nextScale;
+
+    paper.matrix(ctm);
   }
 };
 
@@ -107,7 +118,7 @@ const initPaper = () => {
     height: 800,
     gridSize: 15,
     drawGrid: {
-      name: "fixedDot"
+      name: "dot"
     },
     linkPinning: false,
     snapLinks: true,
@@ -152,7 +163,6 @@ const initPaper = () => {
   });
 
   paper.on("cell:pointerup blank:pointerup", () => {
-    lastTranslate = paper.translate();
     move = false;
   });
 

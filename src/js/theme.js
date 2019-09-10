@@ -341,9 +341,6 @@ export const addElement = (e, position, defaultParams = {}) => {
       minimumResultsForSearch: -1 // hide search box
     });
 
-    // set default value
-    setSelectValueInElement(element, s);
-
     // update param
     s.on("change", function() {
       setSelectValueInElement(element, s);
@@ -367,8 +364,6 @@ export const addElement = (e, position, defaultParams = {}) => {
   for (const inputEl of allInputs) {
     // set default value
     const input = $(inputEl);
-
-    setInputValueInElement(element, input);
 
     // update param
     input.on({

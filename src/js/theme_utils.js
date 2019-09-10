@@ -81,13 +81,31 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
 };
 
 export const setSelectValueInElement = (element, select) => {
-  const selectedValue = select.find(":selected").attr("value");
-  element.attributes.params[select.parent().attr("name")] = selectedValue;
+  const s = select.find(":selected");
+  const selectEl = select.parent();
+  const selectedValue = s.attr("value");
+  const defaultValue = selectEl.data("default");
+  const attr = selectEl.attr("name");
+
+  // only save non default value parameter
+  if (selectedValue == defaultValue) {
+    delete element.attributes.params[attr];
+  } else {
+    element.attributes.params[attr] = selectedValue;
+  }
 };
 
 export const setInputValueInElement = (element, input) => {
   const value = input.val();
-  element.attributes.params[input.attr("name")] = value;
+  const attr = input.attr("name");
+  const defaultValue = input.data("default");
+
+  // only save non default value parameter
+  if (value == defaultValue) {
+    delete element.attributes.params[attr];
+  } else {
+    element.attributes.params[attr] = value;
+  }
 };
 
 export function resetValue(event) {
@@ -129,6 +147,9 @@ export const createSelect = (
   // select
   const selectEl = $(`<${Inputs.SELECT.tag}/>`, {
     class: PARAM_COL,
+    attr: {
+      "data-default": param.options.values[param.options.default]
+    },
     prop: {
       disabled: !userdefined
     }

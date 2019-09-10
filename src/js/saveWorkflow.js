@@ -9,7 +9,8 @@ export const saveWorkflow = jsonGraph => {
   jsonGraph.cells
     .filter(cell => cell.type != "standard.Link")
     .forEach((box, i) => {
-      const { id: Id, type: Name, params, ports } = box;
+      const { id: Id, type, params, ports } = box;
+      const Name = type.replace(/\s/g, "");
       const No = i;
       const Service = "";
       const Inputs = { Parameter: [], Data: [] };

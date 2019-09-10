@@ -25,6 +25,9 @@ export const Inputs = {
 };
 Object.freeze(Inputs);
 
+export const MIN_SCALE = 0.4;
+export const MAX_SCALE = 1;
+
 export const TOOLTIP_OPTIONS = { html: true };
 export const TOOLTIP_BREAK_LINE = "<br>";
 export const TOOLTIP_HTML = `<span><i class="fas fa-info-circle"></i></span>`;

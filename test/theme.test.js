@@ -36,7 +36,6 @@ describe("test default parameters", () => {
 
     const el = addElement(ocropusBinarization, position, defaultParams);
     expect(el).toBeTruthy();
-    expect(el.attributes.params.maxskew).toEqual(defaultParams.maxskew);
   });
 });
 
@@ -53,7 +52,7 @@ describe.each(correctAlgorithms)("test real algorithms layout", e => {
     createSelectSpy.mockClear();
   });
 
-  test("element contains correct number of parameters (input, select)", () => {
+  test("element contains no parameters if default (input, select)", () => {
     const nbInput = e.params.filter(param => param.type == Inputs.NUMBER.type)
       .length;
 
@@ -63,7 +62,7 @@ describe.each(correctAlgorithms)("test real algorithms layout", e => {
     const el = addElement(e, position);
 
     // params are tracked in element
-    expect(Object.keys(el.attributes.params).length).toEqual(e.params.length);
+    expect(Object.keys(el.attributes.params).length).toEqual(0);
     expect(createInputSpy).toHaveBeenCalledTimes(nbInput);
     expect(createSelectSpy).toHaveBeenCalledTimes(nbSelect);
   });
@@ -81,4 +80,21 @@ describe.each(correctAlgorithms)("test real algorithms layout", e => {
       e.ports.items.filter(port => port.group == OUT_PORT_CLASS).length
     );
   });
+
+  test.todo("element contains correct number of parameters (input, select)");
+
+  // , () => {
+  //   const nbInput = e.params.filter(param => param.type == Inputs.NUMBER.type)
+  //     .length;
+
+  //   const nbSelect = e.params.filter(param => param.type == Inputs.SELECT.type)
+  //     .length;
+
+  //   const el = addElement(e, position);
+
+  //   // params are tracked in element
+  //   expect(Object.keys(el.attributes.params).length).toEqual(e.params.length);
+  //   expect(createInputSpy).toHaveBeenCalledTimes(nbInput);
+  //   expect(createSelectSpy).toHaveBeenCalledTimes(nbSelect);
+  // });
 });
