@@ -2,23 +2,21 @@
 import $ from "jquery";
 import groupBy from "lodash.groupby";
 import { categoryName } from "./constants";
-import { getWebServices, getWebServiceFromUrl } from "./utils";
-import { addElementToGraph } from "./theme";
+import { getWebServiceFromUrl } from "./utils";
+import { addElementToGraph } from "./addElement";
 
-const addWebservice = async (webservices, name) => {
+export const addWebservice = async (webservices, name, defaultParams = {}) => {
   const algo = webservices.filter(service => service.name == name);
   if (algo.length) {
     const { url, type: category } = algo[0];
     const webservice = await getWebServiceFromUrl(url);
-    addElementToGraph(webservice, category);
+    addElementToGraph(webservice, category, defaultParams);
   } else {
     console.error(`${name} doesnt exist`);
   }
 };
 
-export const buildLeftSidebar = async () => {
-  const webservices = await getWebServices();
-
+export const buildLeftSidebar = async webservices => {
   // get categories => algorithms
   let servicesPerCategory = webservices.map(service => {
     const { type, name } = service;

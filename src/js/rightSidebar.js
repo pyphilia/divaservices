@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { saveWorkflow } from "./saveWorkflow";
-import { getGraph, resetZoom, fitContent } from "./interface";
+import { graph, paper } from "./interface";
+import { resetZoom } from "./events";
 import { readWorkflow } from "./readWorkflow";
 
 // const newWorkflow = (e) => {
@@ -8,16 +9,22 @@ import { readWorkflow } from "./readWorkflow";
 //   console.log("newWorkflow");
 // };
 
-const openWorkflow = e => {
+const fitContent = () => {
+  paper.scaleContentToFit({
+    padding: 20
+  });
+};
+
+const openWorkflow = (e, webservices) => {
   e.preventDefault();
   console.log("openWorkflow");
-  readWorkflow();
+  readWorkflow(webservices);
 };
 
 const save = e => {
   e.preventDefault();
   console.log("saveWorkflow");
-  saveWorkflow(getGraph().toJSON());
+  saveWorkflow(graph.toJSON());
 };
 
 // const installWorkflow = e => {
@@ -28,14 +35,14 @@ const save = e => {
 const clearWorkflow = e => {
   e.preventDefault();
   console.log("clearWorkflow");
-  getGraph().clear();
+  graph.clear();
 };
 
 const openSettings = () => {
   console.log("openSettings");
 };
 
-export const buildRightSidebar = () => {
+export const buildRightSidebar = webservices => {
   const rightSideBar = {
     // New: newWorkflow,
     Open: {
@@ -64,7 +71,7 @@ export const buildRightSidebar = () => {
       attr: attr ? attr : {}
     });
     menuItemElem.click(e => {
-      action(e);
+      action(e, webservices);
     });
     $("#right-sidebar nav").append(menuItemElem);
   }

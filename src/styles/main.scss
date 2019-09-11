@@ -33,3 +33,23 @@ div.select .select2 {
 .inputs input {
   width: 130px;
 }
+
+.contextmenu {
+  position: absolute;
+  background: white;
+  box-shadow: 0 0 15px darkgrey;
+  padding: 10px;
+  height: 200px;
+  width: 200px;
+  z-index: 3;
+  display: none;
+
+  span {
+    display: block;
+    border-bottom: black 1px solid;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}

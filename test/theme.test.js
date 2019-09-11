@@ -1,5 +1,5 @@
-import { addElement } from "../src/js/theme";
-import * as theme_utils from "../src/js/theme_utils";
+import { addElement } from "../src/js/addElement";
+import * as theme from "../src/js/addElement";
 import { Inputs } from "../src/js/constants";
 import { IN_PORT_CLASS, OUT_PORT_CLASS } from "../src/js/selectors";
 
@@ -43,8 +43,8 @@ describe.each(correctAlgorithms)("test real algorithms layout", e => {
   let createSelectSpy, createInputSpy;
 
   beforeAll(() => {
-    createInputSpy = jest.spyOn(theme_utils, "createInput");
-    createSelectSpy = jest.spyOn(theme_utils, "createSelect");
+    createInputSpy = jest.spyOn(theme, "createInput");
+    createSelectSpy = jest.spyOn(theme, "createSelect");
   });
 
   afterEach(() => {

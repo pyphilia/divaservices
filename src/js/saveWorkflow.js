@@ -14,11 +14,14 @@ export const saveWorkflow = jsonGraph => {
       const No = i;
       const Service = "";
       const Inputs = { Parameter: [], Data: [] };
-      for (const [Name, Value] of Object.entries(params)) {
-        Inputs.Parameter.push({
-          Name,
-          Value
-        });
+      for (const [Name, values] of Object.entries(params)) {
+        const { value: Value, defaultValue } = values;
+        if (Value != defaultValue) {
+          Inputs.Parameter.push({
+            Name,
+            Value
+          });
+        }
       }
 
       ports.items.forEach(port => {

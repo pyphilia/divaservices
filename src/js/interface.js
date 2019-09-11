@@ -2,31 +2,116 @@
 import "select2";
 import * as $ from "jquery";
 import * as joint from "jointjs";
-import { THEME, MIN_SCALE, MAX_SCALE } from "./constants";
+import { DEFAULT_OPTIONS } from "./constants";
 import {
+  TOOLTIP_CLASS,
+  NO_PARAMETER_CLASS,
+  OPTION_PORT_DETAILS,
+  OPTION_PARAMETERS,
+  OPTION_PORTS,
+  OPTION_TOOLTIPS,
+  PARAMETER_SELECTS,
+  PARAMETER_INPUTS,
   INTERFACE_ROOT,
-  PORT_SELECTOR,
   ATTR_TYPE_ALLOWED,
   ATTR_TYPE,
-  TRASH_SELECTOR,
   IN_PORT_CLASS
 } from "./selectors";
-import { setPaperEvents, setThemeOptions } from "./theme";
+import {
+  resetHighlight,
+  setSelection,
+  setKeyboardEvents,
+  setContextMenu,
+  setPaperEvents
+} from "./events";
 
-let paper;
-const graph = new joint.dia.Graph();
+import { computeBoxWidth, computeTitleLength, computeBoxHeight } from "./utils";
 
-export const getGraph = () => {
-  return graph;
+let {
+  showPortDetails,
+  showParameters,
+  showPorts,
+  showTooltips
+} = DEFAULT_OPTIONS;
+
+export let graph;
+export let paper;
+
+const changePortDetails = () => {
+  const prop = showPortDetails ? "block" : "none";
+  for (const el of graph.getElements()) {
+    for (const { id } of el.getPorts()) {
+      el.portProp(id, "attrs/text/display", prop);
+    }
+  }
 };
 
-export const getPaper = () => {
-  return paper;
+const changePorts = () => {
+  const prop = showPorts ? "block" : "none";
+  // show prop details
+  for (const el of graph.getElements()) {
+    for (const { id } of el.getPorts()) {
+      el.portProp(id, "attrs/circle/display", prop);
+    }
+  }
 };
 
-export const fitContent = () => {
-  paper.scaleContentToFit({
-    padding: 20
+const changeTooltips = () => {
+  if (showTooltips) {
+    // show prop details
+    $(`.${TOOLTIP_CLASS}`).show();
+  } else {
+    // hide prop details
+    $(`.${TOOLTIP_CLASS}`).hide();
+  }
+};
+
+const changeParameters = () => {
+  if (showParameters) {
+    $(
+      `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
+    ).show();
+  } else {
+    $(
+      `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
+    ).hide();
+  }
+  for (const e of graph.getElements()) {
+    const newWidth = computeBoxWidth(e, showParameters, true);
+    const newHeight = computeBoxHeight(e, showParameters, true);
+    e.resize(newWidth, newHeight);
+    $(`g[model-id=${e.id}] foreignObject`).attr({
+      width: newWidth,
+      height: newHeight + computeTitleLength(e, true).titleHeight
+    });
+  }
+};
+
+export const setThemeOptions = () => {
+  $(`#${OPTION_PORT_DETAILS}`).prop("checked", showPortDetails);
+  $(`#${OPTION_PORT_DETAILS}`).change(function() {
+    showPortDetails = $(this).prop("checked");
+    changePortDetails();
+    resetHighlight();
+  });
+
+  $(`#${OPTION_PARAMETERS}`).prop("checked", showParameters);
+  $(`#${OPTION_PARAMETERS}`).change(function() {
+    showParameters = $(this).prop("checked");
+    changeParameters();
+    resetHighlight();
+  });
+  $(`#${OPTION_PORTS}`).prop("checked", showPorts);
+  $(`#${OPTION_PORTS}`).change(function() {
+    showPorts = $(this).prop("checked");
+    changePorts();
+    resetHighlight();
+  });
+  $(`#${OPTION_TOOLTIPS}`).prop("checked", showTooltips);
+  $(`#${OPTION_TOOLTIPS}`).change(function() {
+    showTooltips = $(this).prop("checked");
+    changeTooltips();
+    resetHighlight();
   });
 };
 
@@ -67,50 +152,12 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
   return true;
 };
 
-export const resetZoom = () => {
-  const bcr = paper.svg.getBoundingClientRect();
-  const localRect1 = paper.clientToLocalRect({
-    x: bcr.left,
-    y: bcr.top,
-    width: bcr.width,
-    height: bcr.height
-  });
-  const localCenter = localRect1.center();
-  changeZoom(1, localCenter.x, localCenter.y, true);
+const transformWorkflowToGraph = workflow => {
+  console.log("TCL: transformWorkflowToGraph");
 };
 
-// zoom algorithm: https://github.com/clientIO/joint/issues/1027
-const changeZoom = (delta, x, y, reset) => {
-  const nextScale = !reset
-    ? paper.scale().sx + delta / 75 // the current paper scale changed by delta
-    : 1;
-
-  if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
-    const paper = getPaper();
-    const currentScale = paper.scale().sx;
-
-    const beta = currentScale / nextScale;
-
-    const ax = x - x * beta;
-    const ay = y - y * beta;
-
-    const translate = paper.translate();
-
-    const nextTx = translate.tx - ax * nextScale;
-    const nextTy = translate.ty - ay * nextScale;
-
-    paper.translate(nextTx, nextTy);
-
-    const ctm = paper.matrix();
-
-    ctm.a = nextScale;
-    ctm.d = nextScale;
-
-    paper.matrix(ctm);
-  }
-};
-
-const initPaper = () => {
+const buildGraph = async (webservices, workflow) => {
+  graph = new joint.dia.Graph();
   paper = new joint.dia.Paper({
     el: $(INTERFACE_ROOT),
     model: graph,
@@ -130,92 +177,11 @@ const initPaper = () => {
     validateConnection: validateConnectionFunc
   });
 
-  paper.options.highlighting.magnetAvailability =
-    THEME.magnetAvailabilityHighlighter;
-
-  paper.on("element:pointerup", e => {
-    if ($(TRASH_SELECTOR).is(":hover")) {
-      if (confirm("Are you sure you want to delete this element?")) {
-        e.model.remove();
-      } else {
-        // @TODO replace where it was before moving
-      }
-    }
-  });
-
-  /**********ZOOM*/
-
-  paper.on("blank:mousewheel", (evt, x, y, delta) => {
-    changeZoom(delta, x, y);
-  });
-
-  paper.on("element:mousewheel", (e, evt, x, y, delta) => {
-    changeZoom(delta, x, y);
-  });
-
-  /*------------PAN */
-  let move = false;
-  let dragStartPosition;
-
-  paper.on("blank:pointerdown", (event, x, y) => {
-    dragStartPosition = { x: x, y: y };
-    move = true;
-  });
-
-  paper.on("cell:pointerup blank:pointerup", () => {
-    move = false;
-  });
-
-  $(INTERFACE_ROOT).mousemove(event => {
-    if (move) {
-      const currentScale = paper.scale();
-      const newX = event.offsetX / currentScale.sx - dragStartPosition.x;
-      const newY = event.offsetY / currentScale.sy - dragStartPosition.y;
-      paper.translate(newX * currentScale.sx, newY * currentScale.sy);
-    }
-  });
-
-  /*******LINK***/
-
-  paper.on("link:mouseenter", linkView => {
-    const tools = new joint.dia.ToolsView({
-      tools: [
-        new joint.linkTools.TargetArrowhead(),
-        new joint.linkTools.Remove({ distance: -30 })
-      ]
-    });
-    linkView.addTools(tools);
-  });
-
-  paper.on("link:mouseleave", linkView => {
-    linkView.removeTools();
-  });
-
-  paper.on("link:connect link:disconnect", (linkView, evt, elementView) => {
-    const element = elementView.model;
-    element.getInPorts().forEach(function(port) {
-      const portNode = elementView.findPortNode(port.id, PORT_SELECTOR);
-      elementView.unhighlight(portNode, {
-        highlighter: THEME.magnetAvailabilityHighlighter
-      });
-    });
-  });
-
-  /*************/
-
   setPaperEvents(paper);
+  setContextMenu(paper, webservices);
+  setKeyboardEvents();
+  setSelection(paper);
 
-  /*-----------------------*/
-
-  paper.on("blank:contextmenu", () => {});
-};
-
-const transformWorkflowToGraph = workflow => {
-  console.log("TCL: transformWorkflowToGraph");
-};
-
-const buildGraph = async workflow => {
-  initPaper();
   setThemeOptions();
 
   if (workflow) {

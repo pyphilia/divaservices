@@ -2,15 +2,13 @@ import xml2js from "xml2js";
 import path from "path";
 import { HOST } from "./constants";
 
-import { getWebServices, getWebServiceFromUrl } from "./utils";
-import { addElementToGraph, addLinkToGraph } from "./theme";
+import { getWebServiceFromUrl } from "./utils";
+import { addElementToGraph, addLinkToGraph } from "./addElement";
 
-export const readWorkflow = async () => {
+export const readWorkflow = async webservices => {
   const filepath = path.join(HOST, "files/tmp.xml");
 
   let xml = await fetch(filepath).then(response => response.text());
-
-  const webservices = await getWebServices();
 
   xml2js.parseString(xml, async (err, json) => {
     let totalWidth = 100;
