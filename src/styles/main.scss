@@ -53,3 +53,15 @@ div.select .select2 {
     }
   }
 }
+
+#tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 0.8em;
+  padding: 7px;
+  max-width: 200px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 3;
+  display: none;
+}

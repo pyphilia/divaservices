@@ -171,6 +171,15 @@ const setContextMenuItemEvents = webservices => {
     });
 
   document
+    .querySelector("#contextmenu-element .duplicate")
+    .addEventListener("click", async () => {
+      const { params, type } = currentSelection.model.attributes;
+      await addWebservice(webservices, type, {
+        params
+      });
+    });
+
+  document
     .querySelector("#contextmenu-element .delete")
     .addEventListener("click", () => {
       deleteElement(currentSelection);

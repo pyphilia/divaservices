@@ -34,16 +34,12 @@ import {
 
 let { showParameters } = DEFAULT_OPTIONS;
 
-const createBox = (e, id, position) => {
+const createBox = (e, id, { position, size }) => {
   const {
     category,
     label,
     ports: { items }
   } = e;
-  const size = {
-    width: computeBoxWidth(e, showParameters),
-    height: computeBoxHeight(e, showParameters)
-  };
   const { titleHeight } = computeTitleLength(e);
 
   const template = `<g class="scalable"><rect></rect></g>
@@ -160,7 +156,7 @@ export const transformWebserviceForGraph = (webservice, category) => {
 
 // Create a custom element.
 // ------------------------
-export const addElement = (e, position, defaultParams = {}) => {
+export const addElement = (e, parameters, defaultParams = {}) => {
   const { label } = e;
 
   if (!label) {
@@ -168,11 +164,43 @@ export const addElement = (e, position, defaultParams = {}) => {
   }
 
   const id = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-  const element = createBox(e, id, position);
+  const element = createBox(e, id, parameters);
 
   setParametersInForeignObject(element, { id, ...e }, defaultParams);
 
   return element;
+};
+
+// helper function to find an empty position to add
+// an element without overlapping other ones
+// it tries to fill the canvas view first horizontally
+// then vertically
+const findEmptyPosition = size => {
+  const bcr = paper.svg.getBoundingClientRect();
+  const canvasDimensions = paper.clientToLocalRect({
+    x: bcr.left,
+    y: bcr.top,
+    width: bcr.width,
+    height: bcr.height
+  });
+
+  const position = { x: canvasDimensions.x + 100, y: canvasDimensions.y + 100 };
+
+  while (
+    graph.findModelsInArea({
+      ...position,
+      width: size.width + 100,
+      height: size.height + 100
+    }).length
+  ) {
+    position.x += size.width + 100;
+    if (canvasDimensions.x + canvasDimensions.width < position.x + size.width) {
+      position.x = canvasDimensions.x + 100;
+      position.y += size.height + 100;
+    }
+  }
+
+  return position;
 };
 
 export const addElementToGraph = (webservice, category, defaultParams = {}) => {
@@ -182,20 +210,22 @@ export const addElementToGraph = (webservice, category, defaultParams = {}) => {
     category
   );
 
-  const bcr = paper.svg.getBoundingClientRect();
-  const paperLocalRect = paper.clientToLocalRect({
-    x: bcr.left,
-    y: bcr.top,
-    width: bcr.width,
-    height: bcr.height
-  });
+  const size = {
+    width: computeBoxWidth(transformedWebservice, showParameters),
+    height: computeBoxHeight(transformedWebservice, showParameters)
+  };
 
   let { position } = defaultParams;
   if (!position) {
-    position = { x: paperLocalRect.x + 100, y: paperLocalRect.y + 100 };
+    // avoid adding overlapping elements
+    position = findEmptyPosition(size);
   }
 
-  const element = addElement(transformedWebservice, position, defaultParams);
+  const element = addElement(
+    transformedWebservice,
+    { position, size },
+    defaultParams
+  );
   return element;
 };
 

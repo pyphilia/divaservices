@@ -11,7 +11,6 @@ import {
   NAME_COL,
   TOOLTIP_HTML,
   TOOLTIP_BOX_COL,
-  TOOLTIP_OPTIONS,
   RESET_COL,
   TOOLTIP_COL,
   MimeTypes,
@@ -248,7 +247,7 @@ export const createSelect = (
   // add tooltip
   let tooltip = $();
   if (description) {
-    tooltip = defaultTooltip.clone(true).data("title", description);
+    tooltip = defaultTooltip.clone(true).attr("data-title", description);
   }
 
   newSelect.append(nameEl, selectEl, reset, tooltip);
@@ -300,7 +299,7 @@ export const createInput = (
     const tooltipText = `${description}${TOOLTIP_BREAK_LINE}${objectToString(
       options
     )}`;
-    tooltip = defaultTooltip.data("title", tooltipText);
+    tooltip = defaultTooltip.attr("data-title", tooltipText);
   }
   newInput.append(nameEl, inputEl, resetButtonNumber, tooltip);
   return newInput;
@@ -317,6 +316,41 @@ export const checkInputValue = input => {
   const isValid = minCondition && maxCondition && stepCondition;
 
   input.toggleClass("is-invalid", !isValid);
+};
+
+const computeDisplayOffset = (el, { height, width }) => {
+  const mainPosition = document.querySelector("#main").getBoundingClientRect();
+
+  const sPosition = el.offset();
+  console.log("TCL: computeDisplayOffset -> sPosition", sPosition);
+  const dist = {
+    x: (sPosition.left - mainPosition.x + width) * 0.1,
+    y: (sPosition.top - mainPosition.y + height) * 0.09,
+    elementOffset: sPosition
+  };
+  return dist;
+};
+
+// some errors are induced by the svg positioning, thus we have to use mouse position to display
+// the tooltip
+const showTooltip = (tooltip, event) => {
+  const { title } = tooltip.dataset;
+  const el = document.querySelector("#tooltip");
+  el.innerHTML = title;
+  el.style.top = event.y + 10 + "px";
+  el.style.left = event.x + 10 + "px";
+  // const {width, height } = tooltip.getBoundingClientRect();
+  // const dist = computeDisplayOffset($(tooltip), {width,height});
+  // const newTop = dist.y + dist.elementOffset.top;
+  // const newLeft = dist.x + dist.elementOffset.left;
+  // el.style.top = newTop+'px';
+  // el.style.left = newLeft+'px';
+  el.style.display = "block";
+};
+
+const hideTooltip = () => {
+  const el = document.querySelector("#tooltip");
+  el.style.display = "none";
 };
 
 export const setParametersInForeignObject = (
@@ -336,17 +370,18 @@ export const setParametersInForeignObject = (
   for (const param of params) {
     const { name: paramName, type } = param;
 
-    const defaultTooltip = $(TOOLTIP_HTML)
-      .addClass(`${TOOLTIP_CLASS} ${INFO_TOOLTIP_CLASS} ${TOOLTIP_COL}`)
-      .data({
-        id: paramName,
-        param: label,
-        toggle: "tooltip",
-        placement: "right"
+    const defaultTooltip = $(`<div class="${TOOLTIP_COL}"></div>`)
+      .append(TOOLTIP_HTML)
+      .addClass(`${TOOLTIP_CLASS} ${INFO_TOOLTIP_CLASS}`)
+      .attr({
+        "data-id": paramName,
+        "data-param": label,
+        "data-toggle": "tooltip",
+        "data-placement": "right"
       });
 
     const defaultValue = defaultParams.params
-      ? defaultParams.params[paramName]
+      ? defaultParams.params[paramName].value
       : null;
 
     switch (type) {
@@ -405,9 +440,14 @@ export const setParametersInForeignObject = (
 
   // main tooltip
   if (description) {
-    $(TOOLTIP_HTML)
+    $(`<div class="${TOOLTIP_COL}"></div>`)
+      .append(TOOLTIP_HTML)
       .addClass(`${TOOLTIP_CLASS} tooltip-box ${TOOLTIP_BOX_COL}`)
-      .data({ title: description, toggle: "tooltip", placement: "right" })
+      .attr({
+        "data-title": description,
+        "data-toggle": "tooltip",
+        "data-placement": "right"
+      })
       .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`));
   }
 
@@ -427,6 +467,30 @@ export const setParametersInForeignObject = (
     // update param
     s.on("change", function() {
       setSelectValueInElement(element, s);
+    });
+
+    s.on("select2:open", function() {
+      const width = s.next().width();
+      const height = s.next().height();
+
+      const dist = computeDisplayOffset(s, { height, width });
+
+      let newTop = -dist.y;
+      const newLeft = -dist.x;
+
+      let container = document.querySelector(".select2-dropdown--below");
+
+      // if the select is displayed at top
+      const above = document.querySelector(
+        ".select2-container--open .select2-dropdown--above"
+      );
+      if (above) {
+        container = above;
+        newTop += height;
+      }
+
+      container.style.top = newTop + "px";
+      container.style.left = newLeft + "px";
     });
   }
 
@@ -454,7 +518,7 @@ export const setParametersInForeignObject = (
       blur: function() {
         const el = $(this);
         setInputValueInElement(element, el);
-
+        el.trigger("change");
         // check value
         // checkInputValue(el);
       },
@@ -465,11 +529,20 @@ export const setParametersInForeignObject = (
         checkInputValue($(this));
       }
     });
+
+    // evaluate default parameters
+    checkInputValue(input);
   }
 
   // tooltips js
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
-    $(tooltip).tooltip(TOOLTIP_OPTIONS);
+    // $(tooltip).tooltip(TOOLTIP_OPTIONS);
+    tooltip.addEventListener("mouseenter", event => {
+      showTooltip(tooltip, event);
+    });
+    tooltip.addEventListener("mouseleave", () => {
+      hideTooltip(tooltip);
+    });
   }
 };
 
