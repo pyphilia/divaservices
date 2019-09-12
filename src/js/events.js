@@ -302,21 +302,46 @@ export const setKeyboardEvents = () => {
     event => {
       const keyName = event.key;
 
-      if (keyName === "Control") {
-        // do not alert when only Control key is pressed.
-        return;
-      }
-
-      if (keyName === "Delete") {
-        if (currentSelection) {
-          console.log(
-            "TCL: setKeyboardEvents -> currentSelection",
-            currentSelection
-          );
-          deleteElement(currentSelection);
-          currentSelection = null;
+      switch (keyName) {
+        case "Control": {
+          // do not alert when only Control key is pressed.
+          break;
         }
-        return;
+        case "ArrowDown": {
+          if (currentSelection) {
+            currentSelection.model.translate(0, 50);
+          }
+          break;
+        }
+        case "ArrowUp": {
+          if (currentSelection) {
+            currentSelection.model.translate(0, -50);
+          }
+          break;
+        }
+        case "ArrowRight": {
+          if (currentSelection) {
+            currentSelection.model.translate(50, 0);
+          }
+          break;
+        }
+        case "ArrowLeft": {
+          if (currentSelection) {
+            currentSelection.model.translate(-50, 0);
+          }
+          break;
+        }
+        case "Delete": {
+          if (currentSelection) {
+            console.log(
+              "TCL: setKeyboardEvents -> currentSelection",
+              currentSelection
+            );
+            deleteElement(currentSelection);
+            currentSelection = null;
+          }
+          break;
+        }
       }
 
       // if (event.ctrlKey) {

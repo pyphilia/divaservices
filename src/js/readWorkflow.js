@@ -23,6 +23,7 @@ export const readWorkflow = async webservices => {
       } = step;
 
       const webserviceObj = webservices.filter(
+        //@TODO need to read key value --- workflow will keep key in parameters
         webservice => webservice.name == name
       )[0];
       const { url, type: category } = webserviceObj;

@@ -10,9 +10,7 @@ import {
   PARAM_COL,
   NAME_COL,
   TOOLTIP_HTML,
-  TOOLTIP_BOX_COL,
   RESET_COL,
-  TOOLTIP_COL,
   MimeTypes,
   DEFAULT_OPTIONS
 } from "./constants";
@@ -311,8 +309,20 @@ export const checkInputValue = input => {
 
   const minCondition = min ? currentVal >= min : true;
   const maxCondition = max ? currentVal <= max : true;
-  const stepCondition = steps ? Number.isInteger(currentVal / steps) : true;
 
+  // because of js inconsistency with float computations
+  // we transform it to a string, round it to the the least precision
+  // and check if it is a integer, so whether it matches the step
+  const sepNumber = steps.toString().split(".");
+  let precision = 0;
+  if (sepNumber.length == 1) {
+    precision = 0;
+  } else {
+    precision = sepNumber[1].length + 1;
+  }
+  const stepCondition = steps
+    ? Number.isInteger(+parseFloat(currentVal / steps).toFixed(precision))
+    : true;
   const isValid = minCondition && maxCondition && stepCondition;
 
   input.toggleClass("is-invalid", !isValid);
@@ -370,8 +380,7 @@ export const setParametersInForeignObject = (
   for (const param of params) {
     const { name: paramName, type } = param;
 
-    const defaultTooltip = $(`<div class="${TOOLTIP_COL}"></div>`)
-      .append(TOOLTIP_HTML)
+    const defaultTooltip = $(`${TOOLTIP_HTML}`)
       .addClass(`${TOOLTIP_CLASS} ${INFO_TOOLTIP_CLASS}`)
       .attr({
         "data-id": paramName,
@@ -440,9 +449,8 @@ export const setParametersInForeignObject = (
 
   // main tooltip
   if (description) {
-    $(`<div class="${TOOLTIP_COL}"></div>`)
-      .append(TOOLTIP_HTML)
-      .addClass(`${TOOLTIP_CLASS} tooltip-box ${TOOLTIP_BOX_COL}`)
+    $(TOOLTIP_HTML)
+      .addClass(`${TOOLTIP_CLASS} tooltip-box`)
       .attr({
         "data-title": description,
         "data-toggle": "tooltip",

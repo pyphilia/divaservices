@@ -204,7 +204,6 @@ const findEmptyPosition = size => {
 };
 
 export const addElementToGraph = (webservice, category, defaultParams = {}) => {
-  console.log("TCL: addElementToGraph -> defaultParams", defaultParams);
   const transformedWebservice = transformWebserviceForGraph(
     webservice,
     category
