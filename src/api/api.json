@@ -1,0 +1,3024 @@
+[
+  {
+      "name":"Otsu Binarization",
+      "description":"Otsu Binarization",
+      "type":"binarization",
+      "url":"http://divaservices.unifr.ch/api/v2/binarization/otsubinarization/1",
+      "algorithm":{
+          "general":{
+              "name":"Otsu Binarization",
+              "description":"Otsu Binarization",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "DOI":"10.1117/12.783598",
+              "type":"binarization",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":2.5505226480836263,
+              "executions":574
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"otsuBinaryImage",
+                      "type":"image",
+                      "description":"Generated Binary Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"binary",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"HOOSC Feature Extraction",
+      "description":"This code extracts Histogram of Orientation Shape Context (HOOSC) local shape descriptor from an input hieroglyph image.",
+      "type":"imageprocessing",
+      "url":"http://divaservices.unifr.ch/api/v2/imageprocessing/hooscfeatureextraction/1",
+      "algorithm":{
+          "general":{
+              "name":"HOOSC Feature Extraction",
+              "description":"This code extracts Histogram of Orientation Shape Context (HOOSC) local shape descriptor from an input hieroglyph image.",
+              "developer":"Hu, Rui and Odobez, Jean-Marc",
+              "affiliation":"IDIAP",
+              "email":"rhu@idiap.ch",
+              "author":"Hu, Rui and Odobez, Jean-Marc",
+              "type":"imageprocessing",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":19.375,
+              "executions":8
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to analyze",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              },
+              {
+                  "number":{
+                      "name":"numberOfRings",
+                      "description":"Number of rings (reccomended: 2)",
+                      "options":{
+                          "required":true,
+                          "default":2,
+                          "min":1,
+                          "max":4,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"ringsize",
+                      "description":"ratio of the size of the outer ring to that of the average distance between pair-wise pivot points of the shape",
+                      "options":{
+                          "required":true,
+                          "default":1,
+                          "min":0.25,
+                          "max":1,
+                          "steps":0.25
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"pos",
+                      "description":"binary option indicating whether pivot position information will be encoded in the descriptor",
+                      "options":{
+                          "required":true,
+                          "default":0,
+                          "min":0,
+                          "max":1,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"descriptor_json",
+                      "type":"json",
+                      "description":"extracted descriptors",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          }
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"descriptor_csv",
+                      "type":"csv",
+                      "description":"extracted descriptors",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "text/csv"
+                              ],
+                              "default":"text/csv"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Multi Scale Interest Point Detection",
+      "description":"Multi scale interest point detectors based on Gaussian scale space",
+      "type":"imageprocessing",
+      "url":"http://divaservices.unifr.ch/api/v2/imageprocessing/multiscaleinterestpointdetection/1",
+      "algorithm":{
+          "general":{
+              "name":"Multi Scale Interest Point Detection",
+              "description":"Multi scale interest point detectors based on Gaussian scale space",
+              "developer":"Angelika Garz",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Angelika Garz",
+              "type":"imageprocessing",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":11.703703703703702,
+              "executions":81
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to segment",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              },
+              {
+                  "number":{
+                      "name":"threshold",
+                      "description":"threshold for receiving only 'strong' features",
+                      "options":{
+                          "required":true,
+                          "default":1e-06,
+                          "min":0,
+                          "max":1,
+                          "steps":1e-06
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"maxFeaturesPerScale",
+                      "description":"Maximum features per scale",
+                      "options":{
+                          "required":true,
+                          "default":-1,
+                          "min":-1,
+                          "max":1500,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"detector",
+                      "description":"The Interest Point detector to use",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "Harris",
+                              "Hessian",
+                              "Laplace",
+                              "Quadrature",
+                              "Ridge"
+                          ],
+                          "default":0
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"blurSigma",
+                      "description":"Amount of initial blur applied to the image",
+                      "options":{
+                          "required":true,
+                          "default":1,
+                          "steps":0.1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"numScales",
+                      "description":"Number of scales per octave",
+                      "options":{
+                          "required":true,
+                          "default":5,
+                          "min":2,
+                          "max":6,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"numOctaves",
+                      "description":"number of octaves computed. Each consecutive octave is composed of numScales images which have half the resolution of the previous.",
+                      "options":{
+                          "required":true,
+                          "default":3,
+                          "min":2,
+                          "max":5,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"interestpoints",
+                      "type":"json",
+                      "description":"extracted interest points",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          }
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"visualization",
+                      "type":"image",
+                      "description":"visualization image",
+                      "options":{
+                          "visualization":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"ICDAR2017 HisDocLayoutComp Baseline Evaluation",
+      "description":"Evaluation for TASK 2 of the ICDAR2017 Competition on Layout Analysis for Challenging Medieval Manuscripts",
+      "type":"evaluation",
+      "url":"http://divaservices.unifr.ch/api/v2/evaluation/icdar2017hisdoclayoutcompbaselineevaluation/1",
+      "algorithm":{
+          "general":{
+              "name":"ICDAR2017 HisDocLayoutComp Baseline Evaluation",
+              "description":"Evaluation for TASK 2 of the ICDAR2017 Competition on Layout Analysis for Challenging Medieval Manuscripts",
+              "developer":"Tobias Gr\u00fcning (1), Roger Labahn (1), Markus Diem (2), Florian Kleber (2), Stefan Fiel (2)",
+              "affiliation":"(1) University of Rostock - CITlab, (2) TU Wien - Computer Vision Lab",
+              "email":"tobias.gruening@uni-rostock.de",
+              "author":"Tobias Gr\u00fcning (1), Roger Labahn (1), Markus Diem (2), Florian Kleber (2), Stefan Fiel (2)",
+              "website":"https://github.com/Transkribus/TranskribusBaseLineEvaluationScheme",
+              "purpose":"Computing the quality of baseline detection tools.",
+              "type":"evaluation",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":2,
+              "executions":1
+          },
+          "input":[
+              {
+                  "number":{
+                      "name":"threshold",
+                      "description":"threshold for P and R value to make a decision concerning tp, fp, fn, tn",
+                      "options":{
+                          "required":true,
+                          "default":0.75,
+                          "min":0,
+                          "max":0,
+                          "steps":0.01
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "file":{
+                      "name":"gtFile",
+                      "description":"Ground Truth Page XML File",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/xml"
+                              ],
+                              "default":"application/xml"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "file":{
+                      "name":"hypoFile",
+                      "description":"Hypothese Page XML File",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/xml"
+                              ],
+                              "default":"application/xml"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"metrics",
+                      "type":"json",
+                      "description":"computed metrics",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"ICDAR2017 HisDocLayoutComp Layout Evaluation",
+      "description":"Evaluation for TASK 1 of the ICDAR2017 Competition on Layout Analysis for Challenging Medieval Manuscripts",
+      "type":"evaluation",
+      "url":"http://divaservices.unifr.ch/api/v2/evaluation/icdar2017hisdoclayoutcomplayoutevaluation/1",
+      "algorithm":{
+          "general":{
+              "name":"ICDAR2017 HisDocLayoutComp Layout Evaluation",
+              "description":"Evaluation for TASK 1 of the ICDAR2017 Competition on Layout Analysis for Challenging Medieval Manuscripts",
+              "developer":"Manuel Bouillon, Michele Alberti, Marcel Wuersch",
+              "affiliation":"University of Fribourg",
+              "email":"manuel.bouillon@unifr.ch",
+              "author":"Manuel Bouillon",
+              "website":"https://github.com/DIVA-DIA/LayoutAnalysisEvaluator",
+              "purpose":"Pixel Level Layout Analysis Evaluation",
+              "type":"evaluation",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":16.5,
+              "executions":2
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"gtImage",
+                      "description":"Ground Truth Image File",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/png"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "file":{
+                      "name":"resultImage",
+                      "description":"Computed Result Image",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/png"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"metrics",
+                      "type":"json",
+                      "description":"computed metrics",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          }
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"visualization",
+                      "type":"image",
+                      "description":"results visualization",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/png"
+                              ],
+                              "default":"image/png"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"ICDAR2017 HisDocLayoutComp Line Evaluation",
+      "description":"Evaluation for TASK 3 of the ICDAR2017 Competition on Layout Analysis for Challenging Medieval Manuscripts",
+      "type":"evaluation",
+      "url":"http://divaservices.unifr.ch/api/v2/evaluation/icdar2017hisdoclayoutcomplineevaluation/1",
+      "algorithm":{
+          "general":{
+              "name":"ICDAR2017 HisDocLayoutComp Line Evaluation",
+              "description":"Evaluation for TASK 3 of the ICDAR2017 Competition on Layout Analysis for Challenging Medieval Manuscripts",
+              "developer":"Manuel Bouillon",
+              "affiliation":"University of Fribourg",
+              "email":"manuel.bouillon@unifr.ch",
+              "author":"Manuel Bouillon",
+              "website":"https://github.com/DIVA-DIA/LineSegmentationEvaluator",
+              "purpose":"Evaluation of Text Line Extraction",
+              "type":"evaluation",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":24,
+              "executions":14
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"gtImage",
+                      "description":"Ground Truth Image File",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/png"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "file":{
+                      "name":"gtXml",
+                      "description":"Ground Truth Page XML file",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/xml"
+                              ],
+                              "default":"application/xml"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "file":{
+                      "name":"hypoXml",
+                      "description":"Hypothese Page XML File",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/xml"
+                              ],
+                              "default":"application/xml"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"threshold",
+                      "description":"IU matching threshold",
+                      "options":{
+                          "required":true,
+                          "default":0.75,
+                          "min":0,
+                          "max":1,
+                          "steps":0.01
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"commentLines",
+                      "description":"Take Comment Lines into account",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "true",
+                              "false"
+                          ],
+                          "default":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"metrics",
+                      "type":"image",
+                      "description":"computed metrics",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "text/csv"
+                              ],
+                              "default":"text/csv"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Wavelength Seam Carving",
+      "description":"Seam carving method specialized for documents with regular layout.",
+      "type":"segmentation",
+      "url":"http://divaservices.unifr.ch/api/v2/segmentation/wavelengthseamcarving/1",
+      "algorithm":{
+          "general":{
+              "name":"Wavelength Seam Carving",
+              "description":"Seam carving method specialized for documents with regular layout.",
+              "developer":"Mathias Seuret (1), Daniel Stoekl (2)",
+              "affiliation":"(1) University of Fribourg, (2) Ecole Pratique des Hautes Etudes",
+              "email":"mathias.seuret@unifr.ch",
+              "author":"Daniel Stoekl",
+              "type":"segmentation",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":438.9896907216495,
+              "executions":97
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to segment",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"slices",
+                      "description":"Number of slices (reccomended: 3-5)",
+                      "options":{
+                          "required":true,
+                          "default":3,
+                          "min":1,
+                          "max":8,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"smoothing",
+                      "description":"smoothing factor",
+                      "options":{
+                          "required":true,
+                          "default":7e-05,
+                          "min":0,
+                          "max":1,
+                          "steps":1e-05
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"sigma",
+                      "description":"sigma of blur to be applied",
+                      "options":{
+                          "required":true,
+                          "default":0.12,
+                          "min":0,
+                          "max":1,
+                          "steps":0.01
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"slope",
+                      "description":"slope parameter",
+                      "options":{
+                          "required":true,
+                          "default":1,
+                          "min":1,
+                          "max":120,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "highlighter":{
+                      "type":"rectangle",
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"textlines",
+                      "type":"json",
+                      "description":"extracted text lines",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          }
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"textlines_csv",
+                      "type":"csv",
+                      "description":"extracted text lines",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "text/csv"
+                              ],
+                              "default":"text/csv"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Seam Carving Text Line Extraction",
+      "description":"Text Line Extraction using a Seam Carving approach",
+      "type":"segmentation",
+      "url":"http://divaservices.unifr.ch/api/v2/segmentation/seamcarvingtextlineextraction/1",
+      "algorithm":{
+          "general":{
+              "name":"Seam Carving Text Line Extraction",
+              "description":"Text Line Extraction using a Seam Carving approach",
+              "developer":"Nikolaos Arvanitopoulos",
+              "affiliation":"EPFL",
+              "email":"nick.arvanitopoulos@epfl.ch",
+              "author":"Nikolaos Arvanitopoulos",
+              "website":"http://ivrl.epfl.ch/research/handwriting_recognition/text_line_extraction",
+              "type":"segmentation",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":26.56899488926746,
+              "executions":587
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to segment",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              },
+              {
+                  "number":{
+                      "name":"smooth",
+                      "description":"smoothing for projection profile matching",
+                      "options":{
+                          "required":true,
+                          "default":0.0003,
+                          "min":0,
+                          "max":1,
+                          "steps":0.0001
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"slices",
+                      "description":"number of image slices for projection profile matching",
+                      "options":{
+                          "required":true,
+                          "default":8,
+                          "min":4,
+                          "max":8,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"sigma",
+                      "description":"standard deviation for gaussian smoothing",
+                      "options":{
+                          "required":true,
+                          "default":3,
+                          "min":2,
+                          "max":5,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "highlighter":{
+                      "type":"rectangle",
+                      "userdefined":true
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"textlines",
+                      "type":"json",
+                      "description":"extracted text lines",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          }
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"visualization",
+                      "type":"image",
+                      "description":"Text line visualization",
+                      "options":{
+                          "visualization":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/png"
+                              ],
+                              "default":"image/png",
+                              "colorspace":"rgb"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Histogram Text Line Segmentation",
+      "description":"Simple Text Line Segmentation using Histograms",
+      "type":"segmentation",
+      "url":"http://divaservices.unifr.ch/api/v2/segmentation/histogramtextlinesegmentation/1",
+      "algorithm":{
+          "general":{
+              "name":"Histogram Text Line Segmentation",
+              "description":"Simple Text Line Segmentation using Histograms",
+              "developer":"Mathias Seuret",
+              "affiliation":"University of Fribourg",
+              "email":"mathias.seuret@unifr.ch",
+              "author":"Mathias Seuret",
+              "type":"segmentation",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":3.873873873873874,
+              "executions":111
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to detect edges on",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              },
+              {
+                  "highlighter":{
+                      "type":"rectangle",
+                      "userdefined":true
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"textlines",
+                      "type":"json",
+                      "description":"extracted text lines",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          },
+                          "visualization":false
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"visualization",
+                      "type":"image",
+                      "description":"Text line visualization",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg"
+                              ],
+                              "default":"image/jpeg",
+                              "colorspace":"rgb"
+                          },
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Sharpen Enhancement",
+      "description":"Image Sharpening",
+      "type":"enhancement",
+      "url":"http://divaservices.unifr.ch/api/v2/enhancement/sharpenenhancement/1",
+      "algorithm":{
+          "general":{
+              "name":"Sharpen Enhancement",
+              "description":"Image Sharpening",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "type":"enhancement",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":4.047619047619048,
+              "executions":42
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"sharpenLevel",
+                      "description":"Sharpening level to apply",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "4",
+                              "8"
+                          ],
+                          "default":0
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"sharpenEnhancedImage",
+                      "type":"image",
+                      "description":"Generated Enhanced Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"color",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Graph Extraction",
+      "description":"Graph Extraction using different Interest Point Detectors",
+      "type":"graph",
+      "url":"http://divaservices.unifr.ch/api/v2/graph/graphextraction/1",
+      "algorithm":{
+          "general":{
+              "name":"Graph Extraction",
+              "description":"Graph Extraction using different Interest Point Detectors",
+              "developer":"Angelika Garz",
+              "affiliation":"University of Fribourg",
+              "email":"angelika.garz@unifr.ch",
+              "author":"Angelika Garz",
+              "type":"graph",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":3.6413793103448278,
+              "executions":290
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to detect edges on",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"InterestPointDetector",
+                      "description":"The Interest Point Detector to use",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "SCP",
+                              "CP",
+                              "Harris",
+                              "DOG"
+                          ],
+                          "default":3
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"graphvisualization",
+                      "type":"image",
+                      "description":"Graph Visualization image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"binary",
+                          "visualization":true
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"graphxml",
+                      "type":"xml",
+                      "description":"Graph XML file",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "text/xml",
+                                  "application/xml"
+                              ],
+                              "default":"text/xml"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Canny Edge Detection",
+      "description":"Canny Edge Detection",
+      "type":"enhancement",
+      "url":"http://divaservices.unifr.ch/api/v2/enhancement/cannyedgedetection/1",
+      "algorithm":{
+          "general":{
+              "name":"Canny Edge Detection",
+              "description":"Canny Edge Detection",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "type":"enhancement",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":4.269230769230769,
+              "executions":26
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to detect edges on",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"cannyEdgeImage",
+                      "type":"image",
+                      "description":"Edge Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"binary",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Histogram Enhancement",
+      "description":"Image enhancement using histograms",
+      "type":"enhancement",
+      "url":"http://divaservices.unifr.ch/api/v2/enhancement/histogramenhancement/1",
+      "algorithm":{
+          "general":{
+              "name":"Histogram Enhancement",
+              "description":"Image enhancement using histograms",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "type":"enhancement",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":3.6615384615384614,
+              "executions":65
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"histogramEnhancedImage",
+                      "type":"image",
+                      "description":"Generated Enhanced Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"gray",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Grayification",
+      "description":"Image Grayification",
+      "type":"enhancement",
+      "url":"http://divaservices.unifr.ch/api/v2/enhancement/grayification/1",
+      "algorithm":{
+          "general":{
+              "name":"Grayification",
+              "description":"Image Grayification",
+              "developer":"Manuel Bouillon",
+              "affiliation":"University of Fribourg",
+              "email":"manuel.bouillon@unifr.ch",
+              "author":"Manuel Bouillon",
+              "type":"enhancement",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":21.5,
+              "executions":56
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to transform",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"grayImage",
+                      "type":"image",
+                      "description":"Generated Grayscale Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"grayscale",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Image Inversion",
+      "description":"Invert an Image",
+      "type":"enhancement",
+      "url":"http://divaservices.unifr.ch/api/v2/enhancement/imageinversion/1",
+      "algorithm":{
+          "general":{
+              "name":"Image Inversion",
+              "description":"Invert an Image",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "type":"enhancement",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":2.8210526315789473,
+              "executions":95
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"invertedImage",
+                      "type":"image",
+                      "description":"Generated Inverted Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"color",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Sauvola Binarization",
+      "description":"Sauvola Binarization",
+      "type":"binarization",
+      "url":"http://divaservices.unifr.ch/api/v2/binarization/sauvolabinarization/1",
+      "algorithm":{
+          "general":{
+              "name":"Sauvola Binarization",
+              "description":"Sauvola Binarization",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "type":"binarization",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":2.698412698412699,
+              "executions":378
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"radius",
+                      "description":"Radius of the local region (in pixel)",
+                      "options":{
+                          "required":true,
+                          "default":15,
+                          "min":2,
+                          "max":45,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"thres_tune",
+                      "description":"Parameter to tune the threshold",
+                      "options":{
+                          "required":true,
+                          "default":0.3,
+                          "min":0.1,
+                          "max":0.6,
+                          "steps":0.1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"sauvolaBinaryImage",
+                      "type":"image",
+                      "description":"Generated Binary Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"binary",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Kraken Binarization",
+      "description":"Wrapper to the binarization module from kraken",
+      "type":"binarization",
+      "url":"http://divaservices.unifr.ch/api/v2/binarization/krakenbinarization/1",
+      "algorithm":{
+          "general":{
+              "name":"Kraken Binarization",
+              "description":"Wrapper to the binarization module from kraken",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "website":"https://github.com/mittagessen/kraken",
+              "type":"binarization",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":5.755813953488372,
+              "executions":86
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"krakenBinaryImage",
+                      "type":"image",
+                      "description":"Generated Binary Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/png"
+                          },
+                          "colorspace":"binary",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Artificial Noising",
+      "description":"Adds artificial noise to a historical image",
+      "type":"imageprocessing",
+      "url":"http://divaservices.unifr.ch/api/v2/imageprocessing/artificialnoising/1",
+      "algorithm":{
+          "general":{
+              "name":"Artificial Noising",
+              "description":"Adds artificial noise to a historical image",
+              "developer":"Mathias Seuret",
+              "affiliation":"University of Fribourg",
+              "email":"mathias.seuret@unifr.ch",
+              "author":"Mathias Seuret",
+              "type":"imageprocessing",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":52,
+              "executions":2
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"density",
+                      "description":"The density of the artificial noise",
+                      "options":{
+                          "required":true,
+                          "min":25,
+                          "max":75,
+                          "steps":1,
+                          "default":50
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"strength",
+                      "description":"The strength of the artificial noise",
+                      "options":{
+                          "required":true,
+                          "min":0,
+                          "max":3,
+                          "steps":0.1,
+                          "default":1.5
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "file":{
+                      "name":"noise",
+                      "description":"The noise xml script to use",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/xml"
+                              ],
+                              "default":"application/xml"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"noiseImage",
+                      "type":"image",
+                      "description":"Generated Noisy Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"color",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"ocropus recognize",
+      "description":"Wrapper to the OCRopus recognition model (developed by Thomas Breuel)",
+      "type":"ocr",
+      "url":"http://divaservices.unifr.ch/api/v2/ocr/ocropusrecognize/1",
+      "algorithm":{
+          "general":{
+              "name":"ocropus recognize",
+              "description":"Wrapper to the OCRopus recognition model (developed by Thomas Breuel)",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "website":"https://github.com/tmbdev/ocropy",
+              "DOI":"10.1117/12.783598",
+              "purpose":"Applying an OCR recognition model",
+              "type":"ocr",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":5.859452736318404,
+              "executions":804
+          },
+          "input":[
+              {
+                  "folder":{
+                      "name":"dataFolder",
+                      "description":"The input collection (needs to contain input text lines *.bin.png files to recognize)",
+                      "options":{
+                          "required":true
+                      },
+                      "userdefined":false
+                  }
+              },
+              {
+                  "file":{
+                      "name":"recognitionModel",
+                      "description":"Recognition model to use",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/gzip"
+                              ],
+                              "default":"application/gzip"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "folder":{
+                      "name":"recognition"
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Ocropus Training",
+      "description":"Wrapper to the training module of OCRopus (developed by Thomas Breuel)",
+      "type":"ocr",
+      "url":"http://divaservices.unifr.ch/api/v2/ocr/ocropustraining/1",
+      "algorithm":{
+          "general":{
+              "name":"Ocropus Training",
+              "description":"Wrapper to the training module of OCRopus (developed by Thomas Breuel)",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "website":"https://github.com/tmbdev/ocropy",
+              "DOI":"10.1117/12.783598",
+              "purpose":"Training an OCR recognition model",
+              "type":"ocr",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":65,
+              "executions":1
+          },
+          "input":[
+              {
+                  "folder":{
+                      "name":"inputData",
+                      "description":"The input collection (needs to contain the ground truth *.gt.txt, and input text lines *.bin.png files)",
+                      "options":{
+                          "required":true
+                      },
+                      "userdefined":false
+                  }
+              },
+              {
+                  "number":{
+                      "name":"lineHeight",
+                      "description":"the default line height",
+                      "options":{
+                          "required":true,
+                          "default":46,
+                          "min":10,
+                          "max":120,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"trainIteration",
+                      "description":"Number of training iterations to perform",
+                      "options":{
+                          "required":true,
+                          "default":100,
+                          "min":100,
+                          "max":200000,
+                          "steps":100
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"saveFreq",
+                      "description":"Number of iterations performed after which a model is saved",
+                      "options":{
+                          "required":true,
+                          "default":100,
+                          "min":100,
+                          "max":25000,
+                          "steps":100
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "folder":{
+                      "name":"outputModels"
+                  }
+              },
+              {
+                  "file":{
+                      "name":"trainingVisualization",
+                      "type":"image",
+                      "description":"Training loss visualization",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/png"
+                              ],
+                              "default":"image/png"
+                          },
+                          "colorspace":"color",
+                          "visualization":true
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"trainingError",
+                      "type":"json",
+                      "description":"Training Error",
+                      "options":{
+                          "filename":"trainedModel-error.json",
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          },
+                          "visualization":false
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Kraken Pagesegmentation",
+      "description":"Wrapper to the page segmentation module from kraken",
+      "type":"binarization",
+      "url":"http://divaservices.unifr.ch/api/v2/binarization/krakenpagesegmentation/1",
+      "algorithm":{
+          "general":{
+              "name":"Kraken Pagesegmentation",
+              "description":"Wrapper to the page segmentation module from kraken",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "website":"https://github.com/mittagessen/kraken",
+              "type":"binarization",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":52.91428571428571,
+              "executions":35
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"textlines",
+                      "type":"json",
+                      "description":"Extracted text lines",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          },
+                          "visualization":false
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Ocropus Binarization",
+      "description":"Wrapper to the binarization module from OCRopus (developped by Thomas Breuel)",
+      "type":"binarization",
+      "url":"http://divaservices.unifr.ch/api/v2/binarization/ocropusbinarization/1",
+      "algorithm":{
+          "general":{
+              "name":"Ocropus Binarization",
+              "description":"Wrapper to the binarization module from OCRopus (developped by Thomas Breuel)",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "website":"https://github.com/tmbdev/ocropy",
+              "DOI":"10.1117/12.783598",
+              "type":"binarization",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":6.793939393939394,
+              "executions":165
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"enableSkew",
+                      "description":"Enable Skew correction",
+                      "options":{
+                          "required":false,
+                          "values":[
+                              "true",
+                              "false"
+                          ],
+                          "default":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"maxskew",
+                      "description":"skew angle estimation parameter (degree)",
+                      "options":{
+                          "required":false,
+                          "default":2,
+                          "min":1,
+                          "max":15,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"skewsteps",
+                      "description":"steps for skew angle estimation (per degree)",
+                      "options":{
+                          "required":false,
+                          "default":8,
+                          "min":2,
+                          "max":10,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"ocropusBinaryImage",
+                      "type":"image",
+                      "description":"Generated Binary Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"binary",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Ocropus Page Segmentation",
+      "description":"Wrapper to the page segmentation module from OCRopus (developed by Thomas Breuel)",
+      "type":"segmentation",
+      "url":"http://divaservices.unifr.ch/api/v2/segmentation/ocropuspagesegmentation/1",
+      "algorithm":{
+          "general":{
+              "name":"Ocropus Page Segmentation",
+              "description":"Wrapper to the page segmentation module from OCRopus (developed by Thomas Breuel)",
+              "developer":"Marcel W\u00fcrsch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel W\u00fcrsch",
+              "website":"https://github.com/tmbdev/ocropy",
+              "DOI":"10.1117/12.783598",
+              "type":"segmentation",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":6.112903225806452,
+              "executions":124
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to binarize",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"segmentationImage",
+                      "type":"image",
+                      "description":"Generated Binary Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/png"
+                              ],
+                              "default":"image/png"
+                          },
+                          "colorspace":"color",
+                          "visualization":true
+                      }
+                  }
+              },
+              {
+                  "folder":{
+                      "name":"textlines"
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Text Block Extraction",
+      "description":"Text Block Extraction Method",
+      "type":"segmentation",
+      "url":"http://divaservices.unifr.ch/api/v2/segmentation/textblockextraction/1",
+      "algorithm":{
+          "general":{
+              "name":"Text Block Extraction",
+              "description":"Text Block Extraction Method",
+              "developer":"Kai Chen",
+              "affiliation":"University of Fribourg",
+              "email":"kai.chen@unifr.ch",
+              "author":"Kai Chen",
+              "type":"segmentation",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":3.763157894736842,
+              "executions":38
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to detect edges on",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/png"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              },
+              {
+                  "number":{
+                      "name":"maxVerBlockDist",
+                      "description":"Maximal amount of vertical black pixels, after this amount of pixels a cut will be made",
+                      "options":{
+                          "required":true,
+                          "min":0,
+                          "max":200,
+                          "steps":1,
+                          "default":50
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"minVerBlockNbPixels",
+                      "description":"Minimal number of black pixels per block vertically",
+                      "options":{
+                          "required":true,
+                          "steps":1,
+                          "default":200
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"minBlockWidth",
+                      "description":"Minimal block width",
+                      "options":{
+                          "required":true,
+                          "steps":1,
+                          "default":10
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"maxHorBlockDist",
+                      "description":"Maximal block width",
+                      "options":{
+                          "required":true,
+                          "steps":1,
+                          "default":50
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"minHorBlockNbPixels",
+                      "description":"Minimal amount of black pixels per block horizontally",
+                      "options":{
+                          "required":true,
+                          "steps":1,
+                          "default":100
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"minBlockHeight",
+                      "description":"Minimal block height",
+                      "options":{
+                          "required":true,
+                          "steps":1,
+                          "default":200
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"border",
+                      "description":"Minimal width between two blocks",
+                      "options":{
+                          "required":true,
+                          "steps":1,
+                          "default":10
+                      },
+                      "userdefined":true
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"textblocks",
+                      "type":"json",
+                      "description":"extracted text lines",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          },
+                          "visualization":false
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Music Object Detector",
+      "description":"Music Object Detector with TensorFlow",
+      "type":"objectdetection",
+      "url":"http://divaservices.unifr.ch/api/v2/objectdetection/musicobjectdetector/1",
+      "algorithm":{
+          "general":{
+              "name":"Music Object Detector",
+              "description":"Music Object Detector with TensorFlow",
+              "developer":"Alexander Pacha (1)",
+              "affiliation":"(1) TU Wien, (2) Univ Rennes",
+              "email":"alexander.pacha@tuwien.ac.at",
+              "author":"Alexander Pacha(1), Horst Eidenberger (1), Kwon-Young Choi (2), Bertrand Couasnon (2), Yann Ricquebourg (2)",
+              "website":"https://github.com/apacha/MusicObjectDetector-TF",
+              "type":"objectdetection",
+              "license":"Apache2.0",
+              "ownsCopyright":"1",
+              "expectedRuntime":116.75,
+              "executions":68
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image with the handwritten scores",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png"
+                              ],
+                              "default":"image/png"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"annotationImage",
+                      "type":"image",
+                      "description":"Generated Annotated Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg"
+                              ],
+                              "default":"image/jpeg"
+                          },
+                          "colorspace":"rgb",
+                          "visualization":true
+                      }
+                  }
+              },
+              {
+                  "file":{
+                      "name":"annotations",
+                      "type":"text",
+                      "description":"Annotations",
+                      "options":{
+                          "filename":"annotations.txt",
+                          "mimeTypes":{
+                              "allowed":[
+                                  "text/plain"
+                              ],
+                              "default":"text/plain"
+                          },
+                          "visualization":false
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Word Image Extraction",
+      "description":"Extract word images from an image file with an svg that contains the word paths",
+      "type":"kws",
+      "url":"http://divaservices.unifr.ch/api/v2/kws/wordimageextraction/1",
+      "algorithm":{
+          "general":{
+              "name":"Word Image Extraction",
+              "description":"Extract word images from an image file with an svg that contains the word paths",
+              "developer":"Marcel Wuersch",
+              "affiliation":"University of Fribourg",
+              "email":"marcel.wuersch@unifr.ch",
+              "author":"Marcel Wuersch",
+              "type":"kws",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":47.96153846153846,
+              "executions":52
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to extract word images from",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff"
+                              ],
+                              "default":"image/jpeg"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "file":{
+                      "name":"pathSvg",
+                      "description":"",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/svg+xml"
+                              ],
+                              "default":"image/svg+xml"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "folder":{
+                      "name":"crops"
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Active Learning Initialization",
+      "description":"Initialization of the Active Learning",
+      "type":"activelearning",
+      "url":"http://divaservices.unifr.ch/api/v2/activelearning/activelearninginitialization/1",
+      "algorithm":{
+          "general":{
+              "name":"Active Learning Initialization",
+              "description":"Initialization of the Active Learning",
+              "developer":"Bingqing Qu",
+              "affiliation":"University of Fribourg",
+              "email":"bingqing.qu@unifr.ch",
+              "author":"Bingqing Qu",
+              "type":"activelearning",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":32.29203539823009,
+              "executions":113
+          },
+          "input":[
+              {
+                  "folder":{
+                      "name":"learning_data",
+                      "description":"The active learning data needed for the method to work",
+                      "options":{
+                          "required":true
+                      },
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+          ]
+      }
+  },
+  {
+      "name":"Active Learning Method",
+      "description":"Running of the Active Learning",
+      "type":"activelearning",
+      "url":"http://divaservices.unifr.ch/api/v2/activelearning/activelearningmethod/1",
+      "algorithm":{
+          "general":{
+              "name":"Active Learning Method",
+              "description":"Running of the Active Learning",
+              "developer":"Bingqing Qu",
+              "affiliation":"University of Fribourg",
+              "email":"bingqing.qu@unifr.ch",
+              "author":"Bingqing Qu",
+              "type":"activelearning",
+              "license":"Other",
+              "ownsCopyright":"1",
+              "expectedRuntime":24.555555555555554,
+              "executions":72
+          },
+          "input":[
+              {
+                  "folder":{
+                      "name":"learning_data",
+                      "description":"The active learning data needed for the method to work",
+                      "options":{
+                          "required":true
+                      },
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+          ]
+      }
+  },
+  {
+      "name":"Keypoint graph",
+      "description":"Transforms an image into a graph",
+      "type":"graph",
+      "url":"http://divaservices.unifr.ch/api/v2/graph/keypointgraph/1",
+      "algorithm":{
+          "general":{
+              "name":"Keypoint graph",
+              "description":"Transforms an image into a graph",
+              "developer":"Paul Maergner, Marco von Raumer",
+              "affiliation":"University of Fribourg",
+              "email":"marco.vonraumer@unifr.ch",
+              "author":"Paul Maergner, Marco von Raumer",
+              "type":"graph",
+              "expectedRuntime":4.803926771026813,
+              "executions":3769
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The image to transform (or multiple packed in a zip file). WARNING: any uploaded files can be publically accessed! Do not upload any images (signatures) without permission!",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png",
+                                  "image/tiff",
+                                  "application/zip"
+                              ],
+                              "default":"image/png"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"imageGraph",
+                      "type":"xml",
+                      "description":"Resulting graph (or multiple packed in a zip file)",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/xml",
+                                  "application/zip"
+                              ],
+                              "default":"application/xml"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Graph transformation",
+      "description":"Transforms a gxl graph",
+      "type":"graph",
+      "url":"http://divaservices.unifr.ch/api/v2/graph/graphtransformation/1",
+      "algorithm":{
+          "general":{
+              "name":"Graph transformation",
+              "description":"Transforms a gxl graph",
+              "developer":"Marco von Raumer",
+              "affiliation":"University of Fribourg",
+              "email":"marco.vonraumer@unifr.ch",
+              "author":"Marco von Raumer",
+              "type":"graph",
+              "expectedRuntime":2.4242424242424243,
+              "executions":33
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputGraph",
+                      "description":"The graph to transform (gxl, saved as xml or multiple packed in a zip file). WARNING: any uploaded files can be publically accessed! Do not upload any graphs (signatures) without permission!",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/xml",
+                                  "application/zip"
+                              ],
+                              "default":"application/xml"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"keepEdges",
+                      "description":"Keep existing edges",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "true",
+                              "false"
+                          ],
+                          "default":0
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"method",
+                      "description":"Transformation method to apply",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "kspan",
+                              "knearest"
+                          ],
+                          "default":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"numberK",
+                      "description":"Amount of edges to add per node",
+                      "options":{
+                          "required":true,
+                          "default":2,
+                          "min":1,
+                          "max":10,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"mergeMode",
+                      "description":"kspan only: how to merge node distances",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "minimum",
+                              "average"
+                          ],
+                          "default":0
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"transformed",
+                      "type":"xml",
+                      "description":"Transformed graph (gxl, saved as xml or multiple packed in a zip file)",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/xml",
+                                  "application/zip"
+                              ],
+                              "default":"application/xml"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Graph edit distance",
+      "description":"Calculates graph edit distances",
+      "type":"graph",
+      "url":"http://divaservices.unifr.ch/api/v2/graph/grapheditdistance/1",
+      "algorithm":{
+          "general":{
+              "name":"Graph edit distance",
+              "description":"Calculates graph edit distances",
+              "developer":"Paul Maergner, Marco von Raumer",
+              "affiliation":"University of Fribourg",
+              "email":"marco.vonraumer@unifr.ch",
+              "author":"Paul Maergner, Marco von Raumer",
+              "type":"graph",
+              "expectedRuntime":6.3076923076923075,
+              "executions":13
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputData",
+                      "description":"The graphs to treat (packed in a zip file). WARNING: any uploaded files can be publically accessed! Do not upload any graphs (signatures) without permission!",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/zip"
+                              ],
+                              "default":"application/zip"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"numberN",
+                      "description":"Amount of reference graphs (0 to N)",
+                      "options":{
+                          "required":true,
+                          "default":2,
+                          "min":1,
+                          "max":100,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"sortMode",
+                      "description":"check file names for flags (f / g) to determine correct order. (signatures are rearranged such that genuine ones are first)",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "false",
+                              "true"
+                          ],
+                          "default":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"verificationMode",
+                      "description":"Faster, skips pure reference distances. (reference graphs are not compared against each other)",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "false",
+                              "true"
+                          ],
+                          "default":0
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"out",
+                      "type":"csv",
+                      "description":"graph edit distances (ged, saved as csv)",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "text/csv"
+                              ],
+                              "default":"text/csv"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Signature evaluation",
+      "description":"Provides signature verification and evaluation from ged-files",
+      "type":"graph",
+      "url":"http://divaservices.unifr.ch/api/v2/graph/signatureevaluation/1",
+      "algorithm":{
+          "general":{
+              "name":"Signature evaluation",
+              "description":"Provides signature verification and evaluation from ged-files",
+              "developer":"Marco von Raumer",
+              "affiliation":"University of Fribourg",
+              "email":"marco.vonraumer@unifr.ch",
+              "author":"Marco von Raumer",
+              "type":"graph",
+              "expectedRuntime":2,
+              "executions":18
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputData",
+                      "description":"The ged files to evaluate (single txt or multiple packed in a zip file)",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "text/plain",
+                                  "application/zip"
+                              ],
+                              "default":"text/plain"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"numberR",
+                      "description":"Amount of reference signatures (0 to N)",
+                      "options":{
+                          "required":true,
+                          "default":2,
+                          "min":1,
+                          "max":100,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "number":{
+                      "name":"numberG",
+                      "description":"Amount of genuine signatures (0 to N). Notice: only non-reference signatures are considered",
+                      "options":{
+                          "required":true,
+                          "default":2,
+                          "min":1,
+                          "max":100,
+                          "steps":1
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "select":{
+                      "name":"verification",
+                      "description":"Requires 2 input files with same references. Verifies file 2 against file 1 (order is lexicographically determined)",
+                      "options":{
+                          "required":true,
+                          "values":[
+                              "false",
+                              "true"
+                          ],
+                          "default":0
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"results",
+                      "type":"json",
+                      "description":"evaluation results",
+                      "options":{
+                          "visualization":false,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "application/json"
+                              ],
+                              "default":"application/json"
+                          }
+                      }
+                  }
+              }
+          ]
+      }
+  },
+  {
+      "name":"Printed Handwritten Segmentation",
+      "description":"pixelwise printed and handwritten segmentation using a lightweight FCN and CRF post-processing",
+      "type":"segmentation",
+      "url":"http://divaservices.unifr.ch/api/v2/segmentation/printedhandwrittensegmentation/1",
+      "algorithm":{
+          "general":{
+              "name":"Printed Handwritten Segmentation",
+              "description":"pixelwise printed and handwritten segmentation using a lightweight FCN and CRF post-processing",
+              "developer":"Nicolas Dutly",
+              "affiliation":"University Of Fribourg",
+              "email":"nicolas.dutly@unifr.ch",
+              "author":"Nicolas Dutly",
+              "DOI":"",
+              "type":"segmentation",
+              "license":"MIT",
+              "ownsCopyright":"1",
+              "expectedRuntime":83.03225806451613,
+              "executions":31
+          },
+          "input":[
+              {
+                  "file":{
+                      "name":"inputImage",
+                      "description":"The input image to segment",
+                      "options":{
+                          "required":true,
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/jpeg",
+                                  "image/png"
+                              ],
+                              "default":"image/png"
+                          }
+                      },
+                      "userdefined":true
+                  }
+              },
+              {
+                  "outputFolder":{
+                      "userdefined":false
+                  }
+              }
+          ],
+          "output":[
+              {
+                  "file":{
+                      "name":"outputSegmented",
+                      "type":"image",
+                      "description":"Generated Segmented Image",
+                      "options":{
+                          "mimeTypes":{
+                              "allowed":[
+                                  "image/png"
+                              ],
+                              "default":"image/png"
+                          },
+                          "colorspace":"binary",
+                          "visualization":true
+                      }
+                  }
+              }
+          ]
+      }
+  }
+]
