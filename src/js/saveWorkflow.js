@@ -15,8 +15,9 @@ export const saveWorkflow = jsonGraph => {
       const Service = "";
       const Inputs = { Parameter: [], Data: [] };
       for (const [Name, values] of Object.entries(params)) {
+        console.log("TCL: values", values);
         const { value: Value, defaultValue } = values;
-        if (Value != defaultValue) {
+        if (Value != defaultValue.toString()) {
           Inputs.Parameter.push({
             Name,
             Value

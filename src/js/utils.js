@@ -57,13 +57,12 @@ export const isPort = el => {
 export const isPortUserdefined = el => {
   if (el.type) {
     return (
-      (el.type == Inputs.FILE.type || el.type == Inputs.FOLDER.type) &&
-      el.userdefined
+      el.type == Inputs.FILE.type || el.type == Inputs.FOLDER.type
+      // && el.userdefined
     );
   }
   return (
-    (el[Inputs.FILE.type] || el[Inputs.FOLDER.type]) &&
-    el[Object.keys(el)[0]].userdefined
+    el[Inputs.FILE.type] || el[Inputs.FOLDER.type] //&& el[Object.keys(el)[0]].userdefined
   );
 };
 
@@ -149,7 +148,7 @@ export const setSelectValueInElement = (element, select) => {
   const s = select.find(":selected");
   const selectEl = select.parent();
   const value = s.attr("value");
-  const defaultValue = selectEl.data("default");
+  const defaultValue = select.data("default");
   const attr = selectEl.attr("name");
 
   element.attributes.params[attr] = { value, defaultValue };
@@ -189,8 +188,7 @@ export const createSelect = (
   defaultTooltip,
   defaultValue = null
 ) => {
-  const { name, userdefined, options, description } = param;
-  const { default: defaultOption, values } = options;
+  const { name, defaultValue: defaultOption, values, description } = param;
 
   // wrapper
   const newSelect = $("<div/>", {
@@ -202,10 +200,10 @@ export const createSelect = (
   const selectEl = $(`<${Inputs.SELECT.tag}/>`, {
     class: PARAM_COL,
     attr: {
-      "data-default": param.options.values[param.options.default]
+      "data-default": values[defaultOption].toString()
     },
     prop: {
-      disabled: !userdefined
+      disabled: false // @TODO userdefined
     }
   });
 
@@ -218,7 +216,7 @@ export const createSelect = (
   // param options, select the default value or the read value of the workflow
   let selectedId;
   if (defaultValue) {
-    selectedId = param.options.values.indexOf(defaultValue);
+    selectedId = values.indexOf(defaultValue);
     if (selectedId < 0) {
       alert("an error in field ", name, " with value ", defaultValue);
     }
@@ -257,9 +255,15 @@ export const createInput = (
   param,
   resetButton,
   defaultTooltip,
-  defaultValue
+  givenDefaultValue
 ) => {
-  const { name, options, userdefined, description } = param;
+  const {
+    name,
+    values,
+    defaultValue: defaultOption,
+    description,
+    $: attributes
+  } = param;
 
   // wrapper
   const newInput = $("<div/>", { class: "input row" });
@@ -271,18 +275,31 @@ export const createInput = (
   });
 
   // param input
-  const { required, min, max, steps, default: defaultOption } = options;
+  let required = false;
+  if (attributes && attributes.Status == "required") {
+    required = true;
+  }
+  const { min, max, step } = values;
+  const def = givenDefaultValue
+    ? givenDefaultValue
+    : defaultOption
+    ? defaultOption
+    : min
+    ? min
+    : max
+    ? max
+    : 0;
   const inputEl = $(`<${Inputs.NUMBER.tag} />`, {
     class: `${PARAM_COL} form-control`,
-    prop: { disabled: !userdefined, required },
+    prop: { disabled: false, required }, // userdefined?
     attr: {
       type: "text",
       name,
       "data-min": min,
       "data-max": max,
-      "data-steps": steps,
+      "data-step": step,
       "data-default": defaultOption,
-      value: defaultValue ? defaultValue : defaultOption
+      value: def
     }
   });
 
@@ -294,10 +311,11 @@ export const createInput = (
 
   // add tooltip
   let tooltip = $();
-  if (description || options.length) {
-    const tooltipText = `${description}${TOOLTIP_BREAK_LINE}${objectToString(
-      options
-    )}`;
+  if (description || values.length) {
+    const tooltipText = `${description}${TOOLTIP_BREAK_LINE}${objectToString({
+      default: defaultOption,
+      ...values
+    })}`;
     tooltip = defaultTooltip.attr("data-title", tooltipText);
   }
   newInput.append(nameEl, inputEl, resetButtonNumber, tooltip);
@@ -306,7 +324,7 @@ export const createInput = (
 
 export const checkInputValue = input => {
   const currentVal = input.val();
-  const { min, max, steps } = input.data();
+  const { min, max, step } = input.data();
 
   const minCondition = min ? currentVal >= min : true;
   const maxCondition = max ? currentVal <= max : true;
@@ -314,15 +332,15 @@ export const checkInputValue = input => {
   // because of js inconsistency with float computations
   // we transform it to a string, round it to the the least precision
   // and check if it is a integer, so whether it matches the step
-  const sepNumber = steps.toString().split(".");
+  const sepNumber = step.toString().split(".");
   let precision = 0;
   if (sepNumber.length == 1) {
     precision = 0;
   } else {
     precision = sepNumber[1].length + 1;
   }
-  const stepCondition = steps
-    ? Number.isInteger(+parseFloat(currentVal / steps).toFixed(precision))
+  const stepCondition = step
+    ? Number.isInteger(+parseFloat(currentVal / step).toFixed(precision))
     : true;
   const isValid = minCondition && maxCondition && stepCondition;
 
@@ -333,7 +351,6 @@ const computeDisplayOffset = (el, { height, width }) => {
   const mainPosition = document.querySelector("#main").getBoundingClientRect();
 
   const sPosition = el.offset();
-  console.log("TCL: computeDisplayOffset -> sPosition", sPosition);
   const dist = {
     x: (sPosition.left - mainPosition.x + width) * 0.1,
     y: (sPosition.top - mainPosition.y + height) * 0.09,
@@ -561,21 +578,21 @@ export const setParametersInForeignObject = (
 
 export const createPort = (param, group) => {
   let port = {};
-  const obj = param[Object.keys(param)[0]];
-  const { userdefined, options, name } = obj;
-  if (group == OUT_PORT_CLASS || userdefined) {
+  const { name, mimeTypes } = param;
+  if (group) {
+    //group == OUT_PORT_CLASS || userdefined) {
     // always create out port, check userdefined for inputs
 
     let typeAllowed;
     let type;
 
     // folder case
-    if (param[Inputs.FOLDER.type]) {
+    if (param.type == Inputs.FOLDER.type) {
       typeAllowed = [Inputs.FOLDER.type]; // use options allowed types, otherwise it is a folder
       type = Inputs.FOLDER.type;
     } else {
       // @TODO display !userdefined ports ?
-      typeAllowed = options.mimeTypes.allowed;
+      typeAllowed = mimeTypes.allowed;
       type = typeAllowed[0].substr(
         //@TODO diff types ?
         0,

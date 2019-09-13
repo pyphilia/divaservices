@@ -15,7 +15,6 @@ import {
 } from "./constants";
 import {
   isParamInput,
-  isPort,
   isPortUserdefined,
   computeBoxWidth,
   computeBoxHeight,
@@ -105,16 +104,15 @@ const createBox = (e, id, { position, size }) => {
 };
 
 export const transformWebserviceForGraph = (webservice, category) => {
-  if (!webservice.general) {
+  if (!webservice.name) {
     alert("problem with ", webservice);
     return {};
   }
-  const { general, output, input } = webservice;
-  const { name: label, description } = general;
+  const { name: label, description, outputs, inputs } = webservice;
 
   // handle ports
   const ports = { items: [] };
-  input
+  inputs
     .filter(inp => isPortUserdefined(inp))
     .forEach(inp => {
       const port = createPort(inp, IN_PORT_CLASS);
@@ -122,33 +120,24 @@ export const transformWebserviceForGraph = (webservice, category) => {
         ports.items.push(port);
       }
     });
-
-  output
-    .filter(out => isPort(out))
-    .forEach(out => {
-      const port = createPort(out, OUT_PORT_CLASS);
-      if (port.group) {
-        ports.items.push(port);
-      }
-    });
+  console.log(outputs);
+  outputs.forEach(out => {
+    console.log("wefsd");
+    const port = createPort(out, OUT_PORT_CLASS);
+    if (port.group) {
+      ports.items.push(port);
+    }
+  });
 
   // handle params
-  const params = [];
-  for (const inp of input.filter(inp => isParamInput(inp))) {
-    const type = Object.keys(inp)[0];
-    const param = {
-      type,
-      ...inp[type]
-    };
-    params.push(param);
-  }
+  const params = inputs.filter(inp => isParamInput(inp));
 
   const ret = {
+    name,
     description,
     label,
     params,
     ports,
-    information: general,
     category
   };
   return ret;
@@ -158,6 +147,7 @@ export const transformWebserviceForGraph = (webservice, category) => {
 // ------------------------
 export const addElement = (e, parameters, defaultParams = {}) => {
   const { label } = e;
+  console.log("TCL: addElement -> e", e);
 
   if (!label) {
     return;
@@ -203,10 +193,10 @@ const findEmptyPosition = size => {
   return position;
 };
 
-export const addElementToGraph = (webservice, category, defaultParams = {}) => {
+export const addElementToGraph = (webservice, defaultParams = {}) => {
   const transformedWebservice = transformWebserviceForGraph(
     webservice,
-    category
+    webservice.type
   );
 
   const size = {

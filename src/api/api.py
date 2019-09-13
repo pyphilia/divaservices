@@ -68,6 +68,20 @@ def create_services_xml():
             general = algoJson['general']
             information = ET.SubElement(service, 'Information')
             ET.SubElement(information, 'Name').text = general['name']
+            ET.SubElement(information, 'Description').text = general['description']
+            ET.SubElement(information, 'Developer').text = general['developer']
+            ET.SubElement(information, 'Affilation').text = general['affiliation']
+            ET.SubElement(information, 'Email').text = general['email']
+            ET.SubElement(information, 'Author').text = general['author']
+            if('DOI' in general):
+              ET.SubElement(information, 'DOI').text = str(general['DOI'])
+            if('license' in general):
+              ET.SubElement(information, 'License').text = general['license']
+            ET.SubElement(information, 'Type').text = general['type']
+            if 'ownsCopyright' in general:
+              ET.SubElement(information, 'OwnsCopyright').text = general['ownsCopyright']
+            ET.SubElement(information, 'ExpectedRuntime').text = str(general['expectedRuntime'])
+            ET.SubElement(information, 'Executions').text = str(general['executions'])
 
             api = ET.SubElement(service, 'API')
             ET.SubElement(api, 'BaseURL').text = url 
@@ -149,7 +163,8 @@ def create_services_xml():
                 ET.SubElement(output, 'Name').text = out['file']['name']
                 ET.SubElement(output, 'Description').text = out['file']['description']
                 typeEl = ET.SubElement(output, 'Type')
-                mimetypes = ET.SubElement(typeEl, 'MimeTypes')
+                fileEl = ET.SubElement(typeEl, 'File')
+                mimetypes = ET.SubElement(fileEl, 'MimeTypes')
                 for types in out['file']['options']['mimeTypes']['allowed']:
                   ET.SubElement(mimetypes, 'Allowed').text = types
 
