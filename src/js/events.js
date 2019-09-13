@@ -4,6 +4,13 @@ import { BOX_HIGHLIGHTER, THEME, MIN_SCALE, MAX_SCALE } from "./constants";
 import { TRASH_SELECTOR, INTERFACE_ROOT, PORT_SELECTOR } from "./selectors";
 import { paper } from "./interface";
 import { addWebservice } from "./leftSidebar";
+import { fireAlert } from "./alerts";
+import {
+  MESSAGE_COPY_ERROR,
+  MESSAGE_COPY_SUCCESS,
+  MESSAGE_PASTE_SUCCESS,
+  MESSAGE_PASTE_ERROR
+} from "./messages";
 
 let currentSelection;
 let currentCopy;
@@ -60,7 +67,7 @@ const changeZoom = (delta, x, y, reset) => {
 
 /** PAPER EVENTS */
 
-export const setPaperEvents = paper => {
+export const setPaperEvents = () => {
   console.log("SET PAPER EVENTS");
 
   paper.options.highlighting.magnetAvailability =
@@ -152,6 +159,27 @@ const contextMenus = {
   }
 };
 
+const copyCurrentSelection = () => {
+  if (currentSelection) {
+    currentCopy = currentSelection;
+    fireAlert("success", MESSAGE_COPY_SUCCESS);
+  } else {
+    fireAlert("danger", MESSAGE_COPY_ERROR);
+  }
+};
+
+const pasteCurrentSelection = async webservices => {
+  if (currentCopy) {
+    const { params, type } = currentCopy.model.attributes;
+    await addWebservice(webservices, type, {
+      params
+    });
+    fireAlert("success", MESSAGE_PASTE_SUCCESS);
+  } else {
+    fireAlert("danger", MESSAGE_PASTE_ERROR);
+  }
+};
+
 const setContextMenuItemEvents = webservices => {
   // prevent right click on custom context menus
   for (const [, menuObj] of Object.entries(contextMenus)) {
@@ -167,7 +195,7 @@ const setContextMenuItemEvents = webservices => {
   document
     .querySelector("#contextmenu-element .copy")
     .addEventListener("click", () => {
-      currentCopy = currentSelection;
+      copyCurrentSelection();
     });
 
   document
@@ -188,12 +216,7 @@ const setContextMenuItemEvents = webservices => {
   document
     .querySelector("#contextmenu-paper .paste")
     .addEventListener("click", async () => {
-      if (currentCopy) {
-        const { params, type } = currentCopy.model.attributes;
-        await addWebservice(webservices, type, {
-          params
-        });
-      }
+      await pasteCurrentSelection(webservices);
     });
 };
 
@@ -222,7 +245,7 @@ const setPosition = (menuObj, { top, left }) => {
   showMenu(menuObj);
 };
 
-export const setContextMenu = (paper, webservices) => {
+export const setContextMenu = webservices => {
   window.addEventListener("click", () => {
     for (let [, value] of Object.entries(contextMenus)) {
       if (value.visible) {
@@ -265,7 +288,7 @@ export const setContextMenu = (paper, webservices) => {
 
 //** SELECTION */
 
-export const setSelection = paper => {
+export const setSelection = () => {
   paper.on("element:pointerdown", (cellView /*, evt, x, y*/) => {
     hideMenus();
     unHighlightCurrentSelection();
@@ -296,51 +319,61 @@ export const resetHighlight = () => {
 
 //** KEYBOARD */
 
-export const setKeyboardEvents = () => {
+export const setKeyboardEvents = webservices => {
   document.addEventListener(
     "keydown",
     event => {
-      const keyName = event.key;
+      const evt = event || window.event; // IE support
+      const keyName = evt.key;
+      const ctrlDown = evt.ctrlKey || evt.metaKey; // Mac support
 
-      switch (keyName) {
-        case "Control": {
-          // do not alert when only Control key is pressed.
-          break;
-        }
-        case "ArrowDown": {
-          if (currentSelection) {
-            currentSelection.model.translate(0, 50);
+      if (ctrlDown) {
+        switch (keyName) {
+          case "c": {
+            copyCurrentSelection();
+
+            break;
           }
-          break;
-        }
-        case "ArrowUp": {
-          if (currentSelection) {
-            currentSelection.model.translate(0, -50);
+          case "v": {
+            pasteCurrentSelection(webservices);
+            break;
           }
-          break;
+          default:
         }
-        case "ArrowRight": {
-          if (currentSelection) {
-            currentSelection.model.translate(50, 0);
+      } else {
+        switch (keyName) {
+          case "ArrowDown": {
+            if (currentSelection) {
+              currentSelection.model.translate(0, 50);
+            }
+            break;
           }
-          break;
-        }
-        case "ArrowLeft": {
-          if (currentSelection) {
-            currentSelection.model.translate(-50, 0);
+          case "ArrowUp": {
+            if (currentSelection) {
+              currentSelection.model.translate(0, -50);
+            }
+            break;
           }
-          break;
-        }
-        case "Delete": {
-          if (currentSelection) {
-            console.log(
-              "TCL: setKeyboardEvents -> currentSelection",
-              currentSelection
-            );
-            deleteElement(currentSelection);
-            currentSelection = null;
+          case "ArrowRight": {
+            if (currentSelection) {
+              currentSelection.model.translate(50, 0);
+            }
+            break;
           }
-          break;
+          case "ArrowLeft": {
+            if (currentSelection) {
+              currentSelection.model.translate(-50, 0);
+            }
+            break;
+          }
+          case "Delete": {
+            if (currentSelection) {
+              deleteElement(currentSelection);
+              currentSelection = null;
+            }
+            break;
+          }
+          default:
         }
       }
 

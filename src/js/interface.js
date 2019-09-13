@@ -177,10 +177,10 @@ const buildGraph = async (webservices, workflow) => {
     validateConnection: validateConnectionFunc
   });
 
-  setPaperEvents(paper);
-  setContextMenu(paper, webservices);
-  setKeyboardEvents();
-  setSelection(paper);
+  setPaperEvents();
+  setContextMenu(webservices);
+  setKeyboardEvents(webservices);
+  setSelection();
 
   setThemeOptions();
 

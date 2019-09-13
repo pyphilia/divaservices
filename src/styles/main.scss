@@ -65,3 +65,12 @@ div.select .select2 {
   z-index: 3;
   display: none;
 }
+
+.alert {
+  position: absolute;
+  width: 400px;
+  text-align: center;
+  top: 35px;
+  left: 50%;
+  margin-left: -200px;
+}
