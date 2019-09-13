@@ -9,17 +9,23 @@ import {
   MESSAGE_COPY_ERROR,
   MESSAGE_COPY_SUCCESS,
   MESSAGE_PASTE_SUCCESS,
-  MESSAGE_PASTE_ERROR
+  MESSAGE_PASTE_ERROR,
+  MESSAGE_DELETE_CONFIRM
 } from "./messages";
 
-let currentSelection;
-let currentCopy;
+let selectedElements = [];
+let copiedElements = [];
 
-const deleteElement = e => {
-  if (confirm("Are you sure you want to delete this element?")) {
-    e.model.remove();
-  } else {
-    // @TODO replace where it was before moving
+const deleteAllSelected = () => {
+  if (selectedElements.length) {
+    if (confirm(MESSAGE_DELETE_CONFIRM)) {
+      for (const el of selectedElements) {
+        el.model.remove();
+      }
+      selectedElements = [];
+    } else {
+      // @TODO replace where it was before moving
+    }
   }
 };
 
@@ -66,16 +72,20 @@ const changeZoom = (delta, x, y, reset) => {
 };
 
 /** PAPER EVENTS */
+let allPositions = [];
+const saveAllSelectedPosition = () => {
+  for (const [el, i] of selectedElements.map((el, i) => [el.model, i])) {
+    allPositions[i] = el.position();
+  }
+};
 
 export const setPaperEvents = () => {
-  console.log("SET PAPER EVENTS");
-
   paper.options.highlighting.magnetAvailability =
     THEME.magnetAvailabilityHighlighter;
 
-  paper.on("element:pointerup", e => {
+  paper.on("element:pointerup", () => {
     if ($(TRASH_SELECTOR).is(":hover")) {
-      deleteElement(e);
+      deleteAllSelected();
     }
   });
 
@@ -97,7 +107,7 @@ export const setPaperEvents = () => {
     hideMenus();
     dragStartPosition = { x: x, y: y };
     move = true;
-    unHighlightCurrentSelection();
+    unHighlightAllSelected();
 
     // unfocus inputs when clicks
     $("input:focus").blur();
@@ -159,21 +169,23 @@ const contextMenus = {
   }
 };
 
-const copyCurrentSelection = () => {
-  if (currentSelection) {
-    currentCopy = currentSelection;
+const copy = () => {
+  if (selectedElements.length) {
+    copiedElements = selectedElements;
     fireAlert("success", MESSAGE_COPY_SUCCESS);
   } else {
     fireAlert("danger", MESSAGE_COPY_ERROR);
   }
 };
 
-const pasteCurrentSelection = async webservices => {
-  if (currentCopy) {
-    const { params, type } = currentCopy.model.attributes;
-    await addWebservice(webservices, type, {
-      params
-    });
+const paste = async webservices => {
+  if (copiedElements.length) {
+    for (const el of copiedElements) {
+      const { params, type } = el.model.attributes;
+      await addWebservice(webservices, type, {
+        params
+      });
+    }
     fireAlert("success", MESSAGE_PASTE_SUCCESS);
   } else {
     fireAlert("danger", MESSAGE_PASTE_ERROR);
@@ -195,28 +207,32 @@ const setContextMenuItemEvents = webservices => {
   document
     .querySelector("#contextmenu-element .copy")
     .addEventListener("click", () => {
-      copyCurrentSelection();
+      copy();
     });
 
   document
     .querySelector("#contextmenu-element .duplicate")
     .addEventListener("click", async () => {
-      const { params, type } = currentSelection.model.attributes;
-      await addWebservice(webservices, type, {
-        params
-      });
+      if (selectedElements.length) {
+        for (const el of selectedElements) {
+          const { params, type } = el.model.attributes;
+          await addWebservice(webservices, type, {
+            params
+          });
+        }
+      }
     });
 
   document
     .querySelector("#contextmenu-element .delete")
     .addEventListener("click", () => {
-      deleteElement(currentSelection);
+      deleteAllSelected();
     });
 
   document
     .querySelector("#contextmenu-paper .paste")
     .addEventListener("click", async () => {
-      await pasteCurrentSelection(webservices);
+      await paste(webservices);
     });
 };
 
@@ -258,7 +274,7 @@ export const setContextMenu = webservices => {
     evt.preventDefault();
     hideMenu(contextMenus.paper);
 
-    highlightCurrentSelection(cellView);
+    highlightSelection(cellView);
 
     const screenPos = paper.localToClientPoint(x, y);
     const origin = {
@@ -291,51 +307,90 @@ export const setContextMenu = webservices => {
 export const setSelection = () => {
   paper.on("element:pointerdown", (cellView /*, evt, x, y*/) => {
     hideMenus();
-    unHighlightCurrentSelection();
-    highlightCurrentSelection(cellView);
+    if (!ctrlDown) {
+      unHighlightAllSelected();
+    }
+    highlightSelection(cellView);
+    saveAllSelectedPosition();
   });
 };
 
-export const highlightCurrentSelection = cellView => {
+export const highlightSelection = cellView => {
   if (cellView) {
-    currentSelection = cellView;
+    if (!ctrlDown) {
+      unHighlightAllSelected();
+    }
+    selectedElements.push(cellView);
     cellView.highlight(null, BOX_HIGHLIGHTER);
   }
 };
 
-export const unHighlightCurrentSelection = () => {
-  if (currentSelection) {
-    currentSelection.unhighlight(null, BOX_HIGHLIGHTER);
-    currentSelection = null;
+export const highlightAllSelected = () => {
+  if (selectedElements.length) {
+    for (const el of selectedElements) {
+      highlightSelection(el);
+    }
   }
 };
 
+export const unHighlightAllSelected = () => {
+  if (selectedElements.length) {
+    for (const el of selectedElements) {
+      el.unhighlight(null, BOX_HIGHLIGHTER);
+    }
+    selectedElements = [];
+  }
+};
+
+export const unHighlightSelection = cellView => {
+  cellView.unhighlight(null, BOX_HIGHLIGHTER);
+  selectedElements.splice(selectedElements.indexOf(cellView), 1);
+};
+
 export const resetHighlight = () => {
-  if (currentSelection) {
-    unHighlightCurrentSelection();
-    highlightCurrentSelection(currentSelection);
+  if (selectedElements.length) {
+    unHighlightAllSelected();
+    highlightAllSelected();
+  }
+};
+
+export const moveAllSelected = (current, position) => {
+  const selectModels = selectedElements.map(el => el.model);
+  const currentElementIndex = selectModels.indexOf(current);
+  const previousCurrentPosition = allPositions[currentElementIndex];
+  for (const [i, el] of selectModels.filter(el => el != current).entries()) {
+    const { x: previousX, y: previousY } = allPositions[i];
+    const deltaTranslation = {
+      x: position.x - previousCurrentPosition.x,
+      y: position.y - previousCurrentPosition.y
+    };
+    el.position(
+      previousX + deltaTranslation.x,
+      previousY + deltaTranslation.y,
+      { multitranslate: true }
+    );
   }
 };
 
 //** KEYBOARD */
-
+let ctrlDown;
 export const setKeyboardEvents = webservices => {
   document.addEventListener(
     "keydown",
     event => {
       const evt = event || window.event; // IE support
       const keyName = evt.key;
-      const ctrlDown = evt.ctrlKey || evt.metaKey; // Mac support
+      ctrlDown = evt.ctrlKey || evt.metaKey; // Mac support
 
       if (ctrlDown) {
         switch (keyName) {
           case "c": {
-            copyCurrentSelection();
+            copy();
 
             break;
           }
           case "v": {
-            pasteCurrentSelection(webservices);
+            paste(webservices);
             break;
           }
           default:
@@ -343,34 +398,40 @@ export const setKeyboardEvents = webservices => {
       } else {
         switch (keyName) {
           case "ArrowDown": {
-            if (currentSelection) {
-              currentSelection.model.translate(0, 50);
+            if (selectedElements.length) {
+              for (const el of selectedElements) {
+                el.model.translate(0, 50);
+              }
             }
             break;
           }
           case "ArrowUp": {
-            if (currentSelection) {
-              currentSelection.model.translate(0, -50);
+            if (selectedElements.length) {
+              for (const el of selectedElements) {
+                el.model.translate(0, -50);
+              }
             }
             break;
           }
           case "ArrowRight": {
-            if (currentSelection) {
-              currentSelection.model.translate(50, 0);
+            if (selectedElements.length) {
+              for (const el of selectedElements) {
+                el.model.translate(50, 0);
+              }
             }
             break;
           }
           case "ArrowLeft": {
-            if (currentSelection) {
-              currentSelection.model.translate(-50, 0);
+            if (selectedElements.length) {
+              for (const el of selectedElements) {
+                el.model.translate(-50, 0);
+              }
             }
             break;
           }
           case "Delete": {
-            if (currentSelection) {
-              deleteElement(currentSelection);
-              currentSelection = null;
-            }
+            deleteAllSelected();
+
             break;
           }
           default:
@@ -387,4 +448,8 @@ export const setKeyboardEvents = webservices => {
     },
     false
   );
+  document.addEventListener("keyup", event => {
+    const evt = event || window.event; // IE support
+    ctrlDown = evt.ctrlKey || evt.metaKey; // Mac support
+  });
 };

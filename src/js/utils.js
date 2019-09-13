@@ -28,6 +28,7 @@ import {
   PARAMETER_SELECTS,
   PARAMETER_INPUTS
 } from "./selectors";
+import { moveAllSelected } from "./events";
 
 let { showPortDetails, showParameters, showPorts } = DEFAULT_OPTIONS;
 
@@ -505,10 +506,14 @@ export const setParametersInForeignObject = (
   // When the user clicks on a select and moves the bloc
   // the select dropdown is still displayed
   // this event closes it
-  element.on("change:position", () => {
+  element.on("change:position", (el, position, { multitranslate }) => {
     allSelects.each(function() {
       $(this).select2("close");
     });
+
+    if (!multitranslate) {
+      moveAllSelected(el, position);
+    }
   });
 
   // NUMBER EVENTS
