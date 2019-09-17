@@ -169,13 +169,13 @@ export function resetValue(event) {
       const select = el.parentNode.getElementsByTagName(Inputs.SELECT.tag)[0];
       $(select)
         .val(defaultValue)
-        .trigger("change");
+        .trigger("input");
       break;
     }
     case Inputs.NUMBER.tag:
       $(el.parentNode.getElementsByTagName(Inputs.NUMBER.tag)[0])
         .val(defaultValue)
-        .trigger("change");
+        .trigger("input");
       break;
     default:
       alert("error");
@@ -383,7 +383,7 @@ const hideTooltip = () => {
 
 export const setParametersInForeignObject = (
   element,
-  { id, description, params, label },
+  { foreignId, description, params, label },
   defaultParams
 ) => {
   const selectsArr = [];
@@ -407,9 +407,14 @@ export const setParametersInForeignObject = (
         "data-placement": "right"
       });
 
-    const defaultValue = defaultParams.params
-      ? defaultParams.params[paramName].value
+    const defaultValue = defaultParams[paramName]
+      ? defaultParams[paramName].value
       : null;
+    console.log(defaultParams);
+    console.log(defaultValue);
+    // const defaultValue = defaultParams.params
+    //   ? defaultParams.params[paramName].value
+    //   : null;
 
     switch (type) {
       case Inputs.SELECT.type: {
@@ -445,7 +450,7 @@ export const setParametersInForeignObject = (
   inputs.append(inputsArr);
 
   // add params to boxes
-  const foreignObject = $(`foreignObject#${id} body`);
+  const foreignObject = $(`foreignObject#${foreignId} body`);
   const container = foreignObject
     .find(`.${BOX_CONTAINER_CLASS}`)
     .append(inputs, selects);
@@ -491,7 +496,7 @@ export const setParametersInForeignObject = (
     setSelectValueInElement(element, s);
 
     // update param
-    s.on("change", function() {
+    s.on("input", function() {
       setSelectValueInElement(element, s);
     });
 
@@ -548,14 +553,16 @@ export const setParametersInForeignObject = (
       blur: function() {
         const el = $(this);
         setInputValueInElement(element, el);
-        el.trigger("change");
+        el.trigger("input");
         // check value
         // checkInputValue(el);
       },
       click: function() {
         $(this).select();
       },
-      change: function() {
+      input: function() {
+        const el = $(this);
+        setInputValueInElement(element, el);
         checkInputValue($(this));
       }
     });

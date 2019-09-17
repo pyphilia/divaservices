@@ -15,10 +15,10 @@ const fitContent = () => {
   });
 };
 
-const openWorkflow = (e, webservices) => {
+const openWorkflow = e => {
   e.preventDefault();
   console.log("openWorkflow");
-  readWorkflow(webservices);
+  readWorkflow();
 };
 
 const save = e => {
@@ -42,7 +42,7 @@ const openSettings = () => {
   console.log("openSettings");
 };
 
-export const buildRightSidebar = webservices => {
+export const buildRightSidebar = () => {
   const rightSideBar = {
     // New: newWorkflow,
     Open: {
@@ -71,7 +71,7 @@ export const buildRightSidebar = webservices => {
       attr: attr ? attr : {}
     });
     menuItemElem.click(e => {
-      action(e, webservices);
+      action(e, {});
     });
     $("#right-sidebar nav").append(menuItemElem);
   }

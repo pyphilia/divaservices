@@ -2,19 +2,10 @@
 import $ from "jquery";
 import groupBy from "lodash.groupby";
 import { categoryName } from "./constants";
-import { addElementToGraph } from "./addElement";
+import { addWebservice } from "./addElement";
+import { webservices } from "./globals";
 
-export const addWebservice = async (webservices, name, defaultParams = {}) => {
-  const algo = webservices.filter(service => service.name == name);
-  if (algo.length) {
-    console.log("TCL: addWebservice -> algo", algo);
-    addElementToGraph(algo[0], defaultParams);
-  } else {
-    console.error(`${name} doesnt exist`);
-  }
-};
-
-export const buildLeftSidebar = async webservices => {
+export const buildLeftSidebar = async () => {
   // get categories => algorithms
   let servicesPerCategory = webservices.map(service => {
     const { type, name } = service;
@@ -43,7 +34,7 @@ export const buildLeftSidebar = async webservices => {
         `<div class="algo-item ${service}"><span class="icon"></span>${name}</div>`
       );
       algoItem.on("click", function() {
-        addWebservice(webservices, name);
+        addWebservice(name);
       });
       algoItems.push(algoItem);
     }

@@ -2,6 +2,7 @@
 import "select2";
 import * as $ from "jquery";
 import * as joint from "jointjs";
+import { webservices } from "./globals";
 import { DEFAULT_OPTIONS } from "./constants";
 import {
   TOOLTIP_CLASS,
@@ -127,7 +128,7 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
   }
 
   // input accept only one source
-  const usedInPorts = vT.model.getUsedInPorts();
+  const usedInPorts = vT.model.attributes.getUsedInPorts();
   const matchId = usedInPorts.find(({ id }) => id === mT.getAttribute("port"));
   if (matchId) {
     return false;
@@ -156,7 +157,7 @@ const transformWorkflowToGraph = workflow => {
   console.log("TCL: transformWorkflowToGraph");
 };
 
-const buildGraph = async (webservices, workflow) => {
+const buildGraph = async workflow => {
   graph = new joint.dia.Graph();
   paper = new joint.dia.Paper({
     el: $(INTERFACE_ROOT),
@@ -178,8 +179,8 @@ const buildGraph = async (webservices, workflow) => {
   });
 
   setPaperEvents();
-  setContextMenu(webservices);
-  setKeyboardEvents(webservices);
+  setContextMenu();
+  setKeyboardEvents();
   setSelection();
 
   setThemeOptions();

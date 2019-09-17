@@ -21,18 +21,14 @@
     "@fortawesome/free-solid-svg-icons": "^5.10.2",
     "ajv": "^6.10.2",
     "bootstrap": "^4.3.1",
-    "chosen-js": "^1.8.7",
     "file-saver": "^2.0.2",
     "jointjs": "^3.0.4",
     "jquery": "^3.4.1",
     "lodash.groupby": "^4.6.0",
     "node-fetch": "^2.6.0",
     "path": "^0.12.7",
-    "popper": "^1.0.1",
-    "popper.js": "^1.15.0",
     "select2": "^4.0.9",
-    "xml2js": "^0.4.19",
-    "xmlbuilder": "^13.0.2"
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",

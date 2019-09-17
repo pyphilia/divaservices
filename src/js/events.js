@@ -2,8 +2,8 @@ import * as $ from "jquery";
 import * as joint from "jointjs";
 import { BOX_HIGHLIGHTER, THEME, MIN_SCALE, MAX_SCALE } from "./constants";
 import { TRASH_SELECTOR, INTERFACE_ROOT, PORT_SELECTOR } from "./selectors";
-import { paper } from "./interface";
-import { addWebservice } from "./leftSidebar";
+import { paper, graph } from "./interface";
+import { addWebservice } from "./addElement";
 import { fireAlert } from "./alerts";
 import {
   MESSAGE_COPY_ERROR,
@@ -12,17 +12,44 @@ import {
   MESSAGE_PASTE_ERROR,
   MESSAGE_DELETE_CONFIRM
 } from "./messages";
+import {
+  undo,
+  redo,
+  addAction,
+  ACTION_ADD_ALL_ELEMENTS,
+  ACTION_DELETE_ELEMENT,
+  ACTION_DELETE_ALL_ELEMENTS
+} from "./undo";
 
 let selectedElements = [];
 let copiedElements = [];
 
-const deleteAllSelected = () => {
-  if (selectedElements.length) {
+export const deleteElement = (id, setHistory = true) => {
+  const cell = graph.getCell(id);
+  const name = cell.attributes.type;
+  console.log("TCL: cell", cell);
+  const defaultParams = cell.attributes.params;
+  cell.remove();
+  const cellInfo = { name, defaultParams, id };
+  if (setHistory) {
+    addAction(ACTION_DELETE_ELEMENT, cellInfo);
+  }
+  return cellInfo;
+};
+
+export const deleteAllSelected = (els = []) => {
+  const ids = els.length ? els : selectedElements.map(el => el.model.id);
+  const elements = [];
+  if (ids.length) {
     if (confirm(MESSAGE_DELETE_CONFIRM)) {
-      for (const el of selectedElements) {
-        el.model.remove();
+      for (const id of ids) {
+        const info = deleteElement(id, false);
+        elements.push(info);
       }
-      selectedElements = [];
+      if (!ids.length) {
+        selectedElements = [];
+      }
+      addAction(ACTION_DELETE_ALL_ELEMENTS, { elements, ids });
     } else {
       // @TODO replace where it was before moving
     }
@@ -169,6 +196,36 @@ const contextMenus = {
   }
 };
 
+export const addSelectedElements = async (els = [], setHistory = true) => {
+  const elements = els.length ? els : copiedElements;
+  // const el = graph.getCell(elements[0].model.id);
+  // console.log(elements[0].model);
+  // const newEl = el.clone()
+  // graph.addCell(newEl)
+  // const {type: label, params, description} = elements[0].model;
+  // setParametersInForeignObject(
+  //   el,
+  //   { foreignId: 12345, description, params, label },
+  //   defaultParams
+  // );
+  const ids = [];
+  for (const el of elements) {
+    const { params, type } = el.model.attributes;
+    const id = await addWebservice(
+      type,
+      {
+        params
+      },
+      false
+    );
+    ids.push(id);
+  }
+  if (setHistory) {
+    addAction(ACTION_ADD_ALL_ELEMENTS, { ids, elements });
+  }
+  return ids;
+};
+
 const copy = () => {
   if (selectedElements.length) {
     copiedElements = selectedElements;
@@ -178,21 +235,16 @@ const copy = () => {
   }
 };
 
-const paste = async webservices => {
+const paste = async () => {
   if (copiedElements.length) {
-    for (const el of copiedElements) {
-      const { params, type } = el.model.attributes;
-      await addWebservice(webservices, type, {
-        params
-      });
-    }
+    await addSelectedElements();
     fireAlert("success", MESSAGE_PASTE_SUCCESS);
   } else {
     fireAlert("danger", MESSAGE_PASTE_ERROR);
   }
 };
 
-const setContextMenuItemEvents = webservices => {
+const setContextMenuItemEvents = () => {
   // prevent right click on custom context menus
   for (const [, menuObj] of Object.entries(contextMenus)) {
     menuObj.el.addEventListener(
@@ -214,12 +266,7 @@ const setContextMenuItemEvents = webservices => {
     .querySelector("#contextmenu-element .duplicate")
     .addEventListener("click", async () => {
       if (selectedElements.length) {
-        for (const el of selectedElements) {
-          const { params, type } = el.model.attributes;
-          await addWebservice(webservices, type, {
-            params
-          });
-        }
+        await addSelectedElements();
       }
     });
 
@@ -232,7 +279,7 @@ const setContextMenuItemEvents = webservices => {
   document
     .querySelector("#contextmenu-paper .paste")
     .addEventListener("click", async () => {
-      await paste(webservices);
+      await paste();
     });
 };
 
@@ -261,7 +308,7 @@ const setPosition = (menuObj, { top, left }) => {
   showMenu(menuObj);
 };
 
-export const setContextMenu = webservices => {
+export const setContextMenu = () => {
   window.addEventListener("click", () => {
     for (let [, value] of Object.entries(contextMenus)) {
       if (value.visible) {
@@ -299,7 +346,7 @@ export const setContextMenu = webservices => {
     return false;
   });
 
-  setContextMenuItemEvents(webservices);
+  setContextMenuItemEvents();
 };
 
 //** SELECTION */
@@ -320,8 +367,14 @@ export const highlightSelection = cellView => {
     if (!ctrlDown) {
       unHighlightAllSelected();
     }
-    selectedElements.push(cellView);
+    addToSelection(cellView);
     cellView.highlight(null, BOX_HIGHLIGHTER);
+  }
+};
+
+const addToSelection = el => {
+  if (selectedElements.indexOf(el) == -1) {
+    selectedElements.push(el);
   }
 };
 
@@ -334,6 +387,7 @@ export const highlightAllSelected = () => {
 };
 
 export const unHighlightAllSelected = () => {
+  // do not use unHighlightSelection to remove the array once
   if (selectedElements.length) {
     for (const el of selectedElements) {
       el.unhighlight(null, BOX_HIGHLIGHTER);
@@ -349,6 +403,7 @@ export const unHighlightSelection = cellView => {
 
 export const resetHighlight = () => {
   if (selectedElements.length) {
+    selectedElements = [];
     unHighlightAllSelected();
     highlightAllSelected();
   }
@@ -374,7 +429,7 @@ export const moveAllSelected = (current, position) => {
 
 //** KEYBOARD */
 let ctrlDown;
-export const setKeyboardEvents = webservices => {
+export const setKeyboardEvents = () => {
   document.addEventListener(
     "keydown",
     event => {
@@ -390,7 +445,15 @@ export const setKeyboardEvents = webservices => {
             break;
           }
           case "v": {
-            paste(webservices);
+            paste();
+            break;
+          }
+          case "z": {
+            undo();
+            break;
+          }
+          case "y": {
+            redo();
             break;
           }
           default:

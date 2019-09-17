@@ -1,11 +1,11 @@
 import xml2js from "xml2js";
 import path from "path";
 import { HOST } from "./constants";
-
+import { webservices } from "./globals";
 import { getWebServiceFromUrl } from "./utils";
 import { addElementToGraph, addLinkToGraph } from "./addElement";
 
-export const readWorkflow = async webservices => {
+export const readWorkflow = async () => {
   const filepath = path.join(HOST, "files/tmp.xml");
 
   let xml = await fetch(filepath).then(response => response.text());

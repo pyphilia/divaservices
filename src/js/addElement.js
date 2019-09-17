@@ -6,6 +6,7 @@ global.$ = global.jQuery = $;
 import "select2";
 import * as joint from "jointjs";
 import { paper, graph } from "./interface";
+import { webservices } from "./globals";
 import {
   THEME,
   BOX_TITLE_HTML_TAG,
@@ -30,19 +31,21 @@ import {
   IN_PORT_CLASS,
   OUT_PORT_CLASS
 } from "./selectors";
+import { addAction, ACTION_ADD_ELEMENT } from "./undo";
 
 let { showParameters } = DEFAULT_OPTIONS;
 
-const createBox = (e, id, { position, size }) => {
+const createBox = (e, foreignId, { position, size }) => {
   const {
     category,
     label,
-    ports: { items }
+    ports: { items },
+    description
   } = e;
   const { titleHeight } = computeTitleLength(e);
 
   const template = `<g class="scalable"><rect></rect></g>
-      <foreignObject class="${FOREIGN_CLASS}" id="${id}" x="0" y="-${titleHeight}" width="${
+      <foreignObject class="${FOREIGN_CLASS}" id="${foreignId}" x="0" y="-${titleHeight}" width="${
     size.width
   }" height="${size.height + titleHeight}">
       <body xmlns="http://www.w3.org/1999/xhtml">
@@ -55,48 +58,44 @@ const createBox = (e, id, { position, size }) => {
       </body>
       </foreignObject>`;
 
-  const Box = joint.shapes.basic.Rect.define(
-    label,
-    {
-      markup: template,
-      attrs: {
-        root: {
-          magnet: false
-        },
-        body: THEME.body,
-        rect: { ...THEME.rect, ...size }
+  const Box = joint.shapes.basic.Rect.define(label, {
+    markup: template,
+    attrs: {
+      root: {
+        magnet: false
       },
-      position,
-      size,
-      ports: {
-        groups: THEME.groups,
-        items
-      },
-      params: {}
+      body: THEME.body,
+      rect: { ...THEME.rect, ...size }
     },
-    {
-      portMarkup: [{ tagName: "circle", selector: PORT_SELECTOR }],
+    position,
+    size,
+    ports: {
+      groups: THEME.groups,
+      items
+    },
+    description,
+    params: {},
+    portMarkup: [{ tagName: "circle", selector: PORT_SELECTOR }],
 
-      getGroupPorts: function(group) {
-        return this.getPorts().filter(port => {
-          return port.group === group;
-        });
-      },
+    getGroupPorts: function(group) {
+      return this.getPorts().filter(port => {
+        return port.group === group;
+      });
+    },
 
-      getInPorts: function() {
-        return this.getGroupPorts(IN_PORT_CLASS);
-      },
+    getInPorts: function() {
+      return this.getGroupPorts(IN_PORT_CLASS);
+    },
 
-      getUsedInPorts: function() {
-        const graph = this.graph;
-        if (!graph) return [];
-        const connectedLinks = graph.getConnectedLinks(this, { inbound: true });
-        return connectedLinks.map(link => {
-          return this.getPort(link.target().port);
-        });
-      }
+    getUsedInPorts: function() {
+      const graph = this.graph;
+      if (!graph) return [];
+      const connectedLinks = graph.getConnectedLinks(this, { inbound: true });
+      return connectedLinks.map(link => {
+        return this.getPort(link.target().port);
+      });
     }
-  );
+  });
 
   const element = new Box();
   element.addTo(graph);
@@ -120,9 +119,7 @@ export const transformWebserviceForGraph = (webservice, category) => {
         ports.items.push(port);
       }
     });
-  console.log(outputs);
   outputs.forEach(out => {
-    console.log("wefsd");
     const port = createPort(out, OUT_PORT_CLASS);
     if (port.group) {
       ports.items.push(port);
@@ -143,22 +140,40 @@ export const transformWebserviceForGraph = (webservice, category) => {
   return ret;
 };
 
+export const addWebservice = async (
+  name,
+  defaultParams = {},
+  setHistory = true
+) => {
+  const algo = webservices.filter(service => service.name == name);
+  if (algo.length) {
+    const id = addElementToGraph(algo[0], defaultParams);
+    if (setHistory) {
+      addAction(ACTION_ADD_ELEMENT, { id, name, defaultParams });
+    }
+    return id;
+  } else {
+    console.error(`${name} doesnt exist`);
+  }
+};
+
 // Create a custom element.
 // ------------------------
 export const addElement = (e, parameters, defaultParams = {}) => {
   const { label } = e;
-  console.log("TCL: addElement -> e", e);
 
   if (!label) {
     return;
   }
 
-  const id = (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-  const element = createBox(e, id, parameters);
+  const foreignId = (((1 + Math.random()) * 0x10000) | 0)
+    .toString(16)
+    .substring(1);
+  const element = createBox(e, foreignId, parameters);
 
-  setParametersInForeignObject(element, { id, ...e }, defaultParams);
+  setParametersInForeignObject(element, { foreignId, ...e }, defaultParams);
 
-  return element;
+  return element.id;
 };
 
 // helper function to find an empty position to add
@@ -210,12 +225,13 @@ export const addElementToGraph = (webservice, defaultParams = {}) => {
     position = findEmptyPosition(size);
   }
 
-  const element = addElement(
+  const id = addElement(
     transformedWebservice,
     { position, size },
     defaultParams
   );
-  return element;
+
+  return id;
 };
 
 export const addLinkToGraph = link => {
