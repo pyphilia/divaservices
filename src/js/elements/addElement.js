@@ -210,12 +210,13 @@ export const addElementToGraphFromServiceDescription = (
   return id;
 };
 
-export const addElementByName = async (name, defaultParams = {}) => {
+export const addElementByName = (name, defaultParams = {}) => {
   const algo = webservices.filter(service => service.name == name);
   if (algo.length) {
     const id = addElementToGraphFromServiceDescription(algo[0], defaultParams);
+    console.log("TCL: addElementByName -> id", id);
 
-    return id;
+    return { id };
   } else {
     console.error(`${name} doesnt exist`);
   }
