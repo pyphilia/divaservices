@@ -1,7 +1,16 @@
-import { undo, redo } from "../utils/undo";
-import { selectedElements, clearSelection } from "../constants/globals";
-import { deleteElementsById } from "../elements/deleteElement";
-import { copy, paste } from "./controls";
+import {
+  undo,
+  redo,
+  addAction,
+  ACTION_PASTE,
+  ACTION_DELETE
+} from "../utils/undo";
+import {
+  selectedElements,
+  clearSelection,
+  copiedElements
+} from "../constants/globals";
+import { copy } from "./controls";
 
 //** KEYBOARD */
 export let ctrlDown;
@@ -17,11 +26,11 @@ export const initKeyboardEvents = () => {
       if (ctrlDown) {
         switch (keyName) {
           case "c": {
-            copy();
+            copy(selectedElements);
             break;
           }
           case "v": {
-            paste();
+            addAction(ACTION_PASTE, { elements: copiedElements });
             break;
           }
           case "z": {
@@ -69,7 +78,7 @@ export const initKeyboardEvents = () => {
             break;
           }
           case "Delete": {
-            deleteElementsById(selectedElements.map(el => el.model.id));
+            addAction(ACTION_DELETE, { elements: selectedElements });
             clearSelection();
             break;
           }

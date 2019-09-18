@@ -1,16 +1,9 @@
-import {
-  addWebserviceByName,
-  addSelectedElements
-} from "../elements/addElement";
-import {
-  deleteElementById,
-  deleteElementsById
-} from "../elements/deleteElement";
+import { restoreElements } from "../elements/addElement";
+import { deleteElementsByCellView } from "../elements/deleteElement";
+import { paste, undoPaste } from "../events/controls";
 
-export const ACTION_ADD_ELEMENT = "addElement";
-export const ACTION_ADD_ALL_ELEMENTS = "addAllElements";
-export const ACTION_DELETE_ELEMENT = "deleteElement";
-export const ACTION_DELETE_ALL_ELEMENTS = "deleteAllElements";
+export const ACTION_PASTE = "paste";
+export const ACTION_DELETE = "delete";
 
 export const history = [];
 const future = [];
@@ -18,59 +11,30 @@ const future = [];
 export let undoAction = false;
 
 export const addAction = (action, parameters) => {
-  history.push({ action, parameters });
-  console.log(history);
-  if (!undoAction) {
-    future.length = 0;
-    console.log(future);
-  }
-  undoAction = false;
-};
-
-const addFuture = (action, parameters) => {
-  future.push({ action, parameters });
+  const returnValues = ACTIONS[action].redo(parameters);
+  history.push({ action, parameters: { ...returnValues, ...parameters } });
 };
 
 const ACTIONS = {
-  [ACTION_ADD_ELEMENT]: {
-    undo: ({ id }) => {
-      deleteElementById(id);
-    },
-    redo: ({ name, defaultParams }) => {
-      addWebserviceByName(name, defaultParams);
-    }
-  },
-  [ACTION_ADD_ALL_ELEMENTS]: {
-    undo: ({ ids }) => {
-      deleteElementsById(ids);
+  [ACTION_PASTE]: {
+    undo: ({ addedElements }) => {
+      undoPaste(addedElements);
     },
     redo: ({ elements }) => {
-      addSelectedElements(elements);
+      return paste(elements);
     }
   },
-  [ACTION_DELETE_ELEMENT]: {
-    undo: async ({ name, defaultParams }) => {
-      const id = await addWebserviceByName(name, defaultParams, false);
-      addFuture(ACTION_DELETE_ELEMENT, { name, defaultParams, id });
+  [ACTION_DELETE]: {
+    undo: ({ restoredElements }) => {
+      return restoreElements(restoredElements);
     },
-    redo: ({ id }) => {
-      deleteElementById(id);
-    }
-  },
-  [ACTION_DELETE_ALL_ELEMENTS]: {
-    undo: async ({ elements }) => {
-      console.log("TCL: elements", elements);
-      const ids = await addSelectedElements(elements, false);
-      addFuture(ACTION_DELETE_ALL_ELEMENTS, { ids, elements });
-    },
-    redo: ({ ids }) => {
-      deleteElementsById(ids);
+    redo: ({ elements }) => {
+      return deleteElementsByCellView(elements);
     }
   }
 };
 
 export const undo = () => {
-  console.log("TCL: undo -> history", history);
   if (history.length) {
     undoAction = true;
     const lastAction = history.pop();
@@ -81,8 +45,8 @@ export const undo = () => {
 
 export const redo = () => {
   if (future.length) {
-    const nextAction = future.pop();
-    console.log("TCL: redo -> nextAction", nextAction);
-    ACTIONS[nextAction.action].redo(nextAction.parameters);
+    const { action, parameters } = future.pop();
+    const returnValues = ACTIONS[action].redo(parameters);
+    history.push({ action, parameters: { ...parameters, ...returnValues } });
   }
 };

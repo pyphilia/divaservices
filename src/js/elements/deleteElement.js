@@ -1,38 +1,36 @@
-import {
-  ACTION_DELETE_ELEMENT,
-  ACTION_DELETE_ALL_ELEMENTS,
-  addAction
-} from "../utils/undo";
 import { MESSAGE_DELETE_CONFIRM } from "../constants/messages";
 import { graph } from "../layout/interface";
 
-export const deleteElementById = (id, setHistory = true) => {
+export const deleteElementById = id => {
   const cell = graph.getCell(id);
-  console.log("TCL: cell", cell);
-  const name = cell.attributes.type;
-  const defaultParams = cell.attributes.params;
+  const copy = cell.clone();
   cell.remove();
-  const cellInfo = { name, defaultParams, id };
-  if (setHistory) {
-    addAction(ACTION_DELETE_ELEMENT, cellInfo);
-  }
-  return cellInfo;
+  return copy;
 };
 
 export const deleteElementsById = ids => {
-  const elements = [];
+  const restoredElements = [];
   if (ids.length) {
     if (confirm(MESSAGE_DELETE_CONFIRM)) {
       for (const id of ids) {
-        const info = deleteElementById(id, false);
-        elements.push(info);
+        const copy = deleteElementById(id, false);
+        restoredElements.push(copy);
       }
-      // if (!ids.length) {
-      //   ids = [];
-      // }
-      addAction(ACTION_DELETE_ALL_ELEMENTS, { elements, ids });
     } else {
       // @TODO replace where it was before moving
     }
   }
+  return { restoredElements };
+};
+
+export const deleteElementByCellView = cellView => {
+  const id = cellView.model.attributes.id;
+  return deleteElementById(id);
+};
+
+export const deleteElementsByCellView = cellViews => {
+  const ids = cellViews.map(
+    cellView => cellView.attributes.id || cellView.model.attributes.id
+  );
+  return deleteElementsById(ids);
 };

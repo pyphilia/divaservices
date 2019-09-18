@@ -4,10 +4,11 @@ import {
   CONTEXT_MENU_PAPER
 } from "../constants/selectors";
 import { highlightSelection } from "./selections";
-import { copy, paste } from "./controls";
-import { selectedElements } from "../constants/globals";
-import { addSelectedElements } from "../elements/addElement";
+import { copy } from "./controls";
+import { selectedElements, copiedElements } from "../constants/globals";
+import { addElementsByCellView } from "../elements/addElement";
 import { deleteElementsById } from "../elements/deleteElement";
+import { addAction, ACTION_PASTE } from "../utils/undo";
 
 /** CONTEXT MENUS */
 const contextMenus = {
@@ -104,14 +105,14 @@ const initContextMenuItemEvents = () => {
   document
     .querySelector(`${CONTEXT_MENU_ELEMENT} .copy`)
     .addEventListener("click", () => {
-      copy();
+      copy(selectedElements);
     });
 
   document
     .querySelector(`${CONTEXT_MENU_ELEMENT} .duplicate`)
     .addEventListener("click", async () => {
       if (selectedElements.length) {
-        await addSelectedElements();
+        await addElementsByCellView(selectedElements);
       }
     });
 
@@ -125,6 +126,6 @@ const initContextMenuItemEvents = () => {
   document
     .querySelector(`${CONTEXT_MENU_PAPER} .paste`)
     .addEventListener("click", async () => {
-      await paste();
+      addAction(ACTION_PASTE, { elements: copiedElements });
     });
 };

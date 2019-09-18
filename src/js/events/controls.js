@@ -5,15 +5,12 @@ import {
   MESSAGE_PASTE_ERROR
 } from "../constants/messages";
 import { fireAlert } from "../utils/alerts";
-import { addSelectedElements } from "../elements/addElement";
-import {
-  selectedElements,
-  copiedElements,
-  setCopiedElements
-} from "../constants/globals";
+import { addElementsByCellView } from "../elements/addElement";
+import { setCopiedElements } from "../constants/globals";
+import { deleteElementsByCellView } from "../elements/deleteElement";
 
-export const copy = () => {
-  if (selectedElements.length) {
+export const copy = elements => {
+  if (elements.length) {
     setCopiedElements();
     fireAlert("success", MESSAGE_COPY_SUCCESS);
   } else {
@@ -21,11 +18,16 @@ export const copy = () => {
   }
 };
 
-export const paste = async () => {
-  if (copiedElements.length) {
-    await addSelectedElements();
+export const paste = cellViews => {
+  if (cellViews.length) {
+    const addedElements = addElementsByCellView(cellViews);
     fireAlert("success", MESSAGE_PASTE_SUCCESS);
+    return { addedElements };
   } else {
     fireAlert("danger", MESSAGE_PASTE_ERROR);
   }
+};
+
+export const undoPaste = async addedElements => {
+  deleteElementsByCellView(addedElements);
 };

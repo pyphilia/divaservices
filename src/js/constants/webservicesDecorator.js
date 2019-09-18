@@ -77,7 +77,6 @@ const webservicesDecorator = xml => {
       }
     }
 
-    // console.log('parametres');
     if (Parameter) {
       for (const parameter of Parameter) {
         const {

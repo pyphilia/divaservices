@@ -1,11 +1,7 @@
 import "select2";
 import * as joint from "jointjs";
 import { paper, graph } from "../layout/interface";
-import {
-  webservices,
-  getLayoutOptions,
-  copiedElements
-} from "../constants/globals";
+import { webservices, getLayoutOptions } from "../constants/globals";
 import {
   THEME,
   BOX_TITLE_HTML_TAG,
@@ -28,25 +24,21 @@ import {
   IN_PORT_CLASS,
   OUT_PORT_CLASS
 } from "../constants/selectors";
-import {
-  addAction,
-  ACTION_ADD_ELEMENT,
-  ACTION_ADD_ALL_ELEMENTS
-} from "../utils/undo";
 
-const createBox = (e, foreignId, { position, size }) => {
+const createBox = (e, { position, size }) => {
   const {
     category,
     label,
     ports: { items },
-    description
+    description,
+    params
   } = e;
   const { titleHeight } = computeTitleLength(e);
 
   const template = `<g class="scalable"><rect></rect></g>
-      <foreignObject class="${FOREIGN_CLASS}" id="${foreignId}" x="0" y="-${titleHeight}" width="${
-    size.width
-  }" height="${size.height + titleHeight}">
+      <foreignObject class="${FOREIGN_CLASS}" x="0" 
+      y="-${titleHeight}" width="${size.width}" height="${size.height +
+    titleHeight}">
       <body xmlns="http://www.w3.org/1999/xhtml">
       <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
       <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start" style="height:${titleHeight}px">
@@ -73,7 +65,8 @@ const createBox = (e, foreignId, { position, size }) => {
       items
     },
     description,
-    params: {},
+    originalParams: params,
+    defaultParams: {},
     portMarkup: [{ tagName: "circle", selector: PORT_SELECTOR }],
 
     getGroupPorts: function(model, group) {
@@ -101,7 +94,7 @@ const createBox = (e, foreignId, { position, size }) => {
   return element;
 };
 
-export const transformWebserviceForGraph = (webservice, category) => {
+const transformWebserviceForGraph = (webservice, category) => {
   if (!webservice.name) {
     alert("problem with ", webservice);
     return {};
@@ -139,38 +132,17 @@ export const transformWebserviceForGraph = (webservice, category) => {
   return ret;
 };
 
-export const addWebserviceByName = async (
-  name,
-  defaultParams = {},
-  setHistory = true
-) => {
-  const algo = webservices.filter(service => service.name == name);
-  if (algo.length) {
-    const id = addElementToGraph(algo[0], defaultParams);
-    if (setHistory) {
-      addAction(ACTION_ADD_ELEMENT, { id, name, defaultParams });
-    }
-    return id;
-  } else {
-    console.error(`${name} doesnt exist`);
-  }
-};
-
 // Create a custom element.
 // ------------------------
-export const addElement = (e, parameters) => {
+const addElementFromTransformedJSON = (e, parameters) => {
   const { label } = e;
 
   if (!label) {
     return;
   }
+  const element = createBox(e, parameters);
 
-  const foreignId = (((1 + Math.random()) * 0x10000) | 0)
-    .toString(16)
-    .substring(1);
-  const element = createBox(e, foreignId, parameters);
-
-  setParametersInForeignObject(element, { foreignId, ...e }, parameters.params);
+  setParametersInForeignObject(element, e, parameters.params);
 
   return element.id;
 };
@@ -207,7 +179,10 @@ const findEmptyPosition = size => {
   return position;
 };
 
-export const addElementToGraph = (webservice, defaultParams = {}) => {
+export const addElementToGraphFromServiceDescription = (
+  webservice,
+  defaultParams = {}
+) => {
   const transformedWebservice = transformWebserviceForGraph(
     webservice,
     webservice.type
@@ -226,40 +201,62 @@ export const addElementToGraph = (webservice, defaultParams = {}) => {
     position = findEmptyPosition(size);
   }
 
-  const id = addElement(transformedWebservice, { position, size, params });
+  const id = addElementFromTransformedJSON(transformedWebservice, {
+    position,
+    size,
+    params
+  });
 
   return id;
 };
 
-export const addSelectedElements = async (els = [], setHistory = true) => {
-  let elements;
-  if (els.length) {
-    elements = els.map(el => {
-      return { type: el.name, params: el.defaultParams };
-    });
+export const addElementByName = async (name, defaultParams = {}) => {
+  const algo = webservices.filter(service => service.name == name);
+  if (algo.length) {
+    const id = addElementToGraphFromServiceDescription(algo[0], defaultParams);
+
+    return id;
   } else {
-    elements = copiedElements.map(el => el.model.attributes);
+    console.error(`${name} doesnt exist`);
   }
-  const ids = [];
+};
+
+const addElementByCellView = cellView => {
+  const { defaultParams, size } = cellView.model.attributes;
+
+  const e = graph.getCell(cellView.model.id).clone();
+
+  // avoid cloning overlap
+  e.attributes.position = findEmptyPosition(size);
+
+  e.addTo(graph);
+  setParametersInForeignObject(e, defaultParams);
+  return e;
+};
+
+// return for undo purpose
+export const addElementsByCellView = elements => {
+  const els = [];
   for (const el of elements) {
-    const { type, params } = el;
-    const id = await addWebserviceByName(
-      type,
-      {
-        params
-      },
-      false
-    );
-    ids.push(id);
+    const e = addElementByCellView(el);
+    els.push(e);
   }
-  if (setHistory) {
-    addAction(ACTION_ADD_ALL_ELEMENTS, { ids, elements });
+  return els;
+};
+
+// return for undo purpose
+const restoreElement = element => {
+  element.addTo(graph);
+  setParametersInForeignObject(element);
+};
+
+export const restoreElements = elements => {
+  for (const el of elements) {
+    restoreElement(el);
   }
-  return ids;
 };
 
 export const addLinkToGraph = link => {
   const linkEl = new joint.shapes.standard.Link(link);
-
   linkEl.addTo(graph);
 };

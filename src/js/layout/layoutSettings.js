@@ -23,7 +23,6 @@ import { resetHighlight } from "../events/selections";
 
 const changePortDetails = () => {
   const { showPortDetails } = getLayoutOptions();
-  console.log("TCL: changePortDetails -> showPortDetails", showPortDetails);
   const prop = showPortDetails ? "block" : "none";
   for (const el of graph.getElements()) {
     for (const { id } of el.getPorts()) {

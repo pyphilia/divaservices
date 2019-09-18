@@ -31,25 +31,24 @@ import { getLayoutOptions } from "../constants/globals";
 
 export const setSelectValueInElement = (element, select) => {
   const s = select.find(":selected");
-  const selectEl = select.parent();
+  const selectEl = select.parent().parent();
   const value = s.attr("value");
   const defaultValue = select.data("default");
   const attr = selectEl.attr("name");
 
-  element.attributes.params[attr] = { value, defaultValue };
+  element.attributes.defaultParams[attr] = { value, defaultValue };
 };
 
 export const setInputValueInElement = (element, input) => {
   const value = input.val();
   const attr = input.attr("name");
   const defaultValue = input.data("default");
-  element.attributes.params[attr] = { value, defaultValue };
+  element.attributes.defaultParams[attr] = { value, defaultValue };
 };
 
 export function resetValue(event) {
   const el = event.target;
   const defaultValue = el.dataset.value;
-  console.log("TCL: resetValue -> defaultValue", defaultValue);
   switch (el.dataset.parent) {
     case Inputs.SELECT.tag: {
       const select = el.parentNode.getElementsByTagName(Inputs.SELECT.tag)[0];
@@ -70,6 +69,7 @@ export function resetValue(event) {
 }
 
 export const createSelect = (
+  element,
   param,
   resetButton,
   defaultTooltip,
@@ -84,15 +84,22 @@ export const createSelect = (
   });
 
   // select
+  const wrapperSelect = $("<div/>", { class: PARAM_COL });
   const selectEl = $(`<${Inputs.SELECT.tag}/>`, {
-    class: PARAM_COL,
+    style: "width:100%;margin:0",
     attr: {
       "data-default": values[defaultOption].toString()
     },
     prop: {
       disabled: false // @TODO userdefined
     }
+  }).appendTo(wrapperSelect);
+
+  // init select2
+  selectEl.select2({
+    minimumResultsForSearch: -1 // hide search box
   });
+  // add class col-4 to container
 
   // param name
   const nameEl = $("<span/>", {
@@ -134,11 +141,47 @@ export const createSelect = (
     tooltip = defaultTooltip.clone(true).attr("data-title", description);
   }
 
-  newSelect.append(nameEl, selectEl, reset, tooltip);
+  newSelect.append(nameEl, wrapperSelect, reset, tooltip);
+
+  // add select2 on elements
+  // avoid select click bug
+  setSelectValueInElement(element, selectEl);
+
+  // update param
+  selectEl.on("change", function() {
+    setSelectValueInElement(element, selectEl);
+  });
+
+  selectEl.on("select2:open", function() {
+    const s = $(this);
+    const width = s.next().width();
+    const height = s.next().height();
+
+    const dist = computeDisplayOffset(s, { height, width });
+
+    let newTop = -dist.y;
+    const newLeft = -dist.x;
+
+    let container = document.querySelector(".select2-dropdown--below");
+
+    // if the select is displayed at top
+    const above = document.querySelector(
+      ".select2-container--open .select2-dropdown--above"
+    );
+    if (above) {
+      container = above;
+      newTop += height;
+    }
+
+    container.style.top = newTop + "px";
+    container.style.left = newLeft + "px";
+  });
+
   return newSelect;
 };
 
 export const createInput = (
+  element,
   param,
   resetButton,
   defaultTooltip,
@@ -190,6 +233,28 @@ export const createInput = (
     }
   });
 
+  // update param
+  inputEl.on({
+    blur: function() {
+      const el = $(this);
+      setInputValueInElement(element, el);
+      el.trigger("input");
+    },
+    click: function() {
+      $(this).select();
+    },
+    input: function() {
+      const el = $(this);
+      setInputValueInElement(element, el);
+      checkInputValue($(this));
+    }
+  });
+
+  setInputValueInElement(element, inputEl);
+
+  // evaluate default parameters
+  checkInputValue(inputEl);
+
   // reset
   const resetButtonNumber = resetButton.clone(true).attr({
     "data-parent": "input",
@@ -205,6 +270,7 @@ export const createInput = (
     })}`;
     tooltip = defaultTooltip.attr("data-title", tooltipText);
   }
+
   newInput.append(nameEl, inputEl, resetButtonNumber, tooltip);
   return newInput;
 };
@@ -256,11 +322,13 @@ const hideTooltip = () => {
   el.style.display = "none";
 };
 
-export const setParametersInForeignObject = (
-  element,
-  { foreignId, description, params, label },
-  defaultParams = {}
-) => {
+export const setParametersInForeignObject = element => {
+  const {
+    description,
+    type: label,
+    originalParams,
+    defaultParams
+  } = element.attributes;
   const { showParameters } = getLayoutOptions();
 
   const selectsArr = [];
@@ -272,7 +340,7 @@ export const setParametersInForeignObject = (
     click: resetValue
   });
 
-  for (const param of params) {
+  for (const param of originalParams) {
     const { name: paramName, type } = param;
 
     const defaultTooltip = $(`${TOOLTIP_HTML}`)
@@ -294,6 +362,7 @@ export const setParametersInForeignObject = (
     switch (type) {
       case Inputs.SELECT.type: {
         const newSelect = createSelect(
+          element,
           param,
           resetButton,
           defaultTooltip,
@@ -304,6 +373,7 @@ export const setParametersInForeignObject = (
       }
       case Inputs.NUMBER.type: {
         const newInput = createInput(
+          element,
           param,
           resetButton,
           defaultTooltip,
@@ -325,7 +395,9 @@ export const setParametersInForeignObject = (
   inputs.append(inputsArr);
 
   // add params to boxes
-  const foreignObject = $(`foreignObject#${foreignId} body`);
+  const foreignObject = $(
+    `g[model-id=${element.attributes.id}] foreignObject body`
+  );
   const container = foreignObject
     .find(`.${BOX_CONTAINER_CLASS}`)
     .append(inputs, selects);
@@ -357,93 +429,19 @@ export const setParametersInForeignObject = (
       .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`));
   }
 
-  // SELECT EVENTS
-  const allSelects = selects.find(Inputs.SELECT.tag);
-
-  // add select2 on elements
-  // avoid select click bug
-  for (const select of allSelects) {
-    const s = $(select);
-    s.select2({
-      minimumResultsForSearch: -1 // hide search box
-    });
-
-    setSelectValueInElement(element, s);
-
-    // update param
-    s.on("input", function() {
-      setSelectValueInElement(element, s);
-    });
-
-    s.on("select2:open", function() {
-      const width = s.next().width();
-      const height = s.next().height();
-
-      const dist = computeDisplayOffset(s, { height, width });
-
-      let newTop = -dist.y;
-      const newLeft = -dist.x;
-
-      let container = document.querySelector(".select2-dropdown--below");
-
-      // if the select is displayed at top
-      const above = document.querySelector(
-        ".select2-container--open .select2-dropdown--above"
-      );
-      if (above) {
-        container = above;
-        newTop += height;
-      }
-
-      container.style.top = newTop + "px";
-      container.style.left = newLeft + "px";
-    });
-  }
+  // ELEMENT EVENTS
 
   // When the user clicks on a select and moves the bloc
   // the select dropdown is still displayed
   // this event closes it
   element.on("change:position", (el, position, { multitranslate }) => {
-    allSelects.each(function() {
-      $(this).select2("close");
-    });
+    for (const select of document.querySelectorAll(Inputs.SELECT.tag)) {
+      $(select).select2("close");
+    }
     if (!multitranslate) {
       moveAllSelected(el, position);
     }
   });
-
-  // NUMBER EVENTS
-  const allInputs = inputs.find("input");
-
-  // on input click, select all text
-  // avoid select problem for inputs
-  for (const inputEl of allInputs) {
-    // set default value
-    const input = $(inputEl);
-    setInputValueInElement(element, input);
-
-    // update param
-    input.on({
-      blur: function() {
-        const el = $(this);
-        setInputValueInElement(element, el);
-        el.trigger("input");
-        // check value
-        // checkInputValue(el);
-      },
-      click: function() {
-        $(this).select();
-      },
-      input: function() {
-        const el = $(this);
-        setInputValueInElement(element, el);
-        checkInputValue($(this));
-      }
-    });
-
-    // evaluate default parameters
-    checkInputValue(input);
-  }
 
   // tooltips js
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {

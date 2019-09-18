@@ -3,7 +3,10 @@ import path from "path";
 import { HOST } from "../constants/constants";
 import { webservices } from "../constants/globals";
 import { getWebServiceFromUrl } from "../layout/utils";
-import { addElementToGraph, addLinkToGraph } from "../elements/addElement";
+import {
+  addElementToGraphFromServiceDescription,
+  addLinkToGraph
+} from "../elements/addElement";
 
 export const readWorkflow = async () => {
   const filepath = path.join(HOST, "files/tmp.xml");
@@ -73,11 +76,15 @@ export const readWorkflow = async () => {
 
       // add element
       const webservice = await getWebServiceFromUrl(url);
-      const element = addElementToGraph(webservice, category, {
-        information,
-        params,
-        position
-      });
+      const element = addElementToGraphFromServiceDescription(
+        webservice,
+        category,
+        {
+          information,
+          params,
+          position
+        }
+      );
 
       // update position to avoid overlap
       totalWidth += element.attributes.size.width + 250;

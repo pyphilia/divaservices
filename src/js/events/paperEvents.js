@@ -127,7 +127,6 @@ export const initPaperEvents = () => {
 
   paper.on("link:connect link:disconnect", (linkView, evt, elementView) => {
     const element = elementView.model;
-    console.log("TCL: initPaperEvents -> element", element);
     element.attributes.getInPorts(element).forEach(function(port) {
       const portNode = elementView.findPortNode(port.id, PORT_SELECTOR);
       elementView.unhighlight(portNode, {

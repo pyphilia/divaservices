@@ -2,7 +2,7 @@
 import $ from "jquery";
 import groupBy from "lodash.groupby";
 import { categoryName } from "../constants/constants";
-import { addWebserviceByName } from "../elements/addElement";
+import { addElementByName } from "../elements/addElement";
 import { webservices } from "../constants/globals";
 
 export const buildLeftSidebar = async () => {
@@ -34,7 +34,7 @@ export const buildLeftSidebar = async () => {
         `<div class="algo-item ${service}"><span class="icon"></span>${name}</div>`
       );
       algoItem.on("click", function() {
-        addWebserviceByName(name);
+        addElementByName(name);
       });
       algoItems.push(algoItem);
     }

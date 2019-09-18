@@ -9,13 +9,12 @@ export const saveWorkflow = jsonGraph => {
   jsonGraph.cells
     .filter(cell => cell.type != "standard.Link")
     .forEach((box, i) => {
-      const { id: Id, type, params, ports } = box;
+      const { id: Id, type, defaultParams, ports } = box;
       const Name = type.replace(/\s/g, "");
       const No = i;
       const Service = "";
       const Inputs = { Parameter: [], Data: [] };
-      for (const [Name, values] of Object.entries(params)) {
-        console.log("TCL: values", values);
+      for (const [Name, values] of Object.entries(defaultParams)) {
         const { value: Value, defaultValue } = values;
         if (Value != defaultValue.toString()) {
           Inputs.Parameter.push({
