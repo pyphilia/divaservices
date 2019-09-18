@@ -128,10 +128,3 @@ export const THEME = {
     }
   }
 };
-
-export const DEFAULT_OPTIONS = {
-  showParameters: true,
-  showPortDetails: true,
-  showPorts: true,
-  showTooltips: true
-};

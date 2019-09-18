@@ -1,3 +1,10 @@
+/*
+// we import jquery as below for test to work
+import jQuery from "jquery";
+const $ = jQuery;
+global.$ = global.jQuery = $;
+*/
+
 import { addElement } from "../src/js/addElement";
 import * as theme from "../src/js/addElement";
 import { Inputs } from "../src/js/constants";

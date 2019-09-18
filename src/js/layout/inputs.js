@@ -11,9 +11,8 @@ import {
   NAME_COL,
   TOOLTIP_HTML,
   RESET_COL,
-  MimeTypes,
-  DEFAULT_OPTIONS
-} from "./constants";
+  MimeTypes
+} from "../constants/constants";
 import {
   PARAM_NAME_CLASS,
   PORT_SELECTOR,
@@ -21,128 +20,14 @@ import {
   TITLE_ROW_CLASS,
   BOX_CONTAINER_CLASS,
   RESET_BUTTON_CLASS,
-  IN_PORT_CLASS,
-  OUT_PORT_CLASS,
   TOOLTIP_CLASS,
   NO_PARAMETER_CLASS,
   PARAMETER_SELECTS,
   PARAMETER_INPUTS
-} from "./selectors";
-import { moveAllSelected } from "./events";
-
-let { showPortDetails, showParameters, showPorts } = DEFAULT_OPTIONS;
-
-const maxWidth = 650;
-const titleFontSize = 18;
-const paramHeight = 55;
-const defaultHeight = 40;
-const titleHeightOneLine = 60;
-const titleHeightTwoLine = 80;
-
-export const isParamInput = input => {
-  if (input.type) {
-    return input.type == Inputs.SELECT.type || input.type == Inputs.NUMBER.type;
-  }
-
-  return input[Inputs.SELECT.type] || input[Inputs.NUMBER.type];
-};
-
-export const isPort = el => {
-  if (el.type) {
-    return el.type == Inputs.FILE.type || el.type == Inputs.FOLDER.type;
-  }
-  return el[Inputs.FILE.type] || el[Inputs.FOLDER.type];
-};
-
-export const isPortUserdefined = el => {
-  if (el.type) {
-    return (
-      el.type == Inputs.FILE.type || el.type == Inputs.FOLDER.type
-      // && el.userdefined
-    );
-  }
-  return (
-    el[Inputs.FILE.type] || el[Inputs.FOLDER.type] //&& el[Object.keys(el)[0]].userdefined
-  );
-};
-
-export const getWebServiceFromUrl = async url => {
-  const data = await fetch(url);
-  const json = await data.json();
-  return json;
-};
-
-export const objectToString = obj => {
-  let str = "";
-  for (let p in obj) {
-    str += "- " + p + " : " + obj[p] + TOOLTIP_BREAK_LINE;
-  }
-  return str;
-};
-
-export const computeTitleLength = (el, fromSVG = false) => {
-  let titleLength;
-  if (fromSVG) {
-    titleLength = el.attributes.type.length;
-  } else {
-    titleLength = el.label.length;
-  }
-  const value = Math.min(titleLength * titleFontSize, maxWidth);
-  return {
-    value,
-    titleHeight:
-      titleLength * titleFontSize > maxWidth
-        ? titleHeightTwoLine
-        : titleHeightOneLine
-  };
-};
-
-export const computeBoxWidth = (el, showParameters, fromSVG = false) => {
-  const { attributes, params } = el;
-  let getNameLengths;
-  if (fromSVG) {
-    getNameLengths = Object.keys(attributes.params).map(name => name.length);
-  } else {
-    getNameLengths = params
-      ? params
-          .filter(x => isParamInput(x))
-          .map(param => (param.name ? param.name.length : 0))
-      : [0];
-  }
-  const paramNameLength = showParameters ? getNameLengths : [0];
-
-  const inputDefaultWidth = Math.max(...paramNameLength) * 25;
-
-  const nameLength = computeTitleLength(el, fromSVG).value;
-
-  return Math.min(Math.max(nameLength, inputDefaultWidth) + 200, maxWidth); // 200 = button and stuff width
-};
-
-export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
-  const { attributes, params, ports } = el;
-
-  let nbParam;
-  let portsItems;
-  if (fromSVG) {
-    nbParam = Object.keys(attributes.params).length;
-    portsItems = attributes.ports.items;
-  } else {
-    nbParam = params.filter(x => isParamInput(x)).length;
-    portsItems = ports.items;
-  }
-  const inputsHeight = showParameters ? nbParam * paramHeight : 0;
-
-  const inPorts = portsItems.length
-    ? portsItems.filter(x => x.group == IN_PORT_CLASS)
-    : [];
-  const outPorts = portsItems.length
-    ? portsItems.filter(x => x.group == OUT_PORT_CLASS)
-    : [];
-
-  const maxPortEntry = Math.max(inPorts.length, outPorts.length);
-  // @TODO count input + output port
-  return Math.max(defaultHeight, maxPortEntry * 50, inputsHeight);
-};
+} from "../constants/selectors";
+import { objectToString, computeDisplayOffset } from "./utils";
+import { moveAllSelected } from "../events/selections";
+import { getLayoutOptions } from "../constants/globals";
 
 export const setSelectValueInElement = (element, select) => {
   const s = select.find(":selected");
@@ -164,12 +49,14 @@ export const setInputValueInElement = (element, input) => {
 export function resetValue(event) {
   const el = event.target;
   const defaultValue = el.dataset.value;
+  console.log("TCL: resetValue -> defaultValue", defaultValue);
   switch (el.dataset.parent) {
     case Inputs.SELECT.tag: {
       const select = el.parentNode.getElementsByTagName(Inputs.SELECT.tag)[0];
+      // use jquery because of select2
       $(select)
         .val(defaultValue)
-        .trigger("input");
+        .trigger("change");
       break;
     }
     case Inputs.NUMBER.tag:
@@ -347,18 +234,6 @@ export const checkInputValue = input => {
   input.toggleClass("is-invalid", !isValid);
 };
 
-const computeDisplayOffset = (el, { height, width }) => {
-  const mainPosition = document.querySelector("#main").getBoundingClientRect();
-
-  const sPosition = el.offset();
-  const dist = {
-    x: (sPosition.left - mainPosition.x + width) * 0.1,
-    y: (sPosition.top - mainPosition.y + height) * 0.09,
-    elementOffset: sPosition
-  };
-  return dist;
-};
-
 // some errors are induced by the svg positioning, thus we have to use mouse position to display
 // the tooltip
 const showTooltip = (tooltip, event) => {
@@ -384,8 +259,10 @@ const hideTooltip = () => {
 export const setParametersInForeignObject = (
   element,
   { foreignId, description, params, label },
-  defaultParams
+  defaultParams = {}
 ) => {
+  const { showParameters } = getLayoutOptions();
+
   const selectsArr = [];
   const inputsArr = [];
 
@@ -410,8 +287,6 @@ export const setParametersInForeignObject = (
     const defaultValue = defaultParams[paramName]
       ? defaultParams[paramName].value
       : null;
-    console.log(defaultParams);
-    console.log(defaultValue);
     // const defaultValue = defaultParams.params
     //   ? defaultParams.params[paramName].value
     //   : null;
@@ -532,7 +407,6 @@ export const setParametersInForeignObject = (
     allSelects.each(function() {
       $(this).select2("close");
     });
-
     if (!multitranslate) {
       moveAllSelected(el, position);
     }
@@ -584,6 +458,8 @@ export const setParametersInForeignObject = (
 };
 
 export const createPort = (param, group) => {
+  const { showPorts, showPortDetails } = getLayoutOptions();
+
   let port = {};
   const { name, mimeTypes } = param;
   if (group) {

@@ -1,25 +1,25 @@
-import { addWebservice } from "./addElement";
 import {
-  deleteElement,
-  addSelectedElements,
-  deleteAllSelected
-} from "./events";
-
-export const history = [
-  // {action: ACTION_ADD_ELEMENT, parameters: {}}
-];
-const future = [
-  // {action: ACTION_ADD_ELEMENT, parameters: {}}
-];
+  addWebserviceByName,
+  addSelectedElements
+} from "../elements/addElement";
+import {
+  deleteElementById,
+  deleteElementsById
+} from "../elements/deleteElement";
 
 export const ACTION_ADD_ELEMENT = "addElement";
 export const ACTION_ADD_ALL_ELEMENTS = "addAllElements";
 export const ACTION_DELETE_ELEMENT = "deleteElement";
 export const ACTION_DELETE_ALL_ELEMENTS = "deleteAllElements";
 
+export const history = [];
+const future = [];
+
+export let undoAction = false;
+
 export const addAction = (action, parameters) => {
-  console.log("TCL: addAction -> addAction", undoAction);
   history.push({ action, parameters });
+  console.log(history);
   if (!undoAction) {
     future.length = 0;
     console.log(future);
@@ -34,15 +34,15 @@ const addFuture = (action, parameters) => {
 const ACTIONS = {
   [ACTION_ADD_ELEMENT]: {
     undo: ({ id }) => {
-      deleteElement(id);
+      deleteElementById(id);
     },
     redo: ({ name, defaultParams }) => {
-      addWebservice(name, defaultParams);
+      addWebserviceByName(name, defaultParams);
     }
   },
   [ACTION_ADD_ALL_ELEMENTS]: {
     undo: ({ ids }) => {
-      deleteAllSelected(ids);
+      deleteElementsById(ids);
     },
     redo: ({ elements }) => {
       addSelectedElements(elements);
@@ -50,12 +50,11 @@ const ACTIONS = {
   },
   [ACTION_DELETE_ELEMENT]: {
     undo: async ({ name, defaultParams }) => {
-      console.log("TCL: defaultParams", defaultParams);
-      const id = await addWebservice(name, defaultParams, false);
+      const id = await addWebserviceByName(name, defaultParams, false);
       addFuture(ACTION_DELETE_ELEMENT, { name, defaultParams, id });
     },
     redo: ({ id }) => {
-      deleteElement(id);
+      deleteElementById(id);
     }
   },
   [ACTION_DELETE_ALL_ELEMENTS]: {
@@ -65,12 +64,10 @@ const ACTIONS = {
       addFuture(ACTION_DELETE_ALL_ELEMENTS, { ids, elements });
     },
     redo: ({ ids }) => {
-      deleteAllSelected(ids);
+      deleteElementsById(ids);
     }
   }
 };
-
-let undoAction = false;
 
 export const undo = () => {
   console.log("TCL: undo -> history", history);

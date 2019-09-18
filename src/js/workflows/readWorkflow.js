@@ -1,9 +1,9 @@
 import xml2js from "xml2js";
 import path from "path";
-import { HOST } from "./constants";
-import { webservices } from "./globals";
-import { getWebServiceFromUrl } from "./utils";
-import { addElementToGraph, addLinkToGraph } from "./addElement";
+import { HOST } from "../constants/constants";
+import { webservices } from "../constants/globals";
+import { getWebServiceFromUrl } from "../layout/utils";
+import { addElementToGraph, addLinkToGraph } from "../elements/addElement";
 
 export const readWorkflow = async () => {
   const filepath = path.join(HOST, "files/tmp.xml");

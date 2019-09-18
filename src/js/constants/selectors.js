@@ -33,3 +33,6 @@ export const OPTION_PORT_DETAILS = "option-port-details";
 export const OPTION_PORTS = "option-ports";
 export const OPTION_PARAMETERS = "option-parameters";
 export const OPTION_TOOLTIPS = "option-tooltips";
+
+export const CONTEXT_MENU_ELEMENT = "#contextmenu-element";
+export const CONTEXT_MENU_PAPER = "#contextmenu-paper";

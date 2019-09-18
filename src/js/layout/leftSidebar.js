@@ -1,9 +1,9 @@
 // left menu
 import $ from "jquery";
 import groupBy from "lodash.groupby";
-import { categoryName } from "./constants";
-import { addWebservice } from "./addElement";
-import { webservices } from "./globals";
+import { categoryName } from "../constants/constants";
+import { addWebserviceByName } from "../elements/addElement";
+import { webservices } from "../constants/globals";
 
 export const buildLeftSidebar = async () => {
   // get categories => algorithms
@@ -34,7 +34,7 @@ export const buildLeftSidebar = async () => {
         `<div class="algo-item ${service}"><span class="icon"></span>${name}</div>`
       );
       algoItem.on("click", function() {
-        addWebservice(name);
+        addWebserviceByName(name);
       });
       algoItems.push(algoItem);
     }

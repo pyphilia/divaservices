@@ -1,8 +1,7 @@
-import $ from "jquery";
-import { saveWorkflow } from "./saveWorkflow";
-import { graph, paper } from "./interface";
-import { resetZoom } from "./events";
-import { readWorkflow } from "./readWorkflow";
+import { saveWorkflow } from "../workflows/saveWorkflow";
+import { graph, paper } from "../layout/interface";
+import { resetZoom } from "../events/paperEvents";
+import { readWorkflow } from "../workflows/readWorkflow";
 
 // const newWorkflow = (e) => {
 //   e.preventDefault();
@@ -63,16 +62,21 @@ export const buildRightSidebar = () => {
     }
   };
 
+  const rightSidebar = document.querySelector("#right-sidebar nav");
   for (const menuItem in rightSideBar) {
     const { action, attr } = rightSideBar[menuItem];
-    const menuItemElem = $(`<a/>`, {
-      class: "nav-link",
-      text: menuItem,
-      attr: attr ? attr : {}
-    });
-    menuItemElem.click(e => {
+
+    const menuItemElem = document.createElement(`a`);
+    menuItemElem.classList.add("nav-link");
+    menuItemElem.innerHTML = menuItem;
+    menuItemElem.addEventListener("click", e => {
       action(e, {});
     });
-    $("#right-sidebar nav").append(menuItemElem);
+    if (attr) {
+      for (const [key, value] of Object.entries(attr)) {
+        menuItemElem.setAttribute(key, value);
+      }
+    }
+    rightSidebar.appendChild(menuItemElem);
   }
 };

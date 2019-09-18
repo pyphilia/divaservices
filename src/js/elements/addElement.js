@@ -1,28 +1,25 @@
-// we import jquery as below for test to work
-import jQuery from "jquery";
-const $ = jQuery;
-global.$ = global.jQuery = $;
-
 import "select2";
 import * as joint from "jointjs";
-import { paper, graph } from "./interface";
-import { webservices } from "./globals";
+import { paper, graph } from "../layout/interface";
+import {
+  webservices,
+  getLayoutOptions,
+  copiedElements
+} from "../constants/globals";
 import {
   THEME,
   BOX_TITLE_HTML_TAG,
   ICON_COL,
-  TITLE_COL,
-  DEFAULT_OPTIONS
-} from "./constants";
+  TITLE_COL
+} from "../constants/constants";
 import {
   isParamInput,
   isPortUserdefined,
   computeBoxWidth,
   computeBoxHeight,
-  computeTitleLength,
-  createPort,
-  setParametersInForeignObject
-} from "./utils";
+  computeTitleLength
+} from "../layout/utils";
+import { setParametersInForeignObject, createPort } from "../layout/inputs";
 import {
   PORT_SELECTOR,
   TITLE_ROW_CLASS,
@@ -30,10 +27,12 @@ import {
   FOREIGN_CLASS,
   IN_PORT_CLASS,
   OUT_PORT_CLASS
-} from "./selectors";
-import { addAction, ACTION_ADD_ELEMENT } from "./undo";
-
-let { showParameters } = DEFAULT_OPTIONS;
+} from "../constants/selectors";
+import {
+  addAction,
+  ACTION_ADD_ELEMENT,
+  ACTION_ADD_ALL_ELEMENTS
+} from "../utils/undo";
 
 const createBox = (e, foreignId, { position, size }) => {
   const {
@@ -77,14 +76,14 @@ const createBox = (e, foreignId, { position, size }) => {
     params: {},
     portMarkup: [{ tagName: "circle", selector: PORT_SELECTOR }],
 
-    getGroupPorts: function(group) {
-      return this.getPorts().filter(port => {
+    getGroupPorts: function(model, group) {
+      return model.getPorts().filter(port => {
         return port.group === group;
       });
     },
 
-    getInPorts: function() {
-      return this.getGroupPorts(IN_PORT_CLASS);
+    getInPorts: function(model) {
+      return this.getGroupPorts(model, IN_PORT_CLASS);
     },
 
     getUsedInPorts: function() {
@@ -140,7 +139,7 @@ export const transformWebserviceForGraph = (webservice, category) => {
   return ret;
 };
 
-export const addWebservice = async (
+export const addWebserviceByName = async (
   name,
   defaultParams = {},
   setHistory = true
@@ -159,7 +158,7 @@ export const addWebservice = async (
 
 // Create a custom element.
 // ------------------------
-export const addElement = (e, parameters, defaultParams = {}) => {
+export const addElement = (e, parameters) => {
   const { label } = e;
 
   if (!label) {
@@ -171,7 +170,7 @@ export const addElement = (e, parameters, defaultParams = {}) => {
     .substring(1);
   const element = createBox(e, foreignId, parameters);
 
-  setParametersInForeignObject(element, { foreignId, ...e }, defaultParams);
+  setParametersInForeignObject(element, { foreignId, ...e }, parameters.params);
 
   return element.id;
 };
@@ -214,24 +213,49 @@ export const addElementToGraph = (webservice, defaultParams = {}) => {
     webservice.type
   );
 
+  const { showParameters } = getLayoutOptions();
+
   const size = {
     width: computeBoxWidth(transformedWebservice, showParameters),
     height: computeBoxHeight(transformedWebservice, showParameters)
   };
 
-  let { position } = defaultParams;
+  let { position, params } = defaultParams;
   if (!position) {
     // avoid adding overlapping elements
     position = findEmptyPosition(size);
   }
 
-  const id = addElement(
-    transformedWebservice,
-    { position, size },
-    defaultParams
-  );
+  const id = addElement(transformedWebservice, { position, size, params });
 
   return id;
+};
+
+export const addSelectedElements = async (els = [], setHistory = true) => {
+  let elements;
+  if (els.length) {
+    elements = els.map(el => {
+      return { type: el.name, params: el.defaultParams };
+    });
+  } else {
+    elements = copiedElements.map(el => el.model.attributes);
+  }
+  const ids = [];
+  for (const el of elements) {
+    const { type, params } = el;
+    const id = await addWebserviceByName(
+      type,
+      {
+        params
+      },
+      false
+    );
+    ids.push(id);
+  }
+  if (setHistory) {
+    addAction(ACTION_ADD_ALL_ELEMENTS, { ids, elements });
+  }
+  return ids;
 };
 
 export const addLinkToGraph = link => {
