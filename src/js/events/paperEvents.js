@@ -9,12 +9,12 @@ import { paper, graph } from "../layout/interface";
 import { hideContextMenus } from "./contextMenu";
 import { unHighlightAllSelected } from "./selections";
 import { selectedElements, clearSelection } from "../constants/globals";
+import { addAction } from "../utils/undo";
 import {
-  addAction,
   ACTION_DELETE_ELEMENT,
   ACTION_ADD_LINK,
   ACTION_DELETE_LINK
-} from "../utils/undo";
+} from "../constants/actions";
 
 export const resetZoom = () => {
   const bcr = paper.svg.getBoundingClientRect();
@@ -57,9 +57,10 @@ const changeZoom = (delta, x, y, reset) => {
     paper.matrix(ctm);
   }
 };
-
-/** PAPER EVENTS */
-
+/**
+ * Initialize paper events, such as zoom, pan and
+ * links management
+ */
 export const initPaperEvents = () => {
   paper.options.highlighting.magnetAvailability =
     THEME.magnetAvailabilityHighlighter;
@@ -72,7 +73,7 @@ export const initPaperEvents = () => {
     }
   });
 
-  /**********ZOOM*/
+  /*------------ZOOM */
 
   paper.on("blank:mousewheel", (evt, x, y, delta) => {
     changeZoom(delta, x, y);
@@ -83,6 +84,7 @@ export const initPaperEvents = () => {
   });
 
   /*------------PAN */
+
   let move = false;
   let dragStartPosition;
 
@@ -114,7 +116,7 @@ export const initPaperEvents = () => {
       }
     });
 
-  /*******LINK***/
+  /*------------LINK EVENTS */
 
   paper.on("link:mouseenter", linkView => {
     const tools = new joint.dia.ToolsView({
@@ -164,9 +166,5 @@ export const initPaperEvents = () => {
         highlighter: THEME.magnetAvailabilityHighlighter
       });
     });
-  });
-
-  paper.on("cell:delete", () => {
-    console.log("wruisdvjkn");
   });
 };

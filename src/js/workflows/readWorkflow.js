@@ -1,3 +1,7 @@
+/**
+ * Read a workflow from a xml file and open it
+ * in the main interface area
+ */
 import xml2js from "xml2js";
 import path from "path";
 import { HOST } from "../constants/constants";

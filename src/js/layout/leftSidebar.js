@@ -1,9 +1,12 @@
-// left menu
+/**
+ * Initialize the left sidebar
+ */
 import $ from "jquery";
 import groupBy from "lodash.groupby";
 import { categoryName } from "../constants/constants";
 import { webservices } from "../constants/globals";
-import { addAction, ACTION_ADD_ELEMENT } from "../utils/undo";
+import { addAction } from "../utils/undo";
+import { ACTION_ADD_ELEMENT } from "../constants/actions";
 
 export const buildLeftSidebar = async () => {
   // get categories => algorithms

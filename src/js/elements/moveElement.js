@@ -1,5 +1,6 @@
-import { ACTION_MOVE_ELEMENT, addAction } from "../utils/undo";
+import { addAction } from "../utils/undo";
 import { getElementByBoxId } from "../layout/utils";
+import { ACTION_MOVE_ELEMENT } from "../constants/actions";
 
 let allPositions = {};
 export const saveElementsPositionFromCellView = cellViews => {

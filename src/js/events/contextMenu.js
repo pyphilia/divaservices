@@ -8,7 +8,8 @@ import { copy } from "./controls";
 import { selectedElements, copiedElements } from "../constants/globals";
 import { addElementsByCellView } from "../elements/addElement";
 import { deleteElementsById } from "../elements/deleteElement";
-import { addAction, ACTION_PASTE } from "../utils/undo";
+import { addAction } from "../utils/undo";
+import { ACTION_PASTE } from "../constants/actions";
 
 /** CONTEXT MENUS */
 const contextMenus = {

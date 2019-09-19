@@ -1,6 +1,9 @@
+/**
+ * Read a workflow build within the main interface area
+ * and translates it into a xml file
+ */
 import xml2js from "xml2js";
 import { webservices } from "../constants/globals";
-// import { saveAs } from "file-saver";
 
 export const saveWorkflow = jsonGraph => {
   const allPorts = {};

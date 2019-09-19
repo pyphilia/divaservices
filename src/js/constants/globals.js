@@ -5,6 +5,7 @@ import webservicesDecorator from "./webservicesDecorator";
 
 export let webservices;
 
+// init webservices from xml file
 export const initWebservices = async () => {
   const filepath = path.join(HOST, "api/services.xml");
 
@@ -26,7 +27,10 @@ export const initWebservices = async () => {
   webservices = webservicesDecorator(data);
 };
 
+// array of selected elements
 export let selectedElements = [];
+
+// array of copied elements
 export let copiedElements = [];
 
 export const clearSelection = () => {
@@ -43,6 +47,7 @@ export const setCopiedElements = () => {
   copiedElements = selectedElements;
 };
 
+// layout options
 const DEFAULT_OPTIONS = {
   showParameters: true,
   showPortDetails: true,

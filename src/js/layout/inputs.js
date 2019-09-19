@@ -51,7 +51,7 @@ export function resetValue(event) {
   const defaultValue = el.dataset.value;
   switch (el.dataset.parent) {
     case Inputs.SELECT.tag: {
-      const select = el.parentNode.getElementsByTagName(Inputs.SELECT.tag)[0];
+      const select = el.parentNode.querySelector(Inputs.SELECT.tag);
       // use jquery because of select2
       $(select)
         .val(defaultValue)
@@ -59,7 +59,7 @@ export function resetValue(event) {
       break;
     }
     case Inputs.NUMBER.tag:
-      $(el.parentNode.getElementsByTagName(Inputs.NUMBER.tag)[0])
+      $(el.parentNode.querySelector(Inputs.NUMBER.tag))
         .val(defaultValue)
         .trigger("input");
       break;

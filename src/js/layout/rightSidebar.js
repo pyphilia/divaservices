@@ -1,3 +1,7 @@
+/**
+ * Initialize the right sidebar
+ */
+
 import { saveWorkflow } from "../workflows/saveWorkflow";
 import { graph, paper } from "../layout/interface";
 import { resetZoom } from "../events/paperEvents";

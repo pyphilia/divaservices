@@ -82,7 +82,9 @@ export const computeBoxWidth = (el, showParameters, fromSVG = false) => {
   const { attributes, params } = el;
   let getNameLengths;
   if (fromSVG) {
-    getNameLengths = Object.keys(attributes.params).map(name => name.length);
+    getNameLengths = Object.keys(attributes.originalParams).map(
+      name => name.length
+    );
   } else {
     getNameLengths = params
       ? params
@@ -105,7 +107,7 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
   let nbParam;
   let portsItems;
   if (fromSVG) {
-    nbParam = Object.keys(attributes.params).length;
+    nbParam = Object.keys(attributes.defaultParams).length;
     portsItems = attributes.ports.items;
   } else {
     nbParam = params.filter(x => isParamInput(x)).length;

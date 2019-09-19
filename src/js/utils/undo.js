@@ -1,3 +1,10 @@
+/**
+ *
+ * This Undo-redo manager is based on the Command pattern
+ * which receives actions and stores them in an history
+ *
+ */
+
 import {
   restoreElements,
   addElementByName,
@@ -10,13 +17,14 @@ import {
 } from "../elements/deleteElement";
 import { paste, undoPaste } from "../events/controls";
 import { moveElementsByBoxId } from "../elements/moveElement";
-
-export const ACTION_PASTE = "paste";
-export const ACTION_ADD_ELEMENT = "addElement";
-export const ACTION_DELETE_ELEMENT = "deleteElement";
-export const ACTION_ADD_LINK = "addLink";
-export const ACTION_DELETE_LINK = "deleteLink";
-export const ACTION_MOVE_ELEMENT = "moveElement";
+import {
+  ACTION_MOVE_ELEMENT,
+  ACTION_ADD_ELEMENT,
+  ACTION_ADD_LINK,
+  ACTION_DELETE_ELEMENT,
+  ACTION_DELETE_LINK,
+  ACTION_PASTE
+} from "../constants/actions";
 
 const history = [];
 const future = [];
@@ -25,6 +33,8 @@ export let undoAction = false;
 
 // this function is fired only through user action,
 // it will erase stored undone actions
+// execute parameter determine whether to execute the redo function
+// (particularly useful for actions saved from events)
 export const addAction = (action, parameters, execute = true) => {
   const returnValues = execute ? ACTIONS[action].redo(parameters) : {};
   history.push({ action, parameters: { ...parameters, ...returnValues } });

@@ -1,19 +1,17 @@
-import {
-  undo,
-  redo,
-  addAction,
-  ACTION_PASTE,
-  ACTION_DELETE_ELEMENT
-} from "../utils/undo";
+import { undo, redo, addAction } from "../utils/undo";
 import {
   selectedElements,
   clearSelection,
   copiedElements
 } from "../constants/globals";
 import { copy } from "./controls";
+import { ACTION_PASTE, ACTION_DELETE_ELEMENT } from "../constants/actions";
 
-//** KEYBOARD */
 export let ctrlDown;
+
+/**
+ * Initialize keyboard events
+ * */
 
 export const initKeyboardEvents = () => {
   document.addEventListener(
@@ -78,8 +76,12 @@ export const initKeyboardEvents = () => {
             break;
           }
           case "Delete": {
-            addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
-            clearSelection();
+            // do not delete element if an input is focused
+            const focusedInput = document.querySelector("input:focus");
+            if (!focusedInput) {
+              addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
+              clearSelection();
+            }
             break;
           }
           default:

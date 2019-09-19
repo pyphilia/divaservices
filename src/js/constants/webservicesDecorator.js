@@ -1,3 +1,8 @@
+/**
+ * This file contains a decorator to traslate the
+ * given webservices xml file to an equivalent JSON file
+ */
+
 const getTypeName = type => {
   if (type.File) {
     const {

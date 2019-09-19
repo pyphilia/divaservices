@@ -1,4 +1,6 @@
-import "select2";
+/**
+ * Initialize the main interface area
+ */
 import * as $ from "jquery";
 import * as joint from "jointjs";
 import {
@@ -80,7 +82,6 @@ const buildGraph = async workflow => {
   initContextMenu();
   initKeyboardEvents();
   initSelection();
-
   initThemeOptions();
 
   if (workflow) {

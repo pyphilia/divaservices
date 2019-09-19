@@ -9,9 +9,15 @@ import {
 } from "../constants/globals";
 import { saveElementsPositionFromCellView } from "../elements/moveElement";
 
+/**
+ * Initialize the element selection feature
+ * It also handles the highlight effect of the elements
+ */
 export const initSelection = () => {
   paper.on("element:pointerdown", (cellView /*, evt, x, y*/) => {
     hideContextMenus();
+    // if control key is not hold, a different
+    // the current selection is reset
     if (!ctrlDown) {
       unHighlightAllSelected();
     }
@@ -28,9 +34,6 @@ export const initSelection = () => {
 
 export const highlightSelection = cellView => {
   if (cellView) {
-    if (!ctrlDown) {
-      unHighlightAllSelected();
-    }
     addToSelection(cellView);
     cellView.highlight(null, BOX_HIGHLIGHTER);
   }
@@ -52,11 +55,6 @@ export const unHighlightAllSelected = () => {
     }
     clearSelection();
   }
-};
-
-export const unHighlightSelection = cellView => {
-  cellView.unhighlight(null, BOX_HIGHLIGHTER);
-  selectedElements.splice(selectedElements.indexOf(cellView), 1);
 };
 
 export const resetHighlight = () => {
