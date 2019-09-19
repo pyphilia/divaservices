@@ -1,6 +1,7 @@
 import "select2";
 import { TOOLTIP_BREAK_LINE, Inputs } from "../constants/constants";
 import { IN_PORT_CLASS, OUT_PORT_CLASS } from "../constants/selectors";
+import { graph } from "./interface";
 
 const maxWidth = 650;
 const titleFontSize = 18;
@@ -8,6 +9,16 @@ const paramHeight = 55;
 const defaultHeight = 40;
 const titleHeightOneLine = 60;
 const titleHeightTwoLine = 80;
+
+export const getElementByBoxId = id => {
+  return graph.getElements().filter(el => el.attributes.boxId == id)[0];
+};
+
+export const generateUniqueId = () => {
+  return Math.random()
+    .toString(36)
+    .substr(2, 9);
+};
 
 export const getWebServiceFromUrl = async url => {
   const data = await fetch(url);

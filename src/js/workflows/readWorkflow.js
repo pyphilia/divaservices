@@ -2,10 +2,9 @@ import xml2js from "xml2js";
 import path from "path";
 import { HOST } from "../constants/constants";
 import { webservices } from "../constants/globals";
-import { getWebServiceFromUrl } from "../layout/utils";
 import {
   addElementToGraphFromServiceDescription,
-  addLinkToGraph
+  addLinkFromJSON
 } from "../elements/addElement";
 
 export const readWorkflow = async () => {
@@ -22,17 +21,19 @@ export const readWorkflow = async () => {
       const {
         Id: [id],
         Inputs: [inputs],
-        Name: [name]
+        Name: [name],
+        Service: [service]
       } = step;
 
       const webserviceObj = webservices.filter(
         //@TODO need to read key value --- workflow will keep key in parameters
-        webservice => webservice.name == name
+        webservice => webservice.id == service.Key[0]
       )[0];
-      const { url, type: category } = webserviceObj;
-      if (!url) {
+      if (webserviceObj.length) {
         alert("step ", name, " not found");
       }
+
+      const { type: category } = webserviceObj;
 
       //@TODO check params match with definition
       const { Parameter, Data } = inputs;
@@ -75,9 +76,8 @@ export const readWorkflow = async () => {
       const position = { x: totalWidth, y: 100 };
 
       // add element
-      const webservice = await getWebServiceFromUrl(url);
       const element = addElementToGraphFromServiceDescription(
-        webservice,
+        webserviceObj,
         category,
         {
           information,
@@ -116,7 +116,7 @@ export const readWorkflow = async () => {
         target: { id: tMapedBox.id, port: tPortId }
       };
 
-      addLinkToGraph(linkObj);
+      addLinkFromJSON(linkObj);
     }
   });
 };

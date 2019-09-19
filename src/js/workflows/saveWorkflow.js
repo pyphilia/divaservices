@@ -1,4 +1,5 @@
 import xml2js from "xml2js";
+import { webservices } from "../constants/globals";
 // import { saveAs } from "file-saver";
 
 export const saveWorkflow = jsonGraph => {
@@ -12,7 +13,6 @@ export const saveWorkflow = jsonGraph => {
       const { id: Id, type, defaultParams, ports } = box;
       const Name = type.replace(/\s/g, "");
       const No = i;
-      const Service = "";
       const Inputs = { Parameter: [], Data: [] };
       for (const [Name, values] of Object.entries(defaultParams)) {
         const { value: Value, defaultValue } = values;
@@ -31,6 +31,10 @@ export const saveWorkflow = jsonGraph => {
           name: port.name
         };
       });
+
+      // key in webservices list
+      const Key = webservices.filter(algo => algo.name == type)[0].id;
+      const Service = { Key };
 
       const step = { Id, No, Name, Service, Inputs };
       Steps.Step.push(step);

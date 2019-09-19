@@ -7,13 +7,7 @@ import {
   clearSelection,
   addToSelection
 } from "../constants/globals";
-
-let allPositions = [];
-const saveElementsPositionFromCellView = cellViews => {
-  for (const [el, i] of cellViews.map((el, i) => [el.model, i])) {
-    allPositions[i] = el.position();
-  }
-};
+import { saveElementsPositionFromCellView } from "../elements/moveElement";
 
 export const initSelection = () => {
   paper.on("element:pointerdown", (cellView /*, evt, x, y*/) => {
@@ -22,6 +16,12 @@ export const initSelection = () => {
       unHighlightAllSelected();
     }
     highlightSelection(cellView);
+    saveElementsPositionFromCellView(selectedElements);
+  });
+
+  // on key up, if it was a translation, it will have
+  // different positions values
+  paper.on("element:pointerup", () => {
     saveElementsPositionFromCellView(selectedElements);
   });
 };
@@ -63,26 +63,5 @@ export const resetHighlight = () => {
   if (selectedElements.length) {
     unHighlightAllSelected();
     highlightAllSelected();
-  }
-};
-
-// currentElement is the element which the user clicked on to move the other ones
-export const moveAllSelected = (currentElement, position) => {
-  const selectModels = selectedElements.map(el => el.model);
-  const currentElementIndex = selectModels.indexOf(currentElement);
-  const previousCurrentPosition = allPositions[currentElementIndex];
-  for (const [i, el] of selectModels
-    .filter(el => el != currentElement)
-    .entries()) {
-    const { x: previousX, y: previousY } = allPositions[i];
-    const deltaTranslation = {
-      x: position.x - previousCurrentPosition.x,
-      y: position.y - previousCurrentPosition.y
-    };
-    el.position(
-      previousX + deltaTranslation.x,
-      previousY + deltaTranslation.y,
-      { multitranslate: true }
-    );
   }
 };

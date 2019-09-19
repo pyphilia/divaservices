@@ -3,7 +3,7 @@ import $ from "jquery";
 import groupBy from "lodash.groupby";
 import { categoryName } from "../constants/constants";
 import { webservices } from "../constants/globals";
-import { addAction, ACTION_ADD } from "../utils/undo";
+import { addAction, ACTION_ADD_ELEMENT } from "../utils/undo";
 
 export const buildLeftSidebar = async () => {
   // get categories => algorithms
@@ -34,7 +34,7 @@ export const buildLeftSidebar = async () => {
         `<div class="algo-item ${service}"><span class="icon"></span>${name}</div>`
       );
       algoItem.on("click", function() {
-        addAction(ACTION_ADD, { name });
+        addAction(ACTION_ADD_ELEMENT, { name });
       });
       algoItems.push(algoItem);
     }

@@ -3,7 +3,7 @@ import {
   redo,
   addAction,
   ACTION_PASTE,
-  ACTION_DELETE
+  ACTION_DELETE_ELEMENT
 } from "../utils/undo";
 import {
   selectedElements,
@@ -78,7 +78,7 @@ export const initKeyboardEvents = () => {
             break;
           }
           case "Delete": {
-            addAction(ACTION_DELETE, { elements: selectedElements });
+            addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
             clearSelection();
             break;
           }

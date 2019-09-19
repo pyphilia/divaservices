@@ -18,11 +18,11 @@ export const copy = elements => {
   }
 };
 
-export const paste = cellViews => {
+export const paste = (cellViews, ids) => {
   if (cellViews.length) {
-    const addedElements = addElementsByCellView(cellViews);
+    const { addedElements, boxIds } = addElementsByCellView(cellViews, ids);
     fireAlert("success", MESSAGE_PASTE_SUCCESS);
-    return { addedElements };
+    return { addedElements, boxIds };
   } else {
     fireAlert("danger", MESSAGE_PASTE_ERROR);
   }

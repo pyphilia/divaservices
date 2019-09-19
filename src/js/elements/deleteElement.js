@@ -1,36 +1,56 @@
-import { MESSAGE_DELETE_CONFIRM } from "../constants/messages";
 import { graph } from "../layout/interface";
+import { getElementByBoxId } from "../layout/utils";
+
+const deleteElement = element => {
+  const copy = element.clone();
+  element.remove();
+  return copy;
+};
 
 export const deleteElementById = id => {
   const cell = graph.getCell(id);
-  const copy = cell.clone();
-  cell.remove();
-  return copy;
+  return deleteElement(cell);
+};
+
+export const deleteElementByBoxId = boxId => {
+  const cell = getElementByBoxId(boxId);
+  return deleteElement(cell);
 };
 
 export const deleteElementsById = ids => {
   const restoredElements = [];
   if (ids.length) {
-    if (confirm(MESSAGE_DELETE_CONFIRM)) {
-      for (const id of ids) {
-        const copy = deleteElementById(id, false);
-        restoredElements.push(copy);
-      }
-    } else {
-      // @TODO replace where it was before moving
+    for (const id of ids) {
+      const copy = deleteElementById(id, false);
+      restoredElements.push(copy);
     }
+    return { restoredElements };
   }
-  return { restoredElements };
+};
+
+export const deleteElementsByBoxId = boxIds => {
+  const restoredElements = [];
+  if (boxIds.length) {
+    for (const boxId of boxIds) {
+      const copy = deleteElementByBoxId(boxId, false);
+      restoredElements.push(copy);
+    }
+    return { restoredElements };
+  }
 };
 
 export const deleteElementByCellView = cellView => {
-  const id = cellView.model.attributes.id;
+  const id = cellView.model.attributes.id || cellView.attributes.id;
   return deleteElementById(id);
 };
 
 export const deleteElementsByCellView = cellViews => {
-  const ids = cellViews.map(
-    cellView => cellView.attributes.id || cellView.model.attributes.id
+  const boxIds = cellViews.map(
+    cellView => cellView.attributes.boxId || cellView.model.attributes.boxId
   );
-  return deleteElementsById(ids);
+  return deleteElementsByBoxId(boxIds);
+};
+
+export const deleteLink = link => {
+  link.remove();
 };

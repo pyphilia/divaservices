@@ -26,8 +26,8 @@ import {
   PARAMETER_INPUTS
 } from "../constants/selectors";
 import { objectToString, computeDisplayOffset } from "./utils";
-import { moveAllSelected } from "../events/selections";
-import { getLayoutOptions } from "../constants/globals";
+import { moveAllElements } from "../elements/moveElement";
+import { getLayoutOptions, selectedElements } from "../constants/globals";
 
 export const setSelectValueInElement = (element, select) => {
   const s = select.find(":selected");
@@ -439,7 +439,7 @@ export const setParametersInForeignObject = element => {
       $(select).select2("close");
     }
     if (!multitranslate) {
-      moveAllSelected(el, position);
+      moveAllElements(selectedElements, el, position);
     }
   });
 

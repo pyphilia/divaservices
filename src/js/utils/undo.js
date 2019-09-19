@@ -1,13 +1,22 @@
-import { restoreElements, addElementByName } from "../elements/addElement";
+import {
+  restoreElements,
+  addElementByName,
+  addLinkBySourceTarget
+} from "../elements/addElement";
 import {
   deleteElementsByCellView,
-  deleteElementById
+  deleteElementByBoxId,
+  deleteLink
 } from "../elements/deleteElement";
 import { paste, undoPaste } from "../events/controls";
+import { moveElementsByBoxId } from "../elements/moveElement";
 
-export const ACTION_ADD = "add";
 export const ACTION_PASTE = "paste";
-export const ACTION_DELETE = "delete";
+export const ACTION_ADD_ELEMENT = "addElement";
+export const ACTION_DELETE_ELEMENT = "deleteElement";
+export const ACTION_ADD_LINK = "addLink";
+export const ACTION_DELETE_LINK = "deleteLink";
+export const ACTION_MOVE_ELEMENT = "moveElement";
 
 const history = [];
 const future = [];
@@ -16,45 +25,83 @@ export let undoAction = false;
 
 // this function is fired only through user action,
 // it will erase stored undone actions
-export const addAction = (action, parameters) => {
-  const returnValues = ACTIONS[action].redo(parameters);
-  history.push({ action, parameters: { ...returnValues, ...parameters } });
+export const addAction = (action, parameters, execute = true) => {
+  const returnValues = execute ? ACTIONS[action].redo(parameters) : {};
+  history.push({ action, parameters: { ...parameters, ...returnValues } });
   future.length = 0;
+  console.log([...history]);
 };
 
 const ACTIONS = {
-  [ACTION_ADD]: {
-    undo: ({ id }) => {
-      deleteElementById(id);
+  [ACTION_ADD_ELEMENT]: {
+    undo: ({ boxId }) => {
+      return deleteElementByBoxId(boxId);
     },
-    redo: ({ name }) => {
-      return addElementByName(name);
+    redo: ({ name, boxId, position }) => {
+      // retrieve previously pasted boxId, to use it again
+      // and not lose further related history
+      return addElementByName(name, { boxId, position }); //id
     }
   },
   [ACTION_PASTE]: {
     undo: ({ addedElements }) => {
       undoPaste(addedElements);
     },
-    redo: ({ elements }) => {
-      return paste(elements);
+    redo: ({ elements, boxIds }) => {
+      return paste(elements, boxIds);
     }
   },
-  [ACTION_DELETE]: {
+  [ACTION_DELETE_ELEMENT]: {
     undo: ({ restoredElements }) => {
-      return restoreElements(restoredElements);
+      restoreElements(restoredElements);
+      console.log("TCL: restoredElements", restoredElements);
+      return { elements: restoredElements };
     },
     redo: ({ elements }) => {
+      console.log("TCL: elements", elements);
       return deleteElementsByCellView(elements);
     }
+  },
+  [ACTION_MOVE_ELEMENT]: {
+    undo: ({ elementBoxIds, currentPositions }) => {
+      moveElementsByBoxId(elementBoxIds, currentPositions);
+    },
+    redo: ({ elementBoxIds, newPositions }) => {
+      moveElementsByBoxId(elementBoxIds, newPositions);
+    }
+  },
+  [ACTION_ADD_LINK]: {
+    undo: ({ link }) => {
+      deleteLink(link);
+    },
+    redo: link => {
+      return addLinkBySourceTarget(link);
+    }
+  },
+  [ACTION_DELETE_LINK]: {
+    undo: link => {
+      return addLinkBySourceTarget(link);
+    },
+    redo: ({ link }) => {
+      deleteLink(link);
+    }
   }
+  // []: {
+  //   undo: () => {
+
+  //   },
+  //   redo: () => {
+
+  //   }
+  // },
 };
 
 export const undo = () => {
   if (history.length) {
     undoAction = true;
-    const lastAction = history.pop();
-    ACTIONS[lastAction.action].undo(lastAction.parameters);
-    future.push(lastAction);
+    const { action, parameters } = history.pop();
+    const returnValues = ACTIONS[action].undo(parameters);
+    future.push({ action, parameters: { ...parameters, ...returnValues } });
   }
 };
 
@@ -62,6 +109,7 @@ export const redo = () => {
   if (future.length) {
     const { action, parameters } = future.pop();
     const returnValues = ACTIONS[action].redo(parameters);
+
     history.push({ action, parameters: { ...parameters, ...returnValues } });
   }
 };

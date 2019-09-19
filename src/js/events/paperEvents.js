@@ -5,11 +5,16 @@ import {
   INTERFACE_ROOT,
   PORT_SELECTOR
 } from "../constants/selectors";
-import { paper } from "../layout/interface";
+import { paper, graph } from "../layout/interface";
 import { hideContextMenus } from "./contextMenu";
-import { deleteElementsById } from "../elements/deleteElement";
 import { unHighlightAllSelected } from "./selections";
 import { selectedElements, clearSelection } from "../constants/globals";
+import {
+  addAction,
+  ACTION_DELETE_ELEMENT,
+  ACTION_ADD_LINK,
+  ACTION_DELETE_LINK
+} from "../utils/undo";
 
 export const resetZoom = () => {
   const bcr = paper.svg.getBoundingClientRect();
@@ -62,7 +67,7 @@ export const initPaperEvents = () => {
   paper.on("element:pointerup", () => {
     const trash = document.querySelector(TRASH_SELECTOR);
     if (trash.parentElement.querySelector(":hover") === trash) {
-      deleteElementsById(selectedElements.map(el => el.model.id));
+      addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
       clearSelection();
     }
   });
@@ -115,7 +120,14 @@ export const initPaperEvents = () => {
     const tools = new joint.dia.ToolsView({
       tools: [
         new joint.linkTools.TargetArrowhead(),
-        new joint.linkTools.Remove({ distance: -30 })
+        new joint.linkTools.Remove({
+          distance: -30,
+          action: function() {
+            this.model.remove({ ui: true, tool: this.cid });
+            console.log(linkView);
+            addAction(ACTION_DELETE_LINK, { linkView: this });
+          }
+        })
       ]
     });
     linkView.addTools(tools);
@@ -123,6 +135,25 @@ export const initPaperEvents = () => {
 
   paper.on("link:mouseleave", linkView => {
     linkView.removeTools();
+  });
+
+  paper.on("link:connect", linkView => {
+    // console.log(linkView.targetMagnet.nextSibling.textContent);
+    const sourceCell = graph.getCell(linkView.model.source().id);
+    const sourceBoxId = sourceCell.attributes.boxId;
+    const sPortId = linkView.model.source().port;
+    const sPortName = sourceCell.getPort(sPortId).name;
+
+    const targetCell = graph.getCell(linkView.model.target().id);
+    const targetBoxId = targetCell.attributes.boxId;
+    const tPortId = linkView.model.target().port;
+    const tPortName = targetCell.getPort(tPortId).name;
+
+    addAction(
+      ACTION_ADD_LINK,
+      { link: linkView.model, sourceBoxId, targetBoxId, sPortName, tPortName },
+      false
+    );
   });
 
   paper.on("link:connect link:disconnect", (linkView, evt, elementView) => {
@@ -133,5 +164,9 @@ export const initPaperEvents = () => {
         highlighter: THEME.magnetAvailabilityHighlighter
       });
     });
+  });
+
+  paper.on("cell:delete", () => {
+    console.log("wruisdvjkn");
   });
 };

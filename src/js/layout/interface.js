@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import "select2";
 import * as $ from "jquery";
 import * as joint from "jointjs";
@@ -18,6 +17,7 @@ export let graph;
 export let paper;
 
 // matching algorithm for ports to be linked and highlighted
+/* eslint-disable-next-line no-unused-vars */
 const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
   if (!mT) {
     return false;
@@ -53,10 +53,6 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
   }
 
   return true;
-};
-
-const transformWorkflowToGraph = workflow => {
-  console.log("TCL: transformWorkflowToGraph");
 };
 
 const buildGraph = async workflow => {
