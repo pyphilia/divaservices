@@ -1,4 +1,3 @@
-import * as $ from "jquery";
 import * as joint from "jointjs";
 import { graph, paper } from "./interface";
 import {
@@ -8,7 +7,7 @@ import {
 import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../constants/constants";
 
 const SCALE_CONTENT_PADDING = 10;
-const navigator = $(MINIMAP_NAVIGATOR_SELECTOR);
+const navigator = document.querySelector(MINIMAP_NAVIGATOR_SELECTOR);
 
 let mapScale = 0.5;
 let minimapPaper;
@@ -41,10 +40,10 @@ export const updateMinimap = () => {
 
   const newLeft = (-fitContentPaddingX + x) * mapScale;
   const newTop = (-fitContentPaddingY + y) * mapScale;
-  navigator.css("top", newTop);
-  navigator.css("left", newLeft);
-  navigator.width(width * mapScale);
-  navigator.height(height * mapScale);
+  navigator.style.top = `${newTop}px`;
+  navigator.style.left = `${newLeft}px`;
+  navigator.style.width = `${width * mapScale}px`;
+  navigator.style.height = `${height * mapScale}px`;
 };
 
 export const initMinimap = () => {
@@ -70,9 +69,10 @@ let defaultPositionx = 0;
 let defaultPositiony = 0;
 
 const initMinimapEvents = () => {
-  navigator.mousedown(e => {
+  navigator.addEventListener("mousedown", e => {
     const { clientY, clientX } = e;
-    const { top, left } = navigator.position();
+    const top = parseInt(navigator.style.top);
+    const left = parseInt(navigator.style.left);
     mapDragFlag = true;
     defaultPositionx = clientX - left;
     defaultPositiony = clientY - top;
@@ -89,12 +89,14 @@ const initMinimapEvents = () => {
 
       const xScale = newX * mapScale;
       const yScale = newY * mapScale;
-      navigator.css("top", yScale);
-      navigator.css("left", xScale);
+      navigator.style.top = `${yScale}px`;
+      navigator.style.left = `${xScale}px`;
+
+      const paperScale = paper.scale().sx;
 
       paper.translate(
-        -fitContentPaddingX - newX * paper.scale().sx,
-        -fitContentPaddingY - newY * paper.scale().sy
+        -fitContentPaddingX - newX * paperScale,
+        -fitContentPaddingY - newY * paperScale
       );
     }
   });

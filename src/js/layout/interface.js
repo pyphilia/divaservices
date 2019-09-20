@@ -1,7 +1,6 @@
 /**
  * Initialize the main interface area
  */
-import * as $ from "jquery";
 import * as joint from "jointjs";
 import {
   INTERFACE_ROOT,
@@ -61,7 +60,7 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
 const buildGraph = async workflow => {
   graph = new joint.dia.Graph();
   paper = new joint.dia.Paper({
-    el: $(INTERFACE_ROOT),
+    el: document.querySelector(INTERFACE_ROOT),
     model: graph,
     width: "100%",
     height: 800,
@@ -93,7 +92,7 @@ const buildGraph = async workflow => {
     // });
   }
 
-  console.log($(INTERFACE_ROOT));
+  console.log(document.querySelector(INTERFACE_ROOT));
 };
 
 export { buildGraph };
