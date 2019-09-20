@@ -14,6 +14,7 @@ import { initPaperEvents } from "../events/paperEvents";
 import { initContextMenu } from "../events/contextMenu";
 import { initThemeOptions } from "./layoutSettings";
 import { initKeyboardEvents } from "../events/keyboard";
+import { initMinimap } from "./minimap";
 
 export let graph;
 export let paper;
@@ -83,6 +84,7 @@ const buildGraph = async workflow => {
   initKeyboardEvents();
   initSelection();
   initThemeOptions();
+  initMinimap();
 
   if (workflow) {
     // const webservices = transformWorkflowToGraph(workflow);

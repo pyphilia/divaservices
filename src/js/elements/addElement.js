@@ -1,3 +1,10 @@
+/**
+ * Add an element
+ * note: jointjs is its own id to track the element
+ * for undo/redo purpose, we need to keep track of added-deleted item with a boxId
+ * (in jointjs a deleted-recreated element is not the same)
+ */
+
 import "select2";
 import * as joint from "jointjs";
 import { paper, graph } from "../layout/interface";

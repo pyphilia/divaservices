@@ -36,3 +36,6 @@ export const OPTION_TOOLTIPS = "option-tooltips";
 
 export const CONTEXT_MENU_ELEMENT = "#contextmenu-element";
 export const CONTEXT_MENU_PAPER = "#contextmenu-paper";
+
+export const MINIMAP_NAVIGATOR_SELECTOR = "#minimap-navigator";
+export const MINIMAP_PAPER = "minimap-paper";

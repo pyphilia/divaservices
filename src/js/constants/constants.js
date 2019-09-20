@@ -34,6 +34,9 @@ export const BOX_HIGHLIGHTER = {
   }
 };
 
+export const MINIMAP_WIDTH = 150;
+export const MINIMAP_HEIGHT = 150;
+
 export const MIN_SCALE = 0.4;
 export const MAX_SCALE = 1;
 

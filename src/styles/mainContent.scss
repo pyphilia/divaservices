@@ -86,3 +86,21 @@
     font-weight: bold;
   }
 }
+
+#minimap-container {
+  position: absolute;
+  bottom: 50px;
+  left: 50px;
+  z-index: 20;
+  box-shadow: 0 0 5px 2px grey;
+  overflow: hidden;
+}
+
+#minimap-navigator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 3px solid red;
+  cursor: move;
+  box-sizing: border-box;
+}

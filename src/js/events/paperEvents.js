@@ -15,6 +15,7 @@ import {
   ACTION_ADD_LINK,
   ACTION_DELETE_LINK
 } from "../constants/actions";
+import { updateMinimap } from "../layout/minimap";
 
 export const resetZoom = () => {
   const bcr = paper.svg.getBoundingClientRect();
@@ -56,6 +57,7 @@ const changeZoom = (delta, x, y, reset) => {
 
     paper.matrix(ctm);
   }
+  updateMinimap();
 };
 /**
  * Initialize paper events, such as zoom, pan and
@@ -113,6 +115,7 @@ export const initPaperEvents = () => {
         const newX = event.offsetX / currentScale.sx - dragStartPosition.x;
         const newY = event.offsetY / currentScale.sy - dragStartPosition.y;
         paper.translate(newX * currentScale.sx, newY * currentScale.sy);
+        updateMinimap();
       }
     });
 

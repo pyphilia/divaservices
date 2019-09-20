@@ -25,6 +25,7 @@ import {
   ACTION_DELETE_LINK,
   ACTION_PASTE
 } from "../constants/actions";
+import { updateMinimap } from "../layout/minimap";
 
 const history = [];
 const future = [];
@@ -40,6 +41,7 @@ export const addAction = (action, parameters, execute = true) => {
   history.push({ action, parameters: { ...parameters, ...returnValues } });
   future.length = 0;
   console.log([...history]);
+  updateMinimap();
 };
 
 const ACTIONS = {
@@ -113,6 +115,7 @@ export const undo = () => {
     const returnValues = ACTIONS[action].undo(parameters);
     future.push({ action, parameters: { ...parameters, ...returnValues } });
   }
+  updateMinimap();
 };
 
 export const redo = () => {
@@ -122,4 +125,5 @@ export const redo = () => {
 
     history.push({ action, parameters: { ...parameters, ...returnValues } });
   }
+  updateMinimap();
 };

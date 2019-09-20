@@ -7,10 +7,10 @@
     <title>InnoSuisse Workflow Interface</title>
 </head>
 <body>
-
+    
     <!-- tooltip -->
     <div id="tooltip"></div>
-
+    
     <!-- Modal for settings -->
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -33,13 +33,13 @@
             </div>
         </div>
     </div>
-
+    
     <div class="contextmenu" id="contextmenu-element">
         <span class="copy">Copy</span>
         <span class="duplicate">Duplicate</span>
         <span class="delete">Delete</span>
     </div>
-
+    
     <div class="contextmenu" id="contextmenu-paper">
         <span class="paste">Paste</span>
         <span class="delete">Clear</span>
@@ -59,6 +59,12 @@
                 
             </div>
             <div id="main" class="col">
+                
+                <!-- minimap -->
+                <div id="minimap-container">
+                    <div id="minimap-paper"></div>
+                    <div id="minimap-navigator"></div>
+                </div>
                 
                 <!-- trash    -->
                 <div id="trash"><i class="fas fa-trash"></i></div>
