@@ -27,26 +27,6 @@ export const initWebservices = async () => {
   webservices = webservicesDecorator(data);
 };
 
-// array of selected elements
-export let selectedElements = [];
-
-// array of copied elements
-export let copiedElements = [];
-
-export const clearSelection = () => {
-  selectedElements = [];
-};
-
-export const addToSelection = el => {
-  if (selectedElements.indexOf(el) == -1) {
-    selectedElements.push(el);
-  }
-};
-
-export const setCopiedElements = () => {
-  copiedElements = selectedElements;
-};
-
 // layout options
 const DEFAULT_OPTIONS = {
   showParameters: true,

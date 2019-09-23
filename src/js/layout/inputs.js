@@ -27,7 +27,8 @@ import {
 } from "../constants/selectors";
 import { objectToString, computeDisplayOffset } from "./utils";
 import { moveAllElements } from "../elements/moveElement";
-import { getLayoutOptions, selectedElements } from "../constants/globals";
+import { getLayoutOptions } from "../constants/globals";
+import { selectedElements } from "../events/selections";
 
 export const setSelectValueInElement = (element, select) => {
   const s = select.find(":selected");
@@ -152,6 +153,7 @@ export const createSelect = (
     setSelectValueInElement(element, selectEl);
   });
 
+  // fix dropdown position
   selectEl.on("select2:open", function() {
     const s = $(this);
     const width = s.next().width();

@@ -3,9 +3,9 @@ import {
   CONTEXT_MENU_ELEMENT,
   CONTEXT_MENU_PAPER
 } from "../constants/selectors";
-import { highlightSelection } from "./selections";
+import { addCellViewToSelection } from "./selections";
 import { copy } from "./controls";
-import { selectedElements, copiedElements } from "../constants/globals";
+import { selectedElements, copiedElements } from "../events/selections";
 import { addElementsByCellView } from "../elements/addElement";
 import { deleteElementsById } from "../elements/deleteElement";
 import { addAction } from "../utils/undo";
@@ -63,7 +63,7 @@ export const initContextMenu = () => {
     evt.preventDefault();
     hideContextMenu(contextMenus.paper);
 
-    highlightSelection(cellView);
+    addCellViewToSelection([cellView]);
 
     const screenPos = paper.localToClientPoint(x, y);
     const origin = {

@@ -6,8 +6,9 @@ import {
 } from "../constants/messages";
 import { fireAlert } from "../utils/alerts";
 import { addElementsByCellView } from "../elements/addElement";
-import { setCopiedElements } from "../constants/globals";
+import { setCopiedElements } from "../events/selections";
 import { deleteElementsByCellView } from "../elements/deleteElement";
+import { generateUniqueId } from "../layout/utils";
 
 export const copy = elements => {
   if (elements.length) {
@@ -20,6 +21,13 @@ export const copy = elements => {
 
 export const paste = (cellViews, ids) => {
   if (cellViews.length) {
+    // if not specified, generate new ids for the copied elements
+    if (!ids) {
+      ids = [];
+      for (let i = 0; i < cellViews.length; i++) {
+        ids[i] = generateUniqueId();
+      }
+    }
     const { addedElements, boxIds } = addElementsByCellView(cellViews, ids);
     fireAlert("success", MESSAGE_PASTE_SUCCESS);
     return { addedElements, boxIds };

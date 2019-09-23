@@ -4,7 +4,7 @@
 
 import { saveWorkflow } from "../workflows/saveWorkflow";
 import { graph, paper } from "../layout/interface";
-import { resetZoom } from "../events/paperEvents";
+import { resetZoom } from "../events/zoom";
 import { readWorkflow } from "../workflows/readWorkflow";
 
 // const newWorkflow = (e) => {

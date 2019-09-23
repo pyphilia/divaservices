@@ -3,11 +3,12 @@ import {
   selectedElements,
   clearSelection,
   copiedElements
-} from "../constants/globals";
+} from "../events/selections";
 import { copy } from "./controls";
 import { ACTION_PASTE, ACTION_DELETE_ELEMENT } from "../constants/actions";
 
 export let ctrlDown;
+export let spaceDown;
 
 /**
  * Initialize keyboard events
@@ -84,6 +85,10 @@ export const initKeyboardEvents = () => {
             }
             break;
           }
+          case " ": {
+            spaceDown = true;
+            break;
+          }
           default:
         }
       }
@@ -101,5 +106,8 @@ export const initKeyboardEvents = () => {
   document.addEventListener("keyup", event => {
     const evt = event || window.event; // IE support
     ctrlDown = evt.ctrlKey || evt.metaKey; // Mac support
+    if (event.key == " ") {
+      spaceDown = false;
+    }
   });
 };

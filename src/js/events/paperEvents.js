@@ -1,5 +1,5 @@
 import * as joint from "jointjs";
-import { THEME, MIN_SCALE, MAX_SCALE } from "../constants/constants";
+import { THEME } from "../constants/constants";
 import {
   TRASH_SELECTOR,
   INTERFACE_ROOT,
@@ -7,8 +7,8 @@ import {
 } from "../constants/selectors";
 import { paper, graph } from "../layout/interface";
 import { hideContextMenus } from "./contextMenu";
-import { unHighlightAllSelected } from "./selections";
-import { selectedElements, clearSelection } from "../constants/globals";
+import { unSelectAll } from "./selections";
+import { selectedElements, clearSelection } from "../events/selections";
 import { addAction } from "../utils/undo";
 import {
   ACTION_DELETE_ELEMENT,
@@ -16,49 +16,14 @@ import {
   ACTION_DELETE_LINK
 } from "../constants/actions";
 import { updateMinimap } from "../layout/minimap";
+import { spaceDown, ctrlDown } from "./keyboard";
+import {
+  initAreaSelection,
+  endAreaSelection,
+  computeAreaSelection
+} from "./areaSelection";
+import { changeZoom } from "./zoom";
 
-export const resetZoom = () => {
-  const bcr = paper.svg.getBoundingClientRect();
-  const localRect1 = paper.clientToLocalRect({
-    x: bcr.left,
-    y: bcr.top,
-    width: bcr.width,
-    height: bcr.height
-  });
-  const localCenter = localRect1.center();
-  changeZoom(1, localCenter.x, localCenter.y, true);
-};
-
-// zoom algorithm: https://github.com/clientIO/joint/issues/1027
-const changeZoom = (delta, x, y, reset) => {
-  const nextScale = !reset
-    ? paper.scale().sx + delta / 75 // the current paper scale changed by delta
-    : 1;
-
-  if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
-    const currentScale = paper.scale().sx;
-
-    const beta = currentScale / nextScale;
-
-    const ax = x - x * beta;
-    const ay = y - y * beta;
-
-    const translate = paper.translate();
-
-    const nextTx = translate.tx - ax * nextScale;
-    const nextTy = translate.ty - ay * nextScale;
-
-    paper.translate(nextTx, nextTy);
-
-    const ctm = paper.matrix();
-
-    ctm.a = nextScale;
-    ctm.d = nextScale;
-
-    paper.matrix(ctm);
-  }
-  updateMinimap();
-};
 /**
  * Initialize paper events, such as zoom, pan and
  * links management
@@ -93,18 +58,30 @@ export const initPaperEvents = () => {
   paper.on("blank:pointerdown", (event, x, y) => {
     hideContextMenus();
     dragStartPosition = { x: x, y: y };
-    move = true;
-    unHighlightAllSelected();
 
+    move = spaceDown;
+
+    if (!ctrlDown) {
+      unSelectAll();
+    }
     // unfocus inputs when clicks
     const focusedInput = document.querySelector("input:focus");
     if (focusedInput) {
       focusedInput.blur();
     }
+
+    // init area selection
+    if (!spaceDown) {
+      initAreaSelection();
+    }
   });
 
   paper.on("cell:pointerup blank:pointerup", () => {
     move = false;
+
+    if (!spaceDown) {
+      endAreaSelection();
+    }
   });
 
   document
@@ -116,6 +93,11 @@ export const initPaperEvents = () => {
         const newY = event.offsetY / currentScale.sy - dragStartPosition.y;
         paper.translate(newX * currentScale.sx, newY * currentScale.sy);
         updateMinimap();
+      }
+
+      // area selection
+      if (!spaceDown) {
+        computeAreaSelection();
       }
     });
 

@@ -104,3 +104,13 @@
   cursor: move;
   box-sizing: border-box;
 }
+
+#areaSelectionHighlight {
+  z-index: 30;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.1);
+  border: dotted 1px black;
+  width: 0;
+  height: 0;
+  display: hidden;
+}

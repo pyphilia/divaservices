@@ -6,6 +6,7 @@ export const RIGHT_SIDEBAR = "#right-sidebar";
 export const PARAMETER_INPUTS = "inputs";
 export const PARAMETER_SELECTS = "selects";
 
+export const AREA_SELECTION_ELEMENT = "areaSelectionHighlight";
 export const TRASH_SELECTOR = "#trash";
 
 export const PORT_SELECTOR = "portBody";
