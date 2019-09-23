@@ -7,6 +7,7 @@ import { categoryName } from "../constants/constants";
 import { webservices } from "../constants/globals";
 import { addAction } from "../utils/undo";
 import { ACTION_ADD_ELEMENT } from "../constants/actions";
+import { ALGO_ITEM_CLASS } from "../constants/selectors";
 
 export const buildLeftSidebar = async () => {
   // get categories => algorithms
@@ -34,7 +35,7 @@ export const buildLeftSidebar = async () => {
     const algoItems = [];
     for (const { name } of servicesPerCategory[service]) {
       const algoItem = $(
-        `<div class="algo-item ${service}"><span class="icon"></span>${name}</div>`
+        `<div class="${ALGO_ITEM_CLASS} ${service}"><span class="icon"></span>${name}</div>`
       );
       algoItem.on("click", function() {
         addAction(ACTION_ADD_ELEMENT, { name });

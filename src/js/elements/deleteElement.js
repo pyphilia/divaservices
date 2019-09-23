@@ -19,24 +19,21 @@ export const deleteElementByBoxId = boxId => {
 
 export const deleteElementsById = ids => {
   const restoredElements = [];
-  if (ids.length) {
-    for (const id of ids) {
-      const copy = deleteElementById(id, false);
-      restoredElements.push(copy);
-    }
-    return { restoredElements };
+  for (const id of ids) {
+    const copy = deleteElementById(id, false);
+    restoredElements.push(copy);
   }
+  return { restoredElements };
 };
 
 export const deleteElementsByBoxId = boxIds => {
   const restoredElements = [];
-  if (boxIds.length) {
-    for (const boxId of boxIds) {
-      const copy = deleteElementByBoxId(boxId, false);
-      restoredElements.push(copy);
-    }
-    return { restoredElements };
+  for (const boxId of boxIds) {
+    const copy = deleteElementByBoxId(boxId, false);
+    restoredElements.push(copy);
   }
+
+  return { restoredElements };
 };
 
 export const deleteElementByCellView = cellView => {

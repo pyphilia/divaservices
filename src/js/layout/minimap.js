@@ -2,7 +2,7 @@ import * as joint from "jointjs";
 import { graph, paper } from "./interface";
 import {
   MINIMAP_NAVIGATOR_SELECTOR,
-  MINIMAP_PAPER
+  MINIMAP_PAPER_ID
 } from "../constants/selectors";
 import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../constants/constants";
 
@@ -48,7 +48,7 @@ export const updateMinimap = () => {
 
 export const initMinimap = () => {
   minimapPaper = new joint.dia.Paper({
-    el: document.getElementById(MINIMAP_PAPER),
+    el: document.getElementById(MINIMAP_PAPER_ID),
     model: graph,
     width: MINIMAP_WIDTH,
     height: MINIMAP_HEIGHT,

@@ -1,4 +1,7 @@
 export const INTERFACE_ROOT = "#paper-html-elements";
+export const LEFT_SIDEBAR = "#left-sidebar";
+export const ALGO_ITEM_CLASS = "algo-item";
+export const RIGHT_SIDEBAR = "#right-sidebar";
 
 export const PARAMETER_INPUTS = "inputs";
 export const PARAMETER_SELECTS = "selects";
@@ -38,4 +41,4 @@ export const CONTEXT_MENU_ELEMENT = "#contextmenu-element";
 export const CONTEXT_MENU_PAPER = "#contextmenu-paper";
 
 export const MINIMAP_NAVIGATOR_SELECTOR = "#minimap-navigator";
-export const MINIMAP_PAPER = "minimap-paper";
+export const MINIMAP_PAPER_ID = "minimap-paper";

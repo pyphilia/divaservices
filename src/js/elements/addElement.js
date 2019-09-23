@@ -4,8 +4,6 @@
  * for undo/redo purpose, we need to keep track of added-deleted item with a boxId
  * (in jointjs a deleted-recreated element is not the same)
  */
-
-import "select2";
 import * as joint from "jointjs";
 import { paper, graph } from "../layout/interface";
 import { webservices, getLayoutOptions } from "../constants/globals";
@@ -13,7 +11,8 @@ import {
   THEME,
   BOX_TITLE_HTML_TAG,
   ICON_COL,
-  TITLE_COL
+  TITLE_COL,
+  BOX_MARGIN
 } from "../constants/constants";
 import {
   isParamInput,
@@ -104,12 +103,18 @@ const createBox = (e, { position, size, boxId }) => {
   return element;
 };
 
-const transformWebserviceForGraph = (webservice, category) => {
+const transformWebserviceForGraph = webservice => {
   if (!webservice.name) {
     alert("problem with ", webservice);
     return {};
   }
-  const { name: label, description, outputs, inputs } = webservice;
+  const {
+    name: label,
+    description,
+    outputs,
+    inputs,
+    type: category
+  } = webservice;
 
   // handle ports
   const ports = { items: [] };
@@ -165,41 +170,43 @@ const addElementFromTransformedJSON = (e, parameters) => {
 // it tries to fill the canvas view first horizontally
 // then vertically
 const findEmptyPosition = size => {
-  const bcr = paper.svg.getBoundingClientRect();
+  const { left, top, width, height } = paper.svg.getBoundingClientRect();
   const canvasDimensions = paper.clientToLocalRect({
-    x: bcr.left,
-    y: bcr.top,
-    width: bcr.width,
-    height: bcr.height
+    x: left,
+    y: top,
+    width,
+    height
   });
 
-  const position = { x: canvasDimensions.x + 100, y: canvasDimensions.y + 100 };
+  const { x: canvasX, y: canvasY, width: canvasW } = canvasDimensions;
+  const position = { x: canvasX + BOX_MARGIN, y: canvasY + BOX_MARGIN };
+  const { width: sizeWidth, height: sizeHeight } = size;
 
   while (
     graph.findModelsInArea({
       ...position,
-      width: size.width + 100,
-      height: size.height + 100
+      width: sizeWidth + BOX_MARGIN,
+      height: sizeHeight + BOX_MARGIN
     }).length
   ) {
-    position.x += size.width + 100;
-    if (canvasDimensions.x + canvasDimensions.width < position.x + size.width) {
-      position.x = canvasDimensions.x + 100;
-      position.y += size.height + 100;
+    position.x += sizeWidth + BOX_MARGIN;
+    if (canvasX + canvasW < position.x + sizeWidth) {
+      position.x = canvasX + BOX_MARGIN;
+      position.y += sizeHeight + BOX_MARGIN;
     }
   }
 
   return position;
 };
 
+/**
+ * From a JSON description, add the webservice to the graph
+ */
 export const addElementToGraphFromServiceDescription = (
   webservice,
   defaultParams = {}
 ) => {
-  const transformedWebservice = transformWebserviceForGraph(
-    webservice,
-    webservice.type
-  );
+  const transformedWebservice = transformWebserviceForGraph(webservice);
 
   const { showParameters } = getLayoutOptions();
 
@@ -231,9 +238,8 @@ export const addElementByName = (name, defaultParams = {}) => {
   const algo = webservices.filter(service => service.name == name);
   if (algo.length) {
     const e = addElementToGraphFromServiceDescription(algo[0], defaultParams);
-    const { boxId, position } = e.attributes;
 
-    return { boxId, position };
+    return e.attributes; //{ boxId, position };
   } else {
     console.error(`${name} doesnt exist`);
   }
