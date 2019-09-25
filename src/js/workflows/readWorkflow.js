@@ -15,11 +15,11 @@ export const readWorkflow = async () => {
   const filepath = path.join(HOST, "files/tmp.xml");
 
   let xml = await fetch(filepath).then(response => response.text());
+  const elements = [];
 
   xml2js.parseString(xml, async (err, json) => {
     let totalWidth = 100;
     const idMap = {}; // we construct new boxes, so the id are different
-    const elements = [];
     const links = [];
     for (const step of json.WorkflowDefinition.Steps[0].Step) {
       const {
@@ -37,18 +37,16 @@ export const readWorkflow = async () => {
         alert("step ", name, " not found");
       }
 
-      const { type: category } = webserviceObj;
-
-      //@TODO check params match with definition
+      //@TODO check defaultParams match with definition
       const { Parameter, Data } = inputs;
-      const params = {};
+      const defaultParams = {};
       if (Parameter) {
         for (const param of Parameter) {
           const {
             Name: [name],
             Value: [value]
           } = param;
-          params[name] = value;
+          defaultParams[name] = value;
         }
       }
 
@@ -80,15 +78,12 @@ export const readWorkflow = async () => {
       const position = { x: totalWidth, y: 100 };
 
       // add element
-      const element = addElementToGraphFromServiceDescription(
-        webserviceObj,
-        category,
-        {
-          information,
-          params,
-          position
-        }
-      );
+      const element = addElementToGraphFromServiceDescription(webserviceObj, {
+        information,
+        defaultParams,
+        boxId: id,
+        position
+      });
 
       // update position to avoid overlap
       totalWidth += element.attributes.size.width + 250;
@@ -123,4 +118,7 @@ export const readWorkflow = async () => {
       addLinkFromJSON(linkObj);
     }
   });
+
+  const boxIds = elements.map(element => element.attributes.boxId);
+  return { boxIds };
 };

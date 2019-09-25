@@ -5,7 +5,7 @@ import {
   INTERFACE_ROOT,
   PORT_SELECTOR
 } from "../constants/selectors";
-import { paper, graph } from "../layout/interface";
+import { paper } from "../layout/interface";
 import { hideContextMenus } from "./contextMenu";
 import { unSelectAll } from "./selections";
 import { selectedElements, clearSelection } from "../events/selections";
@@ -111,7 +111,6 @@ export const initPaperEvents = () => {
           distance: -30,
           action: function() {
             this.model.remove({ ui: true, tool: this.cid });
-            console.log(linkView);
             addAction(ACTION_DELETE_LINK, { linkView: this });
           }
         })
@@ -125,22 +124,7 @@ export const initPaperEvents = () => {
   });
 
   paper.on("link:connect", linkView => {
-    // console.log(linkView.targetMagnet.nextSibling.textContent);
-    const sourceCell = graph.getCell(linkView.model.source().id);
-    const sourceBoxId = sourceCell.attributes.boxId;
-    const sPortId = linkView.model.source().port;
-    const sPortName = sourceCell.getPort(sPortId).name;
-
-    const targetCell = graph.getCell(linkView.model.target().id);
-    const targetBoxId = targetCell.attributes.boxId;
-    const tPortId = linkView.model.target().port;
-    const tPortName = targetCell.getPort(tPortId).name;
-
-    addAction(
-      ACTION_ADD_LINK,
-      { link: linkView.model, sourceBoxId, targetBoxId, sPortName, tPortName },
-      false
-    );
+    addAction(ACTION_ADD_LINK, { linkView }, false);
   });
 
   paper.on("link:connect link:disconnect", (linkView, evt, elementView) => {

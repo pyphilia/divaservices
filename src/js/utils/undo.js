@@ -13,7 +13,8 @@ import {
 import {
   deleteElementsByCellView,
   deleteElementByBoxId,
-  deleteLink
+  deleteLink,
+  deleteElementsByBoxId
 } from "../elements/deleteElement";
 import { paste, undoPaste } from "../events/controls";
 import { moveElementsByBoxId } from "../elements/moveElement";
@@ -23,9 +24,11 @@ import {
   ACTION_ADD_LINK,
   ACTION_DELETE_ELEMENT,
   ACTION_DELETE_LINK,
-  ACTION_PASTE
+  ACTION_PASTE,
+  ACTION_OPEN_WORKFLOW
 } from "../constants/actions";
 import { updateMinimap } from "../layout/minimap";
+import { readWorkflow } from "../workflows/readWorkflow";
 
 const history = [];
 const future = [];
@@ -36,8 +39,8 @@ export let undoAction = false;
 // it will erase stored undone actions
 // execute parameter determine whether to execute the redo function
 // (particularly useful for actions saved from events)
-export const addAction = (action, parameters, execute = true) => {
-  const returnValues = execute ? ACTIONS[action].redo(parameters) : {};
+export const addAction = async (action, parameters, execute = true) => {
+  const returnValues = execute ? await ACTIONS[action].redo(parameters) : {};
   history.push({ action, parameters: { ...parameters, ...returnValues } });
   future.length = 0;
   console.log([...history]);
@@ -83,19 +86,27 @@ const ACTIONS = {
     }
   },
   [ACTION_ADD_LINK]: {
-    undo: ({ link }) => {
-      deleteLink(link);
+    undo: ({ linkView }) => {
+      deleteLink(linkView);
     },
-    redo: link => {
-      return addLinkBySourceTarget(link);
+    redo: ({ linkView }) => {
+      return addLinkBySourceTarget(linkView);
     }
   },
   [ACTION_DELETE_LINK]: {
-    undo: link => {
-      return addLinkBySourceTarget(link);
+    undo: ({ linkView }) => {
+      return addLinkBySourceTarget(linkView);
     },
-    redo: ({ link }) => {
-      deleteLink(link);
+    redo: ({ linkView }) => {
+      deleteLink(linkView);
+    }
+  },
+  [ACTION_OPEN_WORKFLOW]: {
+    undo: ({ boxIds }) => {
+      return deleteElementsByBoxId(boxIds);
+    },
+    redo: async () => {
+      return await readWorkflow();
     }
   }
   // []: {

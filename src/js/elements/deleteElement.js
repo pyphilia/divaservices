@@ -49,5 +49,7 @@ export const deleteElementsByCellView = cellViews => {
 };
 
 export const deleteLink = link => {
-  link.remove();
+  if (link) {
+    link.remove();
+  }
 };

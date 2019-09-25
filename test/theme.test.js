@@ -4,11 +4,8 @@ import jQuery from "jquery";
 const $ = jQuery;
 global.$ = global.jQuery = $;
 */
-
-import { addElement } from "../src/js/addElement";
-import * as theme from "../src/js/addElement";
-import { Inputs } from "../src/js/constants";
-import { IN_PORT_CLASS, OUT_PORT_CLASS } from "../src/js/selectors";
+import { addElementFromTransformedJSON } from "../src/js/elements/addElement";
+import { Inputs } from "../src/js/constants/constants";
 
 import { correctAlgorithms, ocropusBinarization } from "./algorithms";
 
@@ -17,17 +14,15 @@ const position = {
   y: 0
 };
 
-describe("addElement corner cases", () => {
-  beforeEach(() => {});
-
+describe("addElementFromTransformedJSON corner cases", () => {
   test.each([{}])("no box is created on incorrect element", e => {
-    expect(addElement(e, position)).toBeFalsy();
+    expect(addElementFromTransformedJSON(e, { position })).toBeFalsy();
   });
 
   test.each(correctAlgorithms)(
     "one box is created with correct elements",
     e => {
-      expect(addElement(e, position)).toBeTruthy();
+      expect(addElementFromTransformedJSON(e, { position })).toBeTruthy();
     }
   );
 });
@@ -41,67 +36,49 @@ describe("test default parameters", () => {
       skewsteps: "3"
     };
 
-    const el = addElement(ocropusBinarization, position, defaultParams);
+    const el = addElementFromTransformedJSON(
+      ocropusBinarization,
+      position,
+      defaultParams
+    );
     expect(el).toBeTruthy();
   });
 });
 
+// note: cannot use jest.spyOn on createInput and createSelect because it is not directly call by the tested method
 describe.each(correctAlgorithms)("test real algorithms layout", e => {
-  let createSelectSpy, createInputSpy;
-
-  beforeAll(() => {
-    createInputSpy = jest.spyOn(theme, "createInput");
-    createSelectSpy = jest.spyOn(theme, "createSelect");
-  });
-
-  afterEach(() => {
-    createInputSpy.mockClear();
-    createSelectSpy.mockClear();
-  });
-
-  test("element contains no parameters if default (input, select)", () => {
-    const nbInput = e.params.filter(param => param.type == Inputs.NUMBER.type)
-      .length;
-
-    const nbSelect = e.params.filter(param => param.type == Inputs.SELECT.type)
-      .length;
-
-    const el = addElement(e, position);
-
-    // params are tracked in element
-    expect(Object.keys(el.attributes.params).length).toEqual(0);
-    expect(createInputSpy).toHaveBeenCalledTimes(nbInput);
-    expect(createSelectSpy).toHaveBeenCalledTimes(nbSelect);
-  });
-
-  test("element has correct ports", () => {
-    const el = addElement(e, position);
-    const resPorts = el.getPorts();
-    expect(resPorts.length).toEqual(e.ports.items.length);
-    expect(resPorts.filter(port => port.group == IN_PORT_CLASS).length).toEqual(
-      e.ports.items.filter(port => port.group == IN_PORT_CLASS).length
-    );
-    expect(
-      resPorts.filter(port => port.group == OUT_PORT_CLASS).length
-    ).toEqual(
-      e.ports.items.filter(port => port.group == OUT_PORT_CLASS).length
-    );
-  });
-
-  test.todo("element contains correct number of parameters (input, select)");
-
-  // , () => {
-  //   const nbInput = e.params.filter(param => param.type == Inputs.NUMBER.type)
-  //     .length;
-
-  //   const nbSelect = e.params.filter(param => param.type == Inputs.SELECT.type)
-  //     .length;
-
-  //   const el = addElement(e, position);
-
-  //   // params are tracked in element
-  //   expect(Object.keys(el.attributes.params).length).toEqual(e.params.length);
-  //   expect(createInputSpy).toHaveBeenCalledTimes(nbInput);
-  //   expect(createSelectSpy).toHaveBeenCalledTimes(nbSelect);
+  // test("element has correct ports", () => {
+  //   const el = addElementFromTransformedJSON(e);
+  //   const resPorts = el.getPorts();
+  //   expect(resPorts.length).toEqual(e.ports.items.length);
+  //   expect(resPorts.filter(port => port.group == IN_PORT_CLASS).length).toEqual(
+  //     e.ports.items.filter(port => port.group == IN_PORT_CLASS).length
+  //   );
+  //   expect(
+  //     resPorts.filter(port => port.group == OUT_PORT_CLASS).length
+  //   ).toEqual(
+  //     e.ports.items.filter(port => port.group == OUT_PORT_CLASS).length
+  //   );
   // });
+
+  test(
+    e.label +
+      " - element contains correct number of parameters (input, select)",
+    () => {
+      const nbInput = e.params.filter(param => param.type == Inputs.NUMBER.type)
+        .length;
+
+      const nbSelect = e.params.filter(
+        param => param.type == Inputs.SELECT.type
+      ).length;
+
+      const el = addElementFromTransformedJSON(e);
+
+      // params are tracked in element
+      expect(el.attributes.originalParams.length).toEqual(e.params.length);
+      expect(Object.keys(el.attributes.defaultParams).length).toEqual(
+        e.params.length
+      );
+    }
+  );
 });

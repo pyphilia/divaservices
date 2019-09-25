@@ -33,15 +33,19 @@ import {
   OUT_PORT_CLASS
 } from "../constants/selectors";
 
-const createBox = (e, { position, size, boxId }) => {
+const createBox = (e, { position, size, boxId, defaultParams = {} }) => {
   const {
     category,
     label,
     ports: { items },
     description,
-    params
+    params = {}
   } = e;
   const { titleHeight } = computeTitleLength(e);
+
+  if (!size) {
+    size = { width: 100, height: 100 };
+  }
 
   const template = `<g class="scalable"><rect></rect></g>
       <foreignObject class="${FOREIGN_CLASS}" x="0" 
@@ -75,7 +79,7 @@ const createBox = (e, { position, size, boxId }) => {
     },
     description,
     originalParams: params,
-    defaultParams: {},
+    defaultParams,
     portMarkup: [{ tagName: "circle", selector: PORT_SELECTOR }],
 
     getGroupPorts: function(model, group) {
@@ -103,7 +107,7 @@ const createBox = (e, { position, size, boxId }) => {
   return element;
 };
 
-const transformWebserviceForGraph = webservice => {
+export const transformWebserviceForGraph = webservice => {
   if (!webservice.name) {
     alert("problem with ", webservice);
     return {};
@@ -111,8 +115,8 @@ const transformWebserviceForGraph = webservice => {
   const {
     name: label,
     description,
-    outputs,
-    inputs,
+    outputs = [],
+    inputs = [],
     type: category
   } = webservice;
 
@@ -149,7 +153,7 @@ const transformWebserviceForGraph = webservice => {
 
 // Create a custom element.
 // ------------------------
-const addElementFromTransformedJSON = (e, parameters) => {
+export const addElementFromTransformedJSON = (e, parameters = {}) => {
   const { label } = e;
 
   if (!label) {
@@ -160,7 +164,7 @@ const addElementFromTransformedJSON = (e, parameters) => {
 
   const element = createBox(e, { ...parameters, boxId });
 
-  setParametersInForeignObject(element, e, parameters.params);
+  setParametersInForeignObject(element);
 
   return element;
 };
@@ -204,7 +208,7 @@ const findEmptyPosition = size => {
  */
 export const addElementToGraphFromServiceDescription = (
   webservice,
-  defaultParams = {}
+  defaultParameters = {}
 ) => {
   const transformedWebservice = transformWebserviceForGraph(webservice);
 
@@ -215,17 +219,15 @@ export const addElementToGraphFromServiceDescription = (
     height: computeBoxHeight(transformedWebservice, showParameters)
   };
 
-  let { position, params, boxId } = defaultParams;
+  let { position } = defaultParameters;
   if (!position) {
     // avoid adding overlapping elements
-    position = findEmptyPosition(size);
+    defaultParameters.position = findEmptyPosition(size);
   }
 
   const element = addElementFromTransformedJSON(transformedWebservice, {
-    position,
     size,
-    params,
-    boxId
+    ...defaultParameters
   });
 
   return element;
@@ -295,15 +297,23 @@ export const restoreElements = elements => {
 export const addLinkFromJSON = link => {
   const linkEl = new joint.shapes.standard.Link(link);
   linkEl.addTo(graph);
-  return { link: linkEl };
+  return { linkView: linkEl };
 };
 
-export const addLinkBySourceTarget = ({
-  sourceBoxId,
-  targetBoxId,
-  sPortName,
-  tPortName
-}) => {
+export const addLinkBySourceTarget = linkView => {
+  const source = linkView.model ? linkView.model.source() : linkView.source();
+  const target = linkView.model ? linkView.model.target() : linkView.target();
+
+  const sourceCell = graph.getCell(source.id);
+  const sourceBoxId = sourceCell.attributes.boxId;
+  const sPortId = source.port;
+  const sPortName = sourceCell.getPort(sPortId).name;
+
+  const targetCell = graph.getCell(target.id);
+  const targetBoxId = targetCell.attributes.boxId;
+  const tPortId = target.port;
+  const tPortName = targetCell.getPort(tPortId).name;
+
   const s = getElementByBoxId(sourceBoxId);
   const sPort = s.getPorts().filter(p => p.name == sPortName)[0].id;
   const t = getElementByBoxId(targetBoxId);

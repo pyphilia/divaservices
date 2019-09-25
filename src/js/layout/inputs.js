@@ -76,7 +76,12 @@ export const createSelect = (
   defaultTooltip,
   defaultValue = null
 ) => {
-  const { name, defaultValue: defaultOption, values, description } = param;
+  const { name, defaultValue: defaultOption, values = [], description } = param;
+
+  // if there is no values-options, no need for a select element
+  if (!values.length) {
+    return;
+  }
 
   // wrapper
   const newSelect = $("<div/>", {
@@ -86,10 +91,13 @@ export const createSelect = (
 
   // select
   const wrapperSelect = $("<div/>", { class: PARAM_COL });
+  const dataDefault = values[defaultOption]
+    ? values[defaultOption].toString()
+    : "";
   const selectEl = $(`<${Inputs.SELECT.tag}/>`, {
     style: "width:100%;margin:0",
     attr: {
-      "data-default": values[defaultOption].toString()
+      "data-default": dataDefault
     },
     prop: {
       disabled: false // @TODO userdefined
@@ -191,7 +199,7 @@ export const createInput = (
 ) => {
   const {
     name,
-    values,
+    values = {},
     defaultValue: defaultOption,
     description,
     $: attributes
@@ -287,16 +295,19 @@ export const checkInputValue = input => {
   // because of js inconsistency with float computations
   // we transform it to a string, round it to the the least precision
   // and check if it is a integer, so whether it matches the step
-  const sepNumber = step.toString().split(".");
-  let precision = 0;
-  if (sepNumber.length == 1) {
-    precision = 0;
-  } else {
-    precision = sepNumber[1].length + 1;
+  let stepCondition = true;
+  if (step) {
+    const sepNumber = step.toString().split(".");
+    let precision = 0;
+    if (sepNumber.length == 1) {
+      precision = 0;
+    } else {
+      precision = sepNumber[1].length + 1;
+    }
+    stepCondition = Number.isInteger(
+      +parseFloat(currentVal / step).toFixed(precision)
+    );
   }
-  const stepCondition = step
-    ? Number.isInteger(+parseFloat(currentVal / step).toFixed(precision))
-    : true;
   const isValid = minCondition && maxCondition && stepCondition;
 
   input.toggleClass("is-invalid", !isValid);
@@ -355,7 +366,7 @@ export const setParametersInForeignObject = element => {
       });
 
     const defaultValue = defaultParams[paramName]
-      ? defaultParams[paramName].value
+      ? defaultParams[paramName].value || defaultParams[paramName]
       : null;
     // const defaultValue = defaultParams.params
     //   ? defaultParams.params[paramName].value

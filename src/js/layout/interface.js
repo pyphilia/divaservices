@@ -15,7 +15,7 @@ import { initThemeOptions } from "./layoutSettings";
 import { initKeyboardEvents } from "../events/keyboard";
 import { initMinimap } from "./minimap";
 
-export let graph;
+export const graph = new joint.dia.Graph();
 export let paper;
 
 // matching algorithm for ports to be linked and highlighted
@@ -58,7 +58,6 @@ const validateConnectionFunc = (vS, mS, vT, mT, end, lV) => {
 };
 
 const buildGraph = async workflow => {
-  graph = new joint.dia.Graph();
   paper = new joint.dia.Paper({
     el: document.querySelector(INTERFACE_ROOT),
     model: graph,
