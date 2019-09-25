@@ -33,17 +33,29 @@ import { readWorkflow } from "../workflows/readWorkflow";
 const history = [];
 const future = [];
 
+export const getHistory = () => {
+  return [...history];
+};
+
+export const getFuture = () => {
+  return [...future];
+};
+
+export const clearHistory = () => {
+  history.length = 0;
+};
+
 export let undoAction = false;
 
 // this function is fired only through user action,
 // it will erase stored undone actions
 // execute parameter determine whether to execute the redo function
 // (particularly useful for actions saved from events)
-export const addAction = async (action, parameters, execute = true) => {
+export const addAction = async (action, parameters = {}, execute = true) => {
   const returnValues = execute ? await ACTIONS[action].redo(parameters) : {};
   history.push({ action, parameters: { ...parameters, ...returnValues } });
   future.length = 0;
-  console.log([...history]);
+  console.log(getHistory());
   updateMinimap();
 };
 

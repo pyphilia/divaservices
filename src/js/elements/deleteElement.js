@@ -42,10 +42,12 @@ export const deleteElementByCellView = cellView => {
 };
 
 export const deleteElementsByCellView = cellViews => {
-  const boxIds = cellViews.map(
-    cellView => cellView.attributes.boxId || cellView.model.attributes.boxId
-  );
-  return deleteElementsByBoxId(boxIds);
+  if (cellViews) {
+    const boxIds = cellViews.map(
+      cellView => cellView.attributes.boxId || cellView.model.attributes.boxId
+    );
+    return deleteElementsByBoxId(boxIds);
+  }
 };
 
 export const deleteLink = link => {

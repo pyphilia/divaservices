@@ -1,4 +1,6 @@
-import * as $ from "jquery";
+import jQuery from "jquery";
+const $ = jQuery;
+global.$ = global.jQuery = $;
 
 export const fireAlert = (className, text) => {
   const alert = $(`<div/>`, {

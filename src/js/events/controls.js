@@ -20,7 +20,7 @@ export const copy = elements => {
 };
 
 export const paste = (cellViews, ids) => {
-  if (cellViews.length) {
+  if (cellViews && cellViews.length) {
     // if not specified, generate new ids for the copied elements
     if (!ids) {
       ids = [];
