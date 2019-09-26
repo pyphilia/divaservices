@@ -26,19 +26,15 @@ const boldRegInString = (re, string) => {
 };
 
 const initItems = services => {
+  $(ALGO_ITEMS).html("");
   const servicesPerCategory = groupBy(services, "type");
-  const items = [];
   for (let category of Object.keys(servicesPerCategory).sort()) {
-    // create items
-    items.push(
-      ...createAlgoItems(servicesPerCategory[category].sort(alphabeticalOrder))
-    );
+    createAlgoItems(servicesPerCategory[category].sort(alphabeticalOrder));
   }
-  return items;
 };
 
 const createAlgoItems = items => {
-  return items.map(({ name, type, text }) => {
+  const elements = items.map(({ name, type, text }) => {
     // sorted by name
     const algoItem = $(
       `<div class="${ALGO_ITEM_CLASS} ${type}" name="${name}"><span class="icon"></span><span class="name">${
@@ -50,6 +46,8 @@ const createAlgoItems = items => {
     });
     return algoItem;
   });
+
+  $(ALGO_ITEMS).append(elements);
 };
 
 const initWebservicesSearch = services => {
@@ -59,8 +57,6 @@ const initWebservicesSearch = services => {
     .querySelector(`${ALGO_SEARCH_CONTAINER} input`)
     .addEventListener("input", event => {
       document.querySelector(ALGO_ITEM_WRAPPER).scrollTo(0, 0); // back to top to see results
-      itemsContainer.html("");
-      $(".active").removeClass("active");
 
       const searchQuery = event.target.value.toLowerCase();
 
@@ -92,13 +88,18 @@ const initWebservicesSearch = services => {
 
         // create new items from results
         if (results.length) {
-          const resultItems = createAlgoItems(results);
-          itemsContainer.append(resultItems);
+          itemsContainer.html("");
+          createAlgoItems(results);
         }
       } else {
-        itemsContainer.append(initItems(services));
+        initItems(services);
       }
     });
+};
+
+const resetSearch = services => {
+  document.querySelector(ALGO_SEARCH_CONTAINER + " input").value = "";
+  initItems(services);
 };
 
 export const buildLeftSidebar = async () => {
@@ -122,8 +123,7 @@ export const buildLeftSidebar = async () => {
       `<a class="category-tab ${category}"><div class="icon"></div>${categoryName[category]}</a>`
     );
     menuItem.on("click", function() {
-      $(".active").removeClass("active");
-      $(this).toggleClass("active");
+      resetSearch(services);
 
       const firstEl = document.querySelector(`#algo-items .${category}`);
       // @TODO cross browser solutions https://stackoverflow.com/questions/52276194/window-scrollto-with-options-not-working-on-microsoft-edge
@@ -138,8 +138,7 @@ export const buildLeftSidebar = async () => {
   }
   $("#algo-categories").append(menuItems);
 
-  const items = initItems(services);
-  $(ALGO_ITEMS).append(items);
+  initItems(services);
 
   // init search
   initWebservicesSearch(services);

@@ -70,10 +70,10 @@ let defaultPositiony = 0;
 
 const initMinimapEvents = () => {
   navigator.addEventListener("mousedown", e => {
+    mapDragFlag = true;
     const { clientY, clientX } = e;
     const top = parseInt(navigator.style.top);
     const left = parseInt(navigator.style.left);
-    mapDragFlag = true;
     defaultPositionx = clientX - left;
     defaultPositiony = clientY - top;
   });
@@ -95,8 +95,8 @@ const initMinimapEvents = () => {
       const paperScale = paper.scale().sx;
 
       paper.translate(
-        -fitContentPaddingX - newX * paperScale,
-        -fitContentPaddingY - newY * paperScale
+        (-fitContentPaddingX - newX) * paperScale,
+        (-fitContentPaddingY - newY) * paperScale
       );
     }
   });

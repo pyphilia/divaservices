@@ -63,8 +63,9 @@
   padding: 1rem 0.3rem;
   color: white;
 
-  &.active {
+  &:hover {
     background: black !important;
+    cursor: pointer;
   }
 
   @each $category, $properties in $category-properties {

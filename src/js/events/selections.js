@@ -34,6 +34,10 @@ export const addCellViewsToSelection = cellViews => {
   saveElementsPositionFromCellView(selectedElements);
 };
 
+export const addModelsToSelection = models => {
+  addCellViewsToSelection(models.map(m => paper.findViewByModel(m)));
+};
+
 const removeElementFromSelection = (cellView, index) => {
   selectedElements.splice(index, 1);
   unHighlight(cellView);
