@@ -162,6 +162,21 @@ export const createSelect = (
     setSelectValueInElement(element, selectEl);
   });
 
+  selectEl.on("select2:open", function() {
+    // if the select is displayed at top
+    const above = document.querySelector(
+      ".select2-container--open .select2-dropdown--above"
+    );
+    if (above) {
+      console.log("TCL: above", above);
+      console.log(above.style.top);
+      $(above)
+        .find(".select2-results li")
+        .height();
+      above.style.top = 36 + "px";
+    }
+  });
+
   return newSelect;
 };
 

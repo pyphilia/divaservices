@@ -49,7 +49,7 @@ export const BOX_TITLE_HTML_TAG = "h3";
 
 export const TOOLTIP_COL = "col-1";
 export const NAME_COL = "col-5";
-export const PARAM_COL = "col-4";
+export const PARAM_COL = "col-4 p-0";
 export const RESET_COL = "col-2";
 
 export const ICON_COL = "col-1";

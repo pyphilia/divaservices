@@ -87,6 +87,7 @@ export const initKeyboardEvents = () => {
           }
           case " ": {
             spaceDown = true;
+            event.preventDefault();
             break;
           }
           default:
