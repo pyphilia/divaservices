@@ -28,7 +28,8 @@ import {
 import { objectToString, computeDisplayOffset } from "./utils";
 import { moveAllElements } from "../elements/moveElement";
 import { getLayoutOptions } from "../constants/globals";
-import { selectedElements } from "../events/selections";
+import { selectedElements, addCellViewToSelection } from "../events/selections";
+import { paper } from "./interface";
 
 export const setSelectValueInElement = (element, select) => {
   const s = select.find(":selected");
@@ -452,6 +453,11 @@ export const setParametersInForeignObject = element => {
       $(select).select2("close");
     }
     if (!multitranslate) {
+      // fix ctrl + click on element + drag, select again the current element
+      // induces a small delay in position from the other selected elements
+      if (selectedElements.indexOf(paper.findViewByModel(el)) == -1) {
+        addCellViewToSelection(paper.findViewByModel(el));
+      }
       moveAllElements(selectedElements, el, position);
     }
   });

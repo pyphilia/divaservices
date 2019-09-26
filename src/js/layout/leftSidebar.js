@@ -7,43 +7,140 @@ import { categoryName } from "../constants/constants";
 import { webservices } from "../constants/globals";
 import { addAction } from "../utils/undo";
 import { ACTION_ADD_ELEMENT } from "../constants/actions";
-import { ALGO_ITEM_CLASS } from "../constants/selectors";
+import {
+  ALGO_ITEM_CLASS,
+  ALGO_ITEM_WRAPPER,
+  ALGO_ITEMS,
+  ALGO_SEARCH_CONTAINER
+} from "../constants/selectors";
+
+const alphabeticalOrder = (a, b) => {
+  const x = a.name.toLowerCase();
+  const y = b.name.toLowerCase();
+  return x < y ? -1 : x > y ? 1 : 0;
+};
+
+const boldRegInString = (re, string) => {
+  const matchedString = string.match(re);
+  return string.replace(matchedString, `<b>${matchedString}</b>`);
+};
+
+const initItems = services => {
+  const servicesPerCategory = groupBy(services, "type");
+  const items = [];
+  for (let category of Object.keys(servicesPerCategory).sort()) {
+    // create items
+    items.push(
+      ...createAlgoItems(servicesPerCategory[category].sort(alphabeticalOrder))
+    );
+  }
+  return items;
+};
+
+const createAlgoItems = items => {
+  return items.map(({ name, type, text }) => {
+    // sorted by name
+    const algoItem = $(
+      `<div class="${ALGO_ITEM_CLASS} ${type}" name="${name}"><span class="icon"></span><span class="name">${
+        text ? text : name
+      }</span></div>`
+    );
+    algoItem.click(function() {
+      addAction(ACTION_ADD_ELEMENT, { name });
+    });
+    return algoItem;
+  });
+};
+
+const initWebservicesSearch = services => {
+  const itemsContainer = $(ALGO_ITEMS);
+
+  document
+    .querySelector(`${ALGO_SEARCH_CONTAINER} input`)
+    .addEventListener("input", event => {
+      document.querySelector(ALGO_ITEM_WRAPPER).scrollTo(0, 0); // back to top to see results
+      itemsContainer.html("");
+      $(".active").removeClass("active");
+
+      const searchQuery = event.target.value.toLowerCase();
+
+      // if search sth
+      if (searchQuery.length) {
+        // build regex to take into account capital letters
+        let regex = "";
+        for (const letter of searchQuery) {
+          regex += `[${letter}${letter.toUpperCase()}]`;
+        }
+        const re = new RegExp(regex);
+
+        // apply search regex
+        const searchResult = [];
+        for (const item of services) {
+          const value = item.name.toLowerCase().search(re);
+          searchResult.push({ value, ...item });
+        }
+
+        // filter out non matching items, and sort results
+        let results = searchResult
+          .filter(({ value }) => value != -1)
+          .sort((a, b) => a.value - b.value);
+
+        // apply bold on matched string
+        for (const item of results) {
+          item.text = boldRegInString(re, item.name);
+        }
+
+        // create new items from results
+        if (results.length) {
+          const resultItems = createAlgoItems(results);
+          itemsContainer.append(resultItems);
+        }
+      } else {
+        itemsContainer.append(initItems(services));
+      }
+    });
+};
 
 export const buildLeftSidebar = async () => {
   // get categories => algorithms
-  let servicesPerCategory = webservices.map(service => {
+  const services = webservices.map(service => {
     const { type, name } = service;
     return { type, name };
   });
-  servicesPerCategory = groupBy(servicesPerCategory, "type");
+
+  const searchHeight = document
+    .querySelector(ALGO_SEARCH_CONTAINER)
+    .getBoundingClientRect().height;
 
   const menuItems = [];
-  const tabs = [];
-  for (let service of Object.keys(servicesPerCategory).sort()) {
-    // create tab menu
-    const menuItem = $(`<a class="nav-link ${service}" id="v-pills-${service}-tab" data-toggle="pill" href="#v-pills-${service}" role="tab"
-        aria-controls="v-pills-${service}" aria-selected="false"><div class="icon"></div>${categoryName[service]}</a>`);
+  for (let category of services
+    .map(algo => algo.type)
+    .filter((v, i, a) => a.indexOf(v) === i) // get unique value
+    .sort()) {
+    // create category tab
+    const menuItem = $(
+      `<a class="category-tab ${category}"><div class="icon"></div>${categoryName[category]}</a>`
+    );
+    menuItem.on("click", function() {
+      $(".active").removeClass("active");
+      $(this).toggleClass("active");
+
+      const firstEl = document.querySelector(`#algo-items .${category}`);
+      // @TODO cross browser solutions https://stackoverflow.com/questions/52276194/window-scrollto-with-options-not-working-on-microsoft-edge
+      document.querySelector(ALGO_ITEM_WRAPPER).scrollTo({
+        top: firstEl.offsetTop - searchHeight,
+        left: 0,
+        behavior: "smooth"
+      });
+    });
 
     menuItems.push(menuItem);
-
-    // create tab content and its items
-    const currentTab = $(
-      `<div class="tab-pane fade" id="v-pills-${service}" role="tabpanel" aria-labelledby="v-pills-${service}-tab"></div>`
-    );
-    tabs.push(currentTab);
-
-    const algoItems = [];
-    for (const { name } of servicesPerCategory[service]) {
-      const algoItem = $(
-        `<div class="${ALGO_ITEM_CLASS} ${service}"><span class="icon"></span>${name}</div>`
-      );
-      algoItem.on("click", function() {
-        addAction(ACTION_ADD_ELEMENT, { name });
-      });
-      algoItems.push(algoItem);
-    }
-    currentTab.append(algoItems);
   }
-  $(`#algo-items`).append(tabs);
   $("#algo-categories").append(menuItems);
+
+  const items = initItems(services);
+  $(ALGO_ITEMS).append(items);
+
+  // init search
+  initWebservicesSearch(services);
 };

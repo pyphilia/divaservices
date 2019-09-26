@@ -1,6 +1,9 @@
 export const INTERFACE_ROOT = "#paper-html-elements";
 export const LEFT_SIDEBAR = "#left-sidebar";
+export const ALGO_ITEM_WRAPPER = "#algo-items-wrapper";
+export const ALGO_ITEMS = "#algo-items";
 export const ALGO_ITEM_CLASS = "algo-item";
+export const ALGO_SEARCH_CONTAINER = "#algo-search";
 export const RIGHT_SIDEBAR = "#right-sidebar";
 
 export const PARAMETER_INPUTS = "inputs";

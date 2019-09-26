@@ -7,7 +7,7 @@
     <title>InnoSuisse Workflow Interface</title>
 </head>
 <body>
-
+    
     <!-- area selection highlight element  -->
     <div id="areaSelectionHighlight"></div>
     
@@ -53,11 +53,20 @@
             <h1>Name</h1> <img id="logo" src="http://wuersch.pillo-srv.ch/images/logo.png" alt="divaspotlight logo">
         </div>
         <div id="content-wrapper" class="row">
-            <div id="left-sidebar" class="col-3 row">
-                <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
-                    
-                </div>
-                <div class="tab-content col" id="algo-items">
+            <div id="left-sidebar" class="col-3">
+                <div class="row  h-100">
+                    <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
+                        
+                    </div>
+                    <div  class="col" id="algo-tab">
+                        <div id="algo-search">
+                            <input type="search" class="form-control" placeholder="Search for a webservice..." aria-label="Username" aria-describedby="basic-addon1">
+                        </div>
+                        <div id="algo-items-wrapper">
+                            <div id="algo-items">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
             </div>
