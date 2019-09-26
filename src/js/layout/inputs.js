@@ -25,7 +25,7 @@ import {
   PARAMETER_SELECTS,
   PARAMETER_INPUTS
 } from "../constants/selectors";
-import { objectToString, computeDisplayOffset } from "./utils";
+import { objectToString } from "./utils";
 import { moveAllElements } from "../elements/moveElement";
 import { getLayoutOptions } from "../constants/globals";
 import { selectedElements, addCellViewToSelection } from "../events/selections";
@@ -163,30 +163,30 @@ export const createSelect = (
   });
 
   // fix dropdown position
-  selectEl.on("select2:open", function() {
-    const s = $(this);
-    const width = s.next().width();
-    const height = s.next().height();
+  // selectEl.on("select2:open", function() {
+  //   const s = $(this);
+  //   const width = s.next().width();
+  //   const height = s.next().height();
 
-    const dist = computeDisplayOffset(s, { height, width });
+  //   const dist = computeDisplayOffset(s, { height, width });
 
-    let newTop = -dist.y;
-    const newLeft = -dist.x;
+  //   let newTop = -dist.y;
+  //   const newLeft = -dist.x;
 
-    let container = document.querySelector(".select2-dropdown--below");
+  //   let container = document.querySelector(".select2-dropdown--below");
 
-    // if the select is displayed at top
-    const above = document.querySelector(
-      ".select2-container--open .select2-dropdown--above"
-    );
-    if (above) {
-      container = above;
-      newTop += height;
-    }
+  //   // if the select is displayed at top
+  //   const above = document.querySelector(
+  //     ".select2-container--open .select2-dropdown--above"
+  //   );
+  //   if (above) {
+  //     container = above;
+  //     newTop += height;
+  //   }
 
-    container.style.top = newTop + "px";
-    container.style.left = newLeft + "px";
-  });
+  //   container.style.top = newTop + "px";
+  //   container.style.left = newLeft + "px";
+  // });
 
   return newSelect;
 };

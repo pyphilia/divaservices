@@ -1,20 +1,11 @@
 import * as joint from "jointjs";
 import { THEME } from "../constants/constants";
-import {
-  TRASH_SELECTOR,
-  INTERFACE_ROOT,
-  PORT_SELECTOR
-} from "../constants/selectors";
+import { INTERFACE_ROOT, PORT_SELECTOR } from "../constants/selectors";
 import { paper } from "../layout/interface";
 import { hideContextMenus } from "./contextMenu";
 import { unSelectAll } from "./selections";
-import { selectedElements, clearSelection } from "../events/selections";
 import { addAction } from "../utils/undo";
-import {
-  ACTION_DELETE_ELEMENT,
-  ACTION_ADD_LINK,
-  ACTION_DELETE_LINK
-} from "../constants/actions";
+import { ACTION_ADD_LINK, ACTION_DELETE_LINK } from "../constants/actions";
 import { updateMinimap } from "../layout/minimap";
 import { spaceDown, ctrlDown } from "./keyboard";
 import {
@@ -33,11 +24,11 @@ export const initPaperEvents = () => {
     THEME.magnetAvailabilityHighlighter;
 
   paper.on("element:pointerup", () => {
-    const trash = document.querySelector(TRASH_SELECTOR);
-    if (trash.parentElement.querySelector(":hover") === trash) {
-      addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
-      clearSelection();
-    }
+    // const trash = document.querySelector(TRASH_SELECTOR);
+    // if (trash.parentElement.querySelector(":hover") === trash) {
+    //   addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
+    //   clearSelection();
+    // }
   });
 
   /*------------ZOOM */

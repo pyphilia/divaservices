@@ -73,13 +73,13 @@
   text-align: left;
 }
 
-#trash {
-  position: absolute;
-  bottom: 30px;
-  right: 30px;
-  z-index: 20;
-  font-size: 5em;
-}
+// #trash {
+//   position: absolute;
+//   bottom: 30px;
+//   right: 30px;
+//   z-index: 20;
+//   font-size: 5em;
+// }
 
 .joint-port-label {
   tspan:first-of-type {
@@ -90,7 +90,7 @@
 #minimap-container {
   position: absolute;
   bottom: 50px;
-  left: 50px;
+  right: 50px;
   z-index: 20;
   box-shadow: 0 0 5px 2px grey;
   overflow: hidden;
