@@ -248,9 +248,13 @@ export const addElementByName = (name, defaultParams = {}) => {
 };
 
 const addElementByCellView = (cellView, boxId) => {
-  const { defaultParams, size } = cellView.model.attributes;
+  const {
+    defaultParams,
+    size,
+    boxId: currentBoxId
+  } = cellView.model.attributes;
 
-  const e = graph.getCell(cellView.model.id).clone();
+  const e = getElementByBoxId(currentBoxId).clone();
   let id;
   if (boxId) {
     e.attributes.boxId = boxId;

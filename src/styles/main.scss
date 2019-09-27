@@ -77,3 +77,7 @@ div.select .select2 {
   left: 50%;
   margin-left: -200px;
 }
+
+.gutter-horizontal:hover {
+  cursor: col-resize;
+}
