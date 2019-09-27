@@ -1,8 +1,35 @@
-import { setZoomToScale } from "../events/zoom";
+import { setZoomToScale, zoomOut, zoomIn } from "../events/zoom";
+import { MAX_SCALE, MIN_SCALE } from "../constants/constants";
+import {
+  undo,
+  redo,
+  isHistoryEmpty,
+  isFutureEmpty,
+  addAction
+} from "../utils/undo";
+import { selectedElements } from "../events/selections";
+import { ACTION_DELETE_ELEMENT, ACTION_PASTE } from "../constants/actions";
 
 /**
  * Initialize toolsbar
  */
+
+export const updateSelectionTools = () => {
+  const selectionExists = selectedElements.length;
+  document.getElementById("delete").className = selectionExists
+    ? ""
+    : "disabled";
+  document.getElementById("duplicate").className = selectionExists
+    ? ""
+    : "disabled";
+};
+
+export const updateZoomTools = () => {
+  const undoTool = document.getElementById("undo");
+  const redoTool = document.getElementById("redo");
+  undoTool.className = isHistoryEmpty() ? "disabled" : "";
+  redoTool.className = isFutureEmpty() ? "disabled" : "";
+};
 
 export const updateZoomSlider = scale => {
   document.querySelector("#zoomDropdownButton").innerHTML = scale + "%";
@@ -10,50 +37,69 @@ export const updateZoomSlider = scale => {
   slider.value = scale;
 };
 
+const deleteAction = () => {
+  addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
+};
+const duplicateAction = () => {
+  addAction(ACTION_PASTE, { elements: selectedElements });
+};
+
 export const buildToolsbar = () => {
   const toolsbarIcons = [
     {
       delete: {
-        action: () => {},
-        icon: "fas fa-trash"
+        action: deleteAction,
+        icon: "fas fa-trash",
+        id: "delete",
+        classNames: "disabled"
       },
       duplicate: {
-        action: () => {},
-        icon: "fas fa-clone"
+        action: duplicateAction,
+        icon: "fas fa-clone",
+        id: "duplicate",
+        classNames: "disabled"
       }
     },
     {
       undo: {
-        action: () => {},
+        action: undo,
+        id: "undo",
+        classNames: "disabled",
         icon: "fas fa-undo"
       },
       redo: {
-        action: () => {},
+        action: redo,
+        classNames: "disabled",
+        id: "redo",
         icon: "fas fa-redo"
       }
     },
     {
       "zoom in": {
-        action: () => {},
+        action: zoomIn,
         icon: "fas fa-search-plus"
       },
       "zoom out": {
-        action: () => {},
+        action: zoomOut,
         icon: "fas fa-search-minus"
       },
       "zoom slider": {
         action: () => {},
         element: `
-            <div class="dropdown">
-            <button class="btn btn-secondary btn-sm  dropdown-toggle" type="button" id="zoomDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            100%
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="zoomDropdown">
-            <div class="slidecontainer">
-            <input type="range" min="1" max="200" value="100" class="slider" id="zoomSlider">
-            </div>
-            </div>
-            </div>`,
+        <div class="dropdown">
+        <button class="btn btn-secondary btn-sm  dropdown-toggle" type="button" id="zoomDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        100%
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="zoomDropdown">
+        <div class="slidecontainer">
+        <input type="range" min="${Math.ceil(
+          MIN_SCALE * 100
+        )}" max="${Math.ceil(
+          MAX_SCALE * 100
+        )}" value="100" class="slider" id="zoomSlider">
+        </div>
+        </div>
+        </div>`,
         events: () => {
           const dropdown = document.getElementById("zoomDropdown");
           const slider = dropdown.querySelector("#zoomSlider");
@@ -74,10 +120,12 @@ export const buildToolsbar = () => {
       toolsbar.appendChild(separator);
     }
     for (const name in group) {
-      const { action, icon, element, events } = group[name];
+      const { action, id, classNames, icon, element, events } = group[name];
 
       const menuItemElem = document.createElement(`a`);
       menuItemElem.title = name;
+      menuItemElem.id = id;
+      menuItemElem.className = classNames;
 
       // add icon
       if (icon) {

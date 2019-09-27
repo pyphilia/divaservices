@@ -1,3 +1,4 @@
+export const MAIN_INTERFACE = "#main";
 export const INTERFACE_ROOT = "#paper-html-elements";
 export const LEFT_SIDEBAR = "#left-sidebar";
 export const ALGO_ITEM_WRAPPER = "#algo-items-wrapper";

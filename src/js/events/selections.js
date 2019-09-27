@@ -3,6 +3,7 @@ import { ctrlDown } from "./keyboard";
 import { paper } from "../layout/interface";
 import { hideContextMenus } from "./contextMenu";
 import { saveElementsPositionFromCellView } from "../elements/moveElement";
+import { updateSelectionTools } from "../layout/toolsbar";
 
 // array of selected elements
 export let selectedElements = [];
@@ -12,6 +13,7 @@ export let copiedElements = [];
 
 export const clearSelection = () => {
   selectedElements = [];
+  updateSelectionTools();
 };
 
 export const setCopiedElements = () => {
@@ -24,6 +26,7 @@ export const addCellViewToSelection = cellView => {
   }
   highlightSelection(cellView);
   saveElementsPositionFromCellView(selectedElements);
+  updateSelectionTools();
 };
 
 export const addCellViewsToSelection = cellViews => {
@@ -41,6 +44,7 @@ export const addModelsToSelection = models => {
 const removeElementFromSelection = (cellView, index) => {
   selectedElements.splice(index, 1);
   unHighlight(cellView);
+  updateSelectionTools();
 };
 
 const toggleCellViewInSelection = cellView => {

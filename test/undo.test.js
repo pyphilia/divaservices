@@ -9,6 +9,7 @@ import {
 } from "../src/js/utils/undo";
 import { ACTION_PASTE } from "../src/js/constants/actions";
 jest.mock("../src/js/layout/minimap");
+jest.mock("../src/js/layout/toolsbar");
 
 describe("undo-redo (history)", () => {
   beforeEach(() => {

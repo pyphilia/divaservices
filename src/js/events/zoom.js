@@ -3,6 +3,20 @@ import { updateMinimap } from "../layout/minimap";
 import { paper } from "../layout/interface";
 import { updateZoomSlider } from "../layout/toolsbar";
 
+const zoomStep = 75;
+
+export const zoomOut = () => {
+  const currentScale = paper.scale().sx;
+  const nextScale = currentScale - 2 / zoomStep;
+  setZoomToScale(nextScale);
+};
+
+export const zoomIn = () => {
+  const currentScale = paper.scale().sx;
+  const nextScale = currentScale + 2 / zoomStep;
+  setZoomToScale(nextScale);
+};
+
 export const setZoomToScale = scale => {
   const bcr = paper.svg.getBoundingClientRect();
   const localRect1 = paper.clientToLocalRect({
@@ -18,7 +32,7 @@ export const setZoomToScale = scale => {
 // zoom algorithm: https://github.com/clientIO/joint/issues/1027
 export const changeZoom = (delta, x, y, scale) => {
   const nextScale = !scale
-    ? paper.scale().sx + delta / 75 // the current paper scale changed by delta
+    ? paper.scale().sx + delta / zoomStep // the current paper scale changed by delta
     : scale;
 
   if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {

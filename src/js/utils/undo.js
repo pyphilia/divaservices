@@ -29,6 +29,7 @@ import {
 } from "../constants/actions";
 import { updateMinimap } from "../layout/minimap";
 import { readWorkflow } from "../workflows/readWorkflow";
+import { updateZoomTools } from "../layout/toolsbar";
 
 const history = [];
 const future = [];
@@ -41,11 +42,24 @@ export const getFuture = () => {
   return [...future];
 };
 
+export const isHistoryEmpty = () => {
+  return history.length == 0;
+};
+
+export const isFutureEmpty = () => {
+  return future.length == 0;
+};
+
 export const clearHistory = () => {
   history.length = 0;
 };
 
 export let undoAction = false;
+
+const updateInterface = () => {
+  updateMinimap();
+  updateZoomTools();
+};
 
 // this function is fired only through user action,
 // it will erase stored undone actions
@@ -56,7 +70,7 @@ export const addAction = async (action, parameters = {}, execute = true) => {
   history.push({ action, parameters: { ...parameters, ...returnValues } });
   future.length = 0;
   console.log(getHistory());
-  updateMinimap();
+  updateInterface();
 };
 
 const ACTIONS = {
@@ -138,7 +152,7 @@ export const undo = () => {
     const returnValues = ACTIONS[action].undo(parameters);
     future.push({ action, parameters: { ...parameters, ...returnValues } });
   }
-  updateMinimap();
+  updateInterface();
 };
 
 export const redo = () => {
@@ -148,5 +162,5 @@ export const redo = () => {
 
     history.push({ action, parameters: { ...parameters, ...returnValues } });
   }
-  updateMinimap();
+  updateInterface();
 };

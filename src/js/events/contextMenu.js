@@ -63,7 +63,7 @@ export const initContextMenu = () => {
     evt.preventDefault();
     hideContextMenu(contextMenus.paper);
 
-    addCellViewToSelection([cellView]);
+    addCellViewToSelection(cellView);
 
     const screenPos = paper.localToClientPoint(x, y);
     const origin = {
