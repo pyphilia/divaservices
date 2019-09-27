@@ -11,7 +11,8 @@ import {
   NAME_COL,
   TOOLTIP_HTML,
   RESET_COL,
-  MimeTypes
+  MimeTypes,
+  TOOLTIP_OPTIONS
 } from "../constants/constants";
 import {
   PARAM_NAME_CLASS,
@@ -303,28 +304,6 @@ export const checkInputValue = input => {
   input.toggleClass("is-invalid", !isValid);
 };
 
-// some errors are induced by the svg positioning, thus we have to use mouse position to display
-// the tooltip
-const showTooltip = (tooltip, event) => {
-  const { title } = tooltip.dataset;
-  const el = document.querySelector("#tooltip");
-  el.innerHTML = title;
-  el.style.top = event.y + 10 + "px";
-  el.style.left = event.x + 10 + "px";
-  // const {width, height } = tooltip.getBoundingClientRect();
-  // const dist = computeDisplayOffset($(tooltip), {width,height});
-  // const newTop = dist.y + dist.elementOffset.top;
-  // const newLeft = dist.x + dist.elementOffset.left;
-  // el.style.top = newTop+'px';
-  // el.style.left = newLeft+'px';
-  el.style.display = "block";
-};
-
-const hideTooltip = () => {
-  const el = document.querySelector("#tooltip");
-  el.style.display = "none";
-};
-
 export const setParametersInForeignObject = element => {
   const {
     description,
@@ -451,15 +430,8 @@ export const setParametersInForeignObject = element => {
     }
   });
 
-  // tooltips js
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
-    // $(tooltip).tooltip(TOOLTIP_OPTIONS);
-    tooltip.addEventListener("mouseenter", event => {
-      showTooltip(tooltip, event);
-    });
-    tooltip.addEventListener("mouseleave", () => {
-      hideTooltip(tooltip);
-    });
+    $(tooltip).tooltip(TOOLTIP_OPTIONS);
   }
 };
 
