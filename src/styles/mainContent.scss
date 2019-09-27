@@ -114,3 +114,43 @@
   height: 0;
   display: hidden;
 }
+
+#toolsbar {
+  height: 35px;
+  background: white;
+  border-bottom: 1px solid grey;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 30;
+  padding: 0 5px;
+  box-sizing: border-box;
+
+  a {
+    padding: 0 5px;
+    cursor: pointer;
+
+    &:active {
+      color: red;
+    }
+  }
+
+  a > div {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .separator {
+    width: 1px;
+    display: inline-block;
+    vertical-align: middle;
+    background: lightgrey;
+    height: 100%;
+    margin: 0 7px;
+  }
+
+  .slidecontainer {
+    text-align: center;
+  }
+}
