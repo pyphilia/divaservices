@@ -15,6 +15,7 @@ import { initThemeOptions } from "./layoutSettings";
 import { initKeyboardEvents } from "../events/keyboard";
 import { initMinimap } from "./minimap";
 import { buildToolsbar } from "./toolsbar";
+import { buildFileMenu } from "./fileMenu";
 
 export const graph = new joint.dia.Graph();
 export let paper;
@@ -85,6 +86,7 @@ const buildGraph = async workflow => {
   initThemeOptions();
   initMinimap();
 
+  buildFileMenu();
   buildToolsbar();
 
   if (workflow) {
