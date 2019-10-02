@@ -6,7 +6,7 @@
  */
 import * as joint from "jointjs";
 import { paper, graph } from "../layout/interface";
-import { webservices, getLayoutOptions } from "../constants/globals";
+import { webservices } from "../constants/globals";
 import {
   THEME,
   BOX_TITLE_HTML_TAG,
@@ -32,6 +32,7 @@ import {
   IN_PORT_CLASS,
   OUT_PORT_CLASS
 } from "../constants/selectors";
+import { layoutSettingsApp } from "../layoutSettings";
 
 const createBox = (e, { position, size, boxId, defaultParams = {} }) => {
   const {
@@ -212,7 +213,8 @@ export const addElementToGraphFromServiceDescription = (
 ) => {
   const transformedWebservice = transformWebserviceForGraph(webservice);
 
-  const { showParameters } = getLayoutOptions();
+  const showParameters =
+    layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
 
   const size = {
     width: computeBoxWidth(transformedWebservice, showParameters),
@@ -272,6 +274,7 @@ const addElementByCellView = (cellView, boxId) => {
 
 // return for undo purpose
 export const addElementsByCellView = (elements, ids) => {
+  console.log("addlement");
   const addedElements = [];
   const boxIds = [];
   for (const [i, el] of elements.entries()) {

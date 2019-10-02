@@ -1,15 +1,21 @@
-import { graph } from "../layout/interface";
+import { paper, graph } from "../layout/interface";
 import { getElementByBoxId } from "../layout/utils";
+import { app } from "../main";
 
-const deleteElement = element => {
+const deleteElement = (element, cellView) => {
+  if (!cellView) {
+    cellView = paper.findViewByModel(element);
+  }
+  app.removeElementFromSelection(cellView);
+
   const copy = element.clone();
   element.remove();
   return copy;
 };
 
-export const deleteElementById = id => {
+export const deleteElementById = (id, cellView) => {
   const cell = graph.getCell(id);
-  return deleteElement(cell);
+  return deleteElement(cell, cellView);
 };
 
 export const deleteElementByBoxId = boxId => {
@@ -20,16 +26,16 @@ export const deleteElementByBoxId = boxId => {
 export const deleteElementsById = ids => {
   const restoredElements = [];
   for (const id of ids) {
-    const copy = deleteElementById(id, false);
+    const copy = deleteElementById(id);
     restoredElements.push(copy);
   }
   return { restoredElements };
 };
 
-export const deleteElementsByBoxId = boxIds => {
+export const deleteElementsByBoxId = (boxIds, cellViews) => {
   const restoredElements = [];
-  for (const boxId of boxIds) {
-    const copy = deleteElementByBoxId(boxId, false);
+  for (let i = 0; i < boxIds.length; i++) {
+    const copy = deleteElementByBoxId(boxIds[i], cellViews[i]);
     restoredElements.push(copy);
   }
 
@@ -38,7 +44,7 @@ export const deleteElementsByBoxId = boxIds => {
 
 export const deleteElementByCellView = cellView => {
   const id = cellView.model.attributes.id || cellView.attributes.id;
-  return deleteElementById(id);
+  return deleteElementById(id, cellView);
 };
 
 export const deleteElementsByCellView = cellViews => {
@@ -46,7 +52,7 @@ export const deleteElementsByCellView = cellViews => {
     const boxIds = cellViews.map(
       cellView => cellView.attributes.boxId || cellView.model.attributes.boxId
     );
-    return deleteElementsByBoxId(boxIds);
+    return deleteElementsByBoxId(boxIds, cellViews);
   }
 };
 

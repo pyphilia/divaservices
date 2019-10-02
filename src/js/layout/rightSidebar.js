@@ -5,8 +5,8 @@
 import { saveWorkflow } from "../workflows/saveWorkflow";
 import { graph, paper } from "../layout/interface";
 import { resetZoom } from "../events/zoom";
-import { addAction } from "../utils/undo";
 import { ACTION_OPEN_WORKFLOW } from "../constants/actions";
+import { app } from "../main";
 
 // const newWorkflow = (e) => {
 //   e.preventDefault();
@@ -22,7 +22,7 @@ const fitContent = () => {
 const openWorkflow = e => {
   e.preventDefault();
   console.log("openWorkflow");
-  addAction(ACTION_OPEN_WORKFLOW);
+  app.addAction(ACTION_OPEN_WORKFLOW);
 };
 
 const save = e => {

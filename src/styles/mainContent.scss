@@ -127,6 +127,17 @@
   padding: 0 5px;
   box-sizing: border-box;
 
+  .group {
+    display: inline-block;
+    vertical-align: middle;
+
+    &:not(:first-child) {
+      border-left: 1px solid lightgrey;
+      margin-left: 5px;
+      padding-left: 5px;
+    }
+  }
+
   a {
     padding: 0 5px;
     cursor: pointer;

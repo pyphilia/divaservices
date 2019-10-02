@@ -76,8 +76,13 @@ div.select .select2 {
   top: 35px;
   left: 50%;
   margin-left: -200px;
+  z-index: 30;
 }
 
 .gutter-horizontal:hover {
   cursor: col-resize;
+}
+
+.dropdown-item.disabled {
+  opacity: 0.5;
 }

@@ -28,9 +28,9 @@ import {
 } from "../constants/selectors";
 import { objectToString } from "./utils";
 import { moveAllElements } from "../elements/moveElement";
-import { getLayoutOptions } from "../constants/globals";
-import { selectedElements, addCellViewToSelection } from "../events/selections";
+import { layoutSettingsApp } from "../layoutSettings";
 import { paper } from "./interface";
+import { app } from "../main";
 
 export const setSelectValueInElement = (element, select) => {
   const s = select.find(":selected");
@@ -311,7 +311,8 @@ export const setParametersInForeignObject = element => {
     originalParams,
     defaultParams
   } = element.attributes;
-  const { showParameters } = getLayoutOptions();
+  const showParameters =
+    layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
 
   const selectsArr = [];
   const inputsArr = [];
@@ -423,10 +424,10 @@ export const setParametersInForeignObject = element => {
     if (!multitranslate) {
       // fix ctrl + click on element + drag, select again the current element
       // induces a small delay in position from the other selected elements
-      if (selectedElements.indexOf(paper.findViewByModel(el)) == -1) {
-        addCellViewToSelection(paper.findViewByModel(el));
+      if (app.selectedElements.indexOf(paper.findViewByModel(el)) == -1) {
+        app.addCellViewToSelection(paper.findViewByModel(el));
       }
-      moveAllElements(selectedElements, el, position);
+      moveAllElements(app.selectedElements, el, position);
     }
   });
 
@@ -436,7 +437,9 @@ export const setParametersInForeignObject = element => {
 };
 
 export const createPort = (param, group) => {
-  const { showPorts, showPortDetails } = getLayoutOptions();
+  const showPortDetails =
+    layoutSettingsApp.checkedOptions.indexOf("showPortDetails") != -1;
+  const showPorts = layoutSettingsApp.checkedOptions.indexOf("showPorts") != -1;
 
   let port = {};
   const { name, mimeTypes } = param;

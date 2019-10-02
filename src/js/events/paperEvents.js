@@ -1,19 +1,25 @@
 import * as joint from "jointjs";
 import { THEME } from "../constants/constants";
-import { INTERFACE_ROOT, PORT_SELECTOR } from "../constants/selectors";
-import { paper } from "../layout/interface";
-import { hideContextMenus } from "./contextMenu";
-import { unSelectAll } from "./selections";
-import { addAction } from "../utils/undo";
-import { ACTION_ADD_LINK, ACTION_DELETE_LINK } from "../constants/actions";
-import { updateMinimap } from "../layout/minimap";
-import { spaceDown, ctrlDown } from "./keyboard";
 import {
-  initAreaSelection,
-  endAreaSelection,
-  computeAreaSelection
-} from "./areaSelection";
+  INTERFACE_ROOT,
+  PORT_SELECTOR,
+  CONTEXT_MENU_ELEMENT,
+  CONTEXT_MENU_PAPER
+} from "../constants/selectors";
+import { paper, graph } from "../layout/interface";
+import {
+  ACTION_ADD_LINK,
+  ACTION_DELETE_LINK,
+  ACTION_PASTE
+} from "../constants/actions";
+import { spaceDown, ctrlDown } from "./keyboard";
+
 import { changeZoom } from "./zoom";
+import { app } from "../main";
+import { saveElementsPositionFromCellView } from "../elements/moveElement";
+import { copy } from "./controls";
+import { addElementsByCellView } from "../elements/addElement";
+import { deleteElementsById } from "../elements/deleteElement";
 
 /**
  * Initialize paper events, such as zoom, pan and
@@ -47,13 +53,13 @@ export const initPaperEvents = () => {
   let dragStartPosition;
 
   paper.on("blank:pointerdown", (event, x, y) => {
-    hideContextMenus();
+    app.hideContextMenus();
     dragStartPosition = { x: x, y: y };
 
     move = spaceDown;
 
     if (!ctrlDown) {
-      unSelectAll();
+      app.unSelectAll();
     }
     // unfocus inputs when clicks
     const focusedInput = document.querySelector("input:focus");
@@ -63,7 +69,7 @@ export const initPaperEvents = () => {
 
     // init area selection
     if (!spaceDown) {
-      initAreaSelection();
+      app.initAreaSelection(event);
     }
   });
 
@@ -71,7 +77,7 @@ export const initPaperEvents = () => {
     move = false;
 
     if (!spaceDown) {
-      endAreaSelection();
+      app.endAreaSelection();
     }
   });
 
@@ -83,12 +89,12 @@ export const initPaperEvents = () => {
         const newX = event.offsetX / currentScale.sx - dragStartPosition.x;
         const newY = event.offsetY / currentScale.sy - dragStartPosition.y;
         paper.translate(newX * currentScale.sx, newY * currentScale.sy);
-        updateMinimap();
+        app.activity = true;
       }
 
       // area selection
       if (!spaceDown) {
-        computeAreaSelection();
+        app.computeAreaSelection();
       }
     });
 
@@ -102,7 +108,7 @@ export const initPaperEvents = () => {
           distance: -30,
           action: function() {
             this.model.remove({ ui: true, tool: this.cid });
-            addAction(ACTION_DELETE_LINK, { linkView: this });
+            app.addAction(ACTION_DELETE_LINK, { linkView: this });
           }
         })
       ]
@@ -115,7 +121,7 @@ export const initPaperEvents = () => {
   });
 
   paper.on("link:connect", linkView => {
-    addAction(ACTION_ADD_LINK, { linkView }, false);
+    app.addAction(ACTION_ADD_LINK, { linkView }, false);
   });
 
   paper.on("link:connect link:disconnect", (linkView, evt, elementView) => {
@@ -127,4 +133,94 @@ export const initPaperEvents = () => {
       });
     });
   });
+
+  graph.on("change:position add remove", () => {
+    // @TODO change callbacks if find some
+    app.activity = true;
+  });
+
+  /**SELECTION*/
+
+  /**
+   * Initialize the element selection feature
+   * It also handles the highlight effect of the elements
+   */
+
+  paper.on("element:pointerdown", (cellView /*, evt, x, y*/) => {
+    app.hideContextMenus();
+    // if control key is not hold, a different
+    // the current selection is reset
+    if (!ctrlDown) {
+      app.unSelectAll();
+    }
+
+    app.toggleCellViewInSelection(cellView);
+  });
+
+  // on key up, if it was a translation, it will have
+  // different positions values
+  paper.on("element:pointerup", () => {
+    saveElementsPositionFromCellView(app.selectedElements);
+  });
+
+  /**CONTEXT MENU*/
+
+  paper.on("blank:contextmenu", () => {});
+
+  paper.on("element:contextmenu", (cellView, evt, x, y) => {
+    evt.preventDefault();
+    app.hideContextMenus();
+
+    app.addCellViewToSelection(cellView);
+
+    const screenPos = paper.localToClientPoint(x, y);
+    const origin = {
+      left: screenPos.x,
+      top: screenPos.y
+    };
+    app.setPositionToContextMenu("element", origin);
+    return false;
+  });
+
+  paper.on("blank:contextmenu", (evt, x, y) => {
+    evt.preventDefault();
+
+    app.hideContextMenus();
+
+    const screenPos = paper.localToClientPoint(x, y);
+    const origin = {
+      left: screenPos.x,
+      top: screenPos.y
+    };
+    app.setPositionToContextMenu("paper", origin);
+    return false;
+  });
+
+  document
+    .querySelector(`${CONTEXT_MENU_ELEMENT} .copy`)
+    .addEventListener("click", () => {
+      copy(app.selectedElements);
+    });
+
+  document
+    .querySelector(`${CONTEXT_MENU_ELEMENT} .duplicate`)
+    .addEventListener("click", async () => {
+      if (app.selectedElements.length) {
+        console.log(app.selectedElements);
+        await addElementsByCellView(app.selectedElements);
+      }
+    });
+
+  document
+    .querySelector(`${CONTEXT_MENU_ELEMENT} .delete`)
+    .addEventListener("click", () => {
+      deleteElementsById(app.selectedElements.map(el => el.model.id));
+      app.selectedElements = [];
+    });
+
+  document
+    .querySelector(`${CONTEXT_MENU_PAPER} .paste`)
+    .addEventListener("click", async () => {
+      app.addAction(ACTION_PASTE, { elements: app.copiedElements });
+    });
 };

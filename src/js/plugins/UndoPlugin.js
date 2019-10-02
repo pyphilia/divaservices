@@ -27,51 +27,7 @@ import {
   ACTION_PASTE,
   ACTION_OPEN_WORKFLOW
 } from "../constants/actions";
-import { updateMinimap } from "../layout/minimap";
 import { readWorkflow } from "../workflows/readWorkflow";
-import { updateZoomTools } from "../layout/toolsbar";
-
-const history = [];
-const future = [];
-
-export const getHistory = () => {
-  return [...history];
-};
-
-export const getFuture = () => {
-  return [...future];
-};
-
-export const isHistoryEmpty = () => {
-  return history.length == 0;
-};
-
-export const isFutureEmpty = () => {
-  return future.length == 0;
-};
-
-export const clearHistory = () => {
-  history.length = 0;
-};
-
-export let undoAction = false;
-
-const updateInterface = () => {
-  updateMinimap();
-  updateZoomTools();
-};
-
-// this function is fired only through user action,
-// it will erase stored undone actions
-// execute parameter determine whether to execute the redo function
-// (particularly useful for actions saved from events)
-export const addAction = async (action, parameters = {}, execute = true) => {
-  const returnValues = execute ? await ACTIONS[action].redo(parameters) : {};
-  history.push({ action, parameters: { ...parameters, ...returnValues } });
-  future.length = 0;
-  console.log(getHistory());
-  updateInterface();
-};
 
 const ACTIONS = {
   [ACTION_ADD_ELEMENT]: {
@@ -135,32 +91,61 @@ const ACTIONS = {
       return await readWorkflow();
     }
   }
-  // []: {
-  //   undo: () => {
-
-  //   },
-  //   redo: () => {
-
-  //   }
-  // },
 };
 
-export const undo = () => {
-  if (history.length) {
-    undoAction = true;
-    const { action, parameters } = history.pop();
-    const returnValues = ACTIONS[action].undo(parameters);
-    future.push({ action, parameters: { ...parameters, ...returnValues } });
+const plugin = {
+  install(Vue) {
+    Vue.mixin({
+      data() {
+        return {
+          history: [],
+          future: []
+        };
+      },
+      methods: {
+        redo() {
+          if (this.future.length) {
+            const { action, parameters } = this.future.pop();
+            const returnValues = ACTIONS[action].redo(parameters);
+
+            this.history.push({
+              action,
+              parameters: { ...parameters, ...returnValues }
+            });
+          }
+        },
+        undo() {
+          if (this.history.length) {
+            const { action, parameters } = this.history.pop();
+            const returnValues = ACTIONS[action].undo(parameters);
+            this.future.push({
+              action,
+              parameters: { ...parameters, ...returnValues }
+            });
+          }
+        },
+        clearHistory() {
+          this.history = [];
+        },
+
+        // this function is fired only through user action,
+        // it will erase stored undone actions
+        // execute parameter determine whether to execute the redo function
+        // (particularly useful for actions saved from events)
+        async addAction(action, parameters = {}, execute = true) {
+          const returnValues = execute
+            ? await ACTIONS[action].redo(parameters)
+            : {};
+          this.history.push({
+            action,
+            parameters: { ...parameters, ...returnValues }
+          });
+          this.future = [];
+          console.log([...this.history]);
+        }
+      }
+    });
   }
-  updateInterface();
 };
 
-export const redo = () => {
-  if (future.length) {
-    const { action, parameters } = future.pop();
-    const returnValues = ACTIONS[action].redo(parameters);
-
-    history.push({ action, parameters: { ...parameters, ...returnValues } });
-  }
-  updateInterface();
-};
+export default plugin;

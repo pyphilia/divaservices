@@ -1,6 +1,6 @@
-import { addAction } from "../utils/undo";
 import { getElementByBoxId } from "../layout/utils";
 import { ACTION_MOVE_ELEMENT } from "../constants/actions";
+import { app } from "../main";
 
 let allPositions = {};
 export const saveElementsPositionFromCellView = cellViews => {
@@ -31,7 +31,7 @@ export const saveElementsPositionFromCellView = cellViews => {
   if (keys.length) {
     const distance = JSON.parse(keys[0]);
     if (distance.x != 0 || distance.y != 0) {
-      addAction(ACTION_MOVE_ELEMENT, {
+      app.addAction(ACTION_MOVE_ELEMENT, {
         currentPositions: { ...allPositions },
         newPositions: { ...newPositions },
         elementBoxIds: distances[keys[0]]

@@ -6,13 +6,13 @@ import {
 } from "../constants/messages";
 import { fireAlert } from "../utils/alerts";
 import { addElementsByCellView } from "../elements/addElement";
-import { setCopiedElements } from "../events/selections";
 import { deleteElementsByCellView } from "../elements/deleteElement";
 import { generateUniqueId } from "../layout/utils";
+import { app } from "../main";
 
 export const copy = elements => {
   if (elements.length) {
-    setCopiedElements();
+    app.setCopiedElements();
     fireAlert("success", MESSAGE_COPY_SUCCESS);
   } else {
     fireAlert("danger", MESSAGE_COPY_ERROR);

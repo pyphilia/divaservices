@@ -28,29 +28,9 @@ export const initWebservices = async () => {
 };
 
 // layout options
-const DEFAULT_OPTIONS = {
+export const DEFAULT_OPTIONS = {
   showParameters: true,
   showPortDetails: true,
   showPorts: true,
   showTooltips: true
-};
-
-export const getLayoutOptions = () => {
-  return DEFAULT_OPTIONS;
-};
-
-export const changeShowPorts = value => {
-  DEFAULT_OPTIONS.showPorts = value;
-};
-
-export const changeShowTooltips = value => {
-  DEFAULT_OPTIONS.showTooltips = value;
-};
-
-export const changeShowPortDetails = value => {
-  DEFAULT_OPTIONS.showPortDetails = value;
-};
-
-export const changeShowParameters = value => {
-  DEFAULT_OPTIONS.showParameters = value;
 };

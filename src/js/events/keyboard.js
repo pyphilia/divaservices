@@ -1,11 +1,6 @@
-import { undo, redo, addAction } from "../utils/undo";
-import {
-  selectedElements,
-  clearSelection,
-  copiedElements
-} from "../events/selections";
 import { copy } from "./controls";
 import { ACTION_PASTE, ACTION_DELETE_ELEMENT } from "../constants/actions";
+import { app } from "../main";
 
 export let ctrlDown;
 export let spaceDown;
@@ -25,19 +20,21 @@ export const initKeyboardEvents = () => {
       if (ctrlDown) {
         switch (keyName) {
           case "c": {
-            copy(selectedElements);
+            copy(app.selectedElements);
             break;
           }
           case "v": {
-            addAction(ACTION_PASTE, { elements: copiedElements });
+            app.addAction(ACTION_PASTE, { elements: app.copiedElements });
             break;
           }
           case "z": {
-            undo();
-            break;
+            app.undo();
+            // prevent default ctrl+z operations
+            event.preventDefault();
+            return false;
           }
           case "y": {
-            redo();
+            app.redo();
             break;
           }
           default:
@@ -45,34 +42,26 @@ export const initKeyboardEvents = () => {
       } else {
         switch (keyName) {
           case "ArrowDown": {
-            if (selectedElements.length) {
-              for (const el of selectedElements) {
-                el.model.translate(0, 50);
-              }
+            for (const el of app.selectedElements) {
+              el.model.translate(0, 50);
             }
             break;
           }
           case "ArrowUp": {
-            if (selectedElements.length) {
-              for (const el of selectedElements) {
-                el.model.translate(0, -50);
-              }
+            for (const el of app.selectedElements) {
+              el.model.translate(0, -50);
             }
             break;
           }
           case "ArrowRight": {
-            if (selectedElements.length) {
-              for (const el of selectedElements) {
-                el.model.translate(50, 0);
-              }
+            for (const el of app.selectedElements) {
+              el.model.translate(50, 0);
             }
             break;
           }
           case "ArrowLeft": {
-            if (selectedElements.length) {
-              for (const el of selectedElements) {
-                el.model.translate(-50, 0);
-              }
+            for (const el of app.selectedElements) {
+              el.model.translate(-50, 0);
             }
             break;
           }
@@ -80,8 +69,10 @@ export const initKeyboardEvents = () => {
             // do not delete element if an input is focused
             const focusedInput = document.querySelector("input:focus");
             if (!focusedInput) {
-              addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
-              clearSelection();
+              app.addAction(ACTION_DELETE_ELEMENT, {
+                elements: app.selectedElements
+              });
+              app.clearSelection();
             }
             break;
           }

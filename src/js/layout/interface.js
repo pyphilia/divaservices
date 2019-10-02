@@ -8,14 +8,8 @@ import {
   ATTR_TYPE,
   IN_PORT_CLASS
 } from "../constants/selectors";
-import { initSelection } from "../events/selections";
 import { initPaperEvents } from "../events/paperEvents";
-import { initContextMenu } from "../events/contextMenu";
-import { initThemeOptions } from "./layoutSettings";
 import { initKeyboardEvents } from "../events/keyboard";
-import { initMinimap } from "./minimap";
-import { buildToolsbar } from "./toolsbar";
-import { buildFileMenu } from "./fileMenu";
 
 export const graph = new joint.dia.Graph();
 export let paper;
@@ -80,14 +74,7 @@ const buildGraph = async workflow => {
   });
 
   initPaperEvents();
-  initContextMenu();
   initKeyboardEvents();
-  initSelection();
-  initThemeOptions();
-  initMinimap();
-
-  buildFileMenu();
-  buildToolsbar();
 
   if (workflow) {
     // const webservices = transformWorkflowToGraph(workflow);

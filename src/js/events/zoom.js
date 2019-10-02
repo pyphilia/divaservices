@@ -1,7 +1,7 @@
 import { MIN_SCALE, MAX_SCALE } from "../constants/constants";
-import { updateMinimap } from "../layout/minimap";
 import { paper } from "../layout/interface";
-import { updateZoomSlider } from "../layout/toolsbar";
+import { updateZoomSlider } from "../layout/components/toolsbar";
+import { app } from "../main";
 
 const zoomStep = 75;
 
@@ -59,5 +59,5 @@ export const changeZoom = (delta, x, y, scale) => {
 
     updateZoomSlider(Math.ceil(nextScale * 100));
   }
-  updateMinimap();
+  app.activity = true;
 };
