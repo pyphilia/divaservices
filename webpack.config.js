@@ -76,10 +76,15 @@ module.exports = {
                options: {
                   name: '[name].[ext]',
                   outputPath: 'fonts/',    // where the fonts will go
-                  publicPath: '../fonts/'       // override the default path
+                  publicPath: './fonts/'       // override the default path
                }
             }]
          },
+         {
+            test: /\.xml$/,
+            exclude: /\.json$/,
+            use: 'raw-loader',
+          },
       ]
    },
    plugins: [

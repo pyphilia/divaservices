@@ -1,9 +1,9 @@
 // require('dotenv').config(); // this loads the defined variables from .env
 
 export const {
-  HOST = "",
+  HOST = "/",
   API = "http://divaservices.unifr.ch/api/v2/",
-  WEBSERVICES_XML = "api/services.xml"
+  WEBSERVICES_XML_FILEPATH = "api/services.xml"
 } = process.env;
 
 // layout options
