@@ -5,27 +5,29 @@ import { initWebservices } from "./constants/globals";
 import { initTour } from "./utils/walkthrough";
 import { LEFT_SIDEBAR, MAIN_INTERFACE } from "./constants/selectors";
 // import "@fortawesome/fontawesome-free/js/all"
-import Toolsbar from "./layout/components/toolsbar";
-import LeftSidebar from "./layout/components/leftSidebar";
+import Toolsbar from "./layout/components/Toolsbar";
+import LeftSidebar from "./layout/components/LeftSidebar";
 import Undo from "./plugins/UndoPlugin";
 import Selection from "./plugins/SelectionPlugin";
-import FileMenu from "./layout/components/fileMenu";
-import Minimap from "./layout/components/minimap";
-import ContextMenu from "./plugins/contextMenuPlugin";
+import FileMenu from "./layout/components/FileMenu";
+import Minimap from "./layout/components/Minimap";
 import AreaSelection from "./plugins/AreaSelectionPlugin";
+import Zoom from "./plugins/ZoomPlugin";
 
+import "./ContextMenu";
 import "./layoutSettings";
 
 export let app;
 
 // main js here
 (async () => {
+  // init webservices array
   await initWebservices();
 
   Vue.use(Undo);
-  Vue.use(ContextMenu);
   Vue.use(Selection);
   Vue.use(AreaSelection);
+  Vue.use(Zoom);
 
   app = new Vue({
     el: "#app",
@@ -45,6 +47,7 @@ export let app;
     },
     async mounted() {
       await buildGraph(true); //@TODO to change
+
       Split([LEFT_SIDEBAR, MAIN_INTERFACE], {
         elementStyle: function(dimension, size, gutterSize) {
           return { "flex-basis": "calc(" + size + "% - " + gutterSize + "px)" };

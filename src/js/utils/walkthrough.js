@@ -2,7 +2,7 @@ import Shepherd from "shepherd.js";
 import {
   INTERFACE_ROOT,
   LEFT_SIDEBAR,
-  RIGHT_SIDEBAR,
+  FILE_MENU,
   MINIMAP_PAPER_ID,
   ALGO_ITEM_CLASS
 } from "../constants/selectors";
@@ -96,11 +96,11 @@ export const initTour = () => {
       buttons
     },
     {
-      id: "right",
+      id: "filemenu",
       text:
         "And the right sidebar offers various workflow operations, the most important ones being saving and installing them.",
       attachTo: {
-        element: RIGHT_SIDEBAR,
+        element: FILE_MENU,
         on: "left"
       },
       classes: "example-step-extra-class",

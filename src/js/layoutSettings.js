@@ -11,7 +11,7 @@ import {
   computeTitleLength,
   computeBoxHeight
 } from "./layout/utils";
-import { DEFAULT_OPTIONS } from "./constants/globals";
+import { DEFAULT_OPTIONS } from "../config";
 
 const changePortDetails = event => {
   const prop = event.target.checked ? "block" : "none";

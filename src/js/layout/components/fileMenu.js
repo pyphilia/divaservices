@@ -1,7 +1,8 @@
 import Vue from "vue";
 import * as $ from "jquery";
 import { copy } from "../../events/controls";
-import { ACTION_PASTE } from "../../constants/actions";
+import { ACTION_ADD_ELEMENTS } from "../../constants/actions";
+import { graph } from "../interface";
 
 const FileMenu = Vue.component("FileMenu", {
   props: [
@@ -34,7 +35,7 @@ const FileMenu = Vue.component("FileMenu", {
           {
             name: "Paste",
             action: () => {
-              this.addActionFunc(ACTION_PASTE, this.copiedEls);
+              this.addActionFunc(ACTION_ADD_ELEMENTS, [...this.copiedEls]);
             },
             requireSelection: true
           },
@@ -47,7 +48,12 @@ const FileMenu = Vue.component("FileMenu", {
             requireSelection: true
           },
           { name: "separator" },
-          { name: "Clear", action: () => {} },
+          {
+            name: "Clear",
+            action: () => {
+              graph.clear();
+            }
+          },
           {
             name: "Undo",
             action: () => {
@@ -74,9 +80,7 @@ const FileMenu = Vue.component("FileMenu", {
         Workflow: [
           {
             name: "Install",
-            action: () => {
-              // document.getElementById('exampleModal').modal()
-            }
+            action: () => {}
           }
         ],
         Settings: [
@@ -114,37 +118,3 @@ const FileMenu = Vue.component("FileMenu", {
 });
 
 export default FileMenu;
-
-// export const buildFileMenu = () => {
-//   const root = $("ul.navbar-nav");
-
-//   const menuItems = [];
-//   for (const item in menu) {
-//     const menuItem = $('<li class="nav-item dropdown"></li>');
-//     const menuTitle = $(
-//       `<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">${item}</a>`
-//     );
-//     menuItem.append(menuTitle);
-
-//     const dropdown = $(
-//       '<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink"></div>'
-//     );
-//     const subitems = [];
-//     for (const subitem of menu[item]) {
-//       const { name } = subitem;
-//       let dropdownItem;
-//       if (name != "separator") {
-//         dropdownItem = $('<a class="dropdown-item" href="#"></a>');
-//         dropdownItem.text(name);
-//       } else {
-//         dropdownItem = '<div class="dropdown-divider"></div>';
-//       }
-//       subitems.push(dropdownItem);
-//     }
-//     dropdown.append(subitems);
-//     menuItem.append(dropdown);
-//     menuItems.push(menuItem);
-//   }
-//   root.append(menuItems);
-//   console.log(document.querySelector("ul.navbar-nav"));
-// };

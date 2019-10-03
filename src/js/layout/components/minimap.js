@@ -23,7 +23,6 @@ const Minimap = Vue.component("Minimap", {
       minimapPaper: null
     };
   },
-  computed: {},
   methods: {
     update() {
       // if(paper) {
@@ -78,8 +77,6 @@ const Minimap = Vue.component("Minimap", {
 
     this.minimapPaper.scaleContentToFit();
     this.mapScale = this.minimapPaper.scale().sx;
-
-    // this.update();
 
     this.navigator = document.querySelector(MINIMAP_NAVIGATOR_SELECTOR);
 

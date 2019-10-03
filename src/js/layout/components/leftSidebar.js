@@ -116,7 +116,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
       }
     }
   },
-  template: `<div id="left-sidebar" class="col-3">
+  template: `<div id="left-sidebar" class="col">
   <div class="row  h-100">
   <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
   <a v-for="category in categories" :class="'category-tab ' + category" @click="categoryClick(category)"><div class="icon"></div>{{getCategoryName(category)}}</a>

@@ -1,13 +1,13 @@
 import xml2js from "xml2js";
 import path from "path";
-import { HOST } from "./constants";
+import { HOST, WEBSERVICES_XML } from "../../config";
 import webservicesDecorator from "./webservicesDecorator";
 
 export let webservices;
 
 // init webservices from xml file
 export const initWebservices = async () => {
-  const filepath = path.join(HOST, "api/services.xml");
+  const filepath = path.join(HOST, WEBSERVICES_XML);
 
   const response = await fetch(filepath);
   const xml = await response.text();
@@ -25,12 +25,4 @@ export const initWebservices = async () => {
   console.log("---- webservices initialized");
 
   webservices = webservicesDecorator(data);
-};
-
-// layout options
-export const DEFAULT_OPTIONS = {
-  showParameters: true,
-  showPortDetails: true,
-  showPorts: true,
-  showTooltips: true
 };

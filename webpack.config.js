@@ -1,5 +1,7 @@
 // This library allows us to combine paths easily
 const path = require('path');
+const dotenv = require('dotenv')
+const {DefinePlugin} = require('webpack');
 
 const DIST = 'public';
 
@@ -80,6 +82,11 @@ module.exports = {
          },
       ]
    },
+   plugins: [
+      new DefinePlugin({
+        'process.env': JSON.stringify(dotenv.config().parsed)
+      })
+  ],
    devServer: {
       contentBase: DIST,
       hot: true,

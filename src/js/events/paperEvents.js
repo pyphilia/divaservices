@@ -1,26 +1,13 @@
 import * as joint from "jointjs";
 import { THEME } from "../constants/constants";
-import {
-  INTERFACE_ROOT,
-  PORT_SELECTOR,
-  CONTEXT_MENU_ELEMENT,
-  CONTEXT_MENU_PAPER
-} from "../constants/selectors";
+import { INTERFACE_ROOT, PORT_SELECTOR } from "../constants/selectors";
 import { paper, graph } from "../layout/interface";
-import {
-  ACTION_ADD_LINK,
-  ACTION_DELETE_LINK,
-  ACTION_PASTE
-} from "../constants/actions";
+import { ACTION_ADD_LINK, ACTION_DELETE_LINK } from "../constants/actions";
 import { spaceDown, ctrlDown } from "./keyboard";
 
-import { changeZoom } from "./zoom";
 import { app } from "../main";
 import { saveElementsPositionFromCellView } from "../elements/moveElement";
-import { copy } from "./controls";
-import { addElementsByCellView } from "../elements/addElement";
-import { deleteElementsById } from "../elements/deleteElement";
-
+import { ContextMenuApp } from "../ContextMenu";
 /**
  * Initialize paper events, such as zoom, pan and
  * links management
@@ -32,7 +19,7 @@ export const initPaperEvents = () => {
   paper.on("element:pointerup", () => {
     // const trash = document.querySelector(TRASH_SELECTOR);
     // if (trash.parentElement.querySelector(":hover") === trash) {
-    //   addAction(ACTION_DELETE_ELEMENT, { elements: selectedElements });
+    //   addAction(ACTION_DELETE_ELEMENTS, { elements: selectedElements });
     //   clearSelection();
     // }
   });
@@ -40,11 +27,11 @@ export const initPaperEvents = () => {
   /*------------ZOOM */
 
   paper.on("blank:mousewheel", (evt, x, y, delta) => {
-    changeZoom(delta, x, y);
+    app.changeZoom(delta, x, y);
   });
 
   paper.on("element:mousewheel", (e, evt, x, y, delta) => {
-    changeZoom(delta, x, y);
+    app.changeZoom(delta, x, y);
   });
 
   /*------------PAN */
@@ -53,7 +40,7 @@ export const initPaperEvents = () => {
   let dragStartPosition;
 
   paper.on("blank:pointerdown", (event, x, y) => {
-    app.hideContextMenus();
+    ContextMenuApp.hideContextMenus();
     dragStartPosition = { x: x, y: y };
 
     move = spaceDown;
@@ -147,7 +134,7 @@ export const initPaperEvents = () => {
    */
 
   paper.on("element:pointerdown", (cellView /*, evt, x, y*/) => {
-    app.hideContextMenus();
+    ContextMenuApp.hideContextMenus();
     // if control key is not hold, a different
     // the current selection is reset
     if (!ctrlDown) {
@@ -169,8 +156,13 @@ export const initPaperEvents = () => {
 
   paper.on("element:contextmenu", (cellView, evt, x, y) => {
     evt.preventDefault();
-    app.hideContextMenus();
+    ContextMenuApp.hideContextMenus();
 
+    // if control key is not hold, a different
+    // the current selection is reset
+    if (!ctrlDown) {
+      app.unSelectAll();
+    }
     app.addCellViewToSelection(cellView);
 
     const screenPos = paper.localToClientPoint(x, y);
@@ -178,49 +170,21 @@ export const initPaperEvents = () => {
       left: screenPos.x,
       top: screenPos.y
     };
-    app.setPositionToContextMenu("element", origin);
+    ContextMenuApp.setPositionToContextMenu("element", origin);
     return false;
   });
 
   paper.on("blank:contextmenu", (evt, x, y) => {
     evt.preventDefault();
 
-    app.hideContextMenus();
+    ContextMenuApp.hideContextMenus();
 
     const screenPos = paper.localToClientPoint(x, y);
     const origin = {
       left: screenPos.x,
       top: screenPos.y
     };
-    app.setPositionToContextMenu("paper", origin);
+    ContextMenuApp.setPositionToContextMenu("paper", origin);
     return false;
   });
-
-  document
-    .querySelector(`${CONTEXT_MENU_ELEMENT} .copy`)
-    .addEventListener("click", () => {
-      copy(app.selectedElements);
-    });
-
-  document
-    .querySelector(`${CONTEXT_MENU_ELEMENT} .duplicate`)
-    .addEventListener("click", async () => {
-      if (app.selectedElements.length) {
-        console.log(app.selectedElements);
-        await addElementsByCellView(app.selectedElements);
-      }
-    });
-
-  document
-    .querySelector(`${CONTEXT_MENU_ELEMENT} .delete`)
-    .addEventListener("click", () => {
-      deleteElementsById(app.selectedElements.map(el => el.model.id));
-      app.selectedElements = [];
-    });
-
-  document
-    .querySelector(`${CONTEXT_MENU_PAPER} .paste`)
-    .addEventListener("click", async () => {
-      app.addAction(ACTION_PASTE, { elements: app.copiedElements });
-    });
 };

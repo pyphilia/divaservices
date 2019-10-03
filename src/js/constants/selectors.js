@@ -5,7 +5,7 @@ export const ALGO_ITEM_WRAPPER = "#algo-items-wrapper";
 export const ALGO_ITEMS = "#algo-items";
 export const ALGO_ITEM_CLASS = "algo-item";
 export const ALGO_SEARCH_CONTAINER = "#algo-search";
-export const RIGHT_SIDEBAR = "#right-sidebar";
+export const FILE_MENU = "#navbar-menu";
 
 export const PARAMETER_INPUTS = "inputs";
 export const PARAMETER_SELECTS = "selects";

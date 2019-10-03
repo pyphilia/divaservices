@@ -22,9 +22,9 @@ import {
   ACTION_MOVE_ELEMENT,
   ACTION_ADD_ELEMENT,
   ACTION_ADD_LINK,
-  ACTION_DELETE_ELEMENT,
+  ACTION_DELETE_ELEMENTS,
   ACTION_DELETE_LINK,
-  ACTION_PASTE,
+  ACTION_ADD_ELEMENTS,
   ACTION_OPEN_WORKFLOW
 } from "../constants/actions";
 import { readWorkflow } from "../workflows/readWorkflow";
@@ -40,7 +40,7 @@ const ACTIONS = {
       return addElementByName(name, { boxId, position }); //id
     }
   },
-  [ACTION_PASTE]: {
+  [ACTION_ADD_ELEMENTS]: {
     undo: ({ addedElements }) => {
       undoPaste(addedElements);
     },
@@ -48,7 +48,7 @@ const ACTIONS = {
       return paste(elements, boxIds);
     }
   },
-  [ACTION_DELETE_ELEMENT]: {
+  [ACTION_DELETE_ELEMENTS]: {
     undo: ({ restoredElements }) => {
       restoreElements(restoredElements);
       console.log("TCL: restoredElements", restoredElements);

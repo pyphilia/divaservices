@@ -1,5 +1,8 @@
 import { copy } from "./controls";
-import { ACTION_PASTE, ACTION_DELETE_ELEMENT } from "../constants/actions";
+import {
+  ACTION_ADD_ELEMENTS,
+  ACTION_DELETE_ELEMENTS
+} from "../constants/actions";
 import { app } from "../main";
 
 export let ctrlDown;
@@ -24,7 +27,9 @@ export const initKeyboardEvents = () => {
             break;
           }
           case "v": {
-            app.addAction(ACTION_PASTE, { elements: app.copiedElements });
+            app.addAction(ACTION_ADD_ELEMENTS, {
+              elements: [...app.copiedElements]
+            });
             break;
           }
           case "z": {
@@ -69,7 +74,7 @@ export const initKeyboardEvents = () => {
             // do not delete element if an input is focused
             const focusedInput = document.querySelector("input:focus");
             if (!focusedInput) {
-              app.addAction(ACTION_DELETE_ELEMENT, {
+              app.addAction(ACTION_DELETE_ELEMENTS, {
                 elements: app.selectedElements
               });
               app.clearSelection();

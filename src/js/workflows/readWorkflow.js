@@ -4,7 +4,7 @@
  */
 import xml2js from "xml2js";
 import path from "path";
-import { HOST } from "../constants/constants";
+import { HOST } from "../../config";
 import { webservices } from "../constants/globals";
 import {
   addElementToGraphFromServiceDescription,

@@ -1,9 +1,5 @@
 import { PORT_SELECTOR } from "./selectors";
 
-export const HOST = "";
-
-export const DIVA_SERVICES_API_URL = "http://divaservices.unifr.ch/api/v2/";
-
 export const categoryName = {
   binarization: "binarization",
   kws: "kws",
@@ -39,6 +35,7 @@ export const BOX_MARGIN = 100;
 export const MINIMAP_WIDTH = 150;
 export const MINIMAP_HEIGHT = 150;
 
+export const DEFAULT_SCALE = 1;
 export const MIN_SCALE = 0.4;
 export const MAX_SCALE = 1;
 

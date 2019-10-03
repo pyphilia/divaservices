@@ -8,16 +8,7 @@
 </head>
 <body>
     
-    <div class="contextmenu" id="contextmenu-element">
-        <span class="copy">Copy</span>
-        <span class="duplicate">Duplicate</span>
-        <span class="delete">Delete</span>
-    </div>
-    
-    <div class="contextmenu" id="contextmenu-paper">
-        <span class="paste">Paste</span>
-        <span class="delete">Clear</span>
-    </div>
+    <div id="contextMenus"></div>
     
     <!-- area selection highlight element  -->
     <div id="areaSelectionHighlight"></div>
@@ -113,7 +104,7 @@
             
             <div id="message"></div>
             
-            <toolsbar :exist-selection='selectedElements.length > 0' :exist-history='history.length > 0' :exist-future='future.length > 0'></toolsbar>
+            <toolsbar :zoom-in-func="zoomIn" :zoom-out-func="zoomOut" :set-zoom-func="setZoomToScale" :add-action-func="addAction" :selection="selectedElements" :undo-func="undo" :redo-func="redo" :scale-value="scale" :exist-selection='selectedElements.length > 0' :exist-history='history.length > 0' :exist-future='future.length > 0'></toolsbar>
             
             
         </div>
