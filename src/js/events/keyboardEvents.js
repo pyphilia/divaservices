@@ -1,9 +1,6 @@
 import { copy } from "./controls";
-import {
-  ACTION_ADD_ELEMENTS,
-  ACTION_DELETE_ELEMENTS
-} from "../constants/actions";
-import { app } from "../main";
+import { app } from "../app";
+import UndoRedoHistory from "../store/plugins/UndoRedoHistory";
 
 export let ctrlDown;
 export let spaceDown;
@@ -27,19 +24,17 @@ export const initKeyboardEvents = () => {
             break;
           }
           case "v": {
-            app.addAction(ACTION_ADD_ELEMENTS, {
-              elements: [...app.copiedElements]
-            });
+            app.duplicateElements({ elements: app.copiedElements });
             break;
           }
           case "z": {
-            app.undo();
+            UndoRedoHistory.undo();
             // prevent default ctrl+z operations
             event.preventDefault();
             return false;
           }
           case "y": {
-            app.redo();
+            UndoRedoHistory.redo();
             break;
           }
           default:
@@ -74,10 +69,7 @@ export const initKeyboardEvents = () => {
             // do not delete element if an input is focused
             const focusedInput = document.querySelector("input:focus");
             if (!focusedInput) {
-              app.addAction(ACTION_DELETE_ELEMENTS, {
-                elements: app.selectedElements
-              });
-              app.clearSelection();
+              app.deleteElements({ elements: app.selectedElements });
             }
             break;
           }

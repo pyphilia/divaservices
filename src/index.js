@@ -1,9 +1,9 @@
-import "bootstrap";
+// import "bootstrap";
 
-import "@fortawesome/fontawesome-free/js/all.min";
+// import "@fortawesome/fontawesome-free/js/all.min";
 
-// html files
-import "./index.html";
+// // html files
+// import "./index.html";
 
-// js files
-import "./js/main.js";
+// // js files
+// import "./js/main.js";

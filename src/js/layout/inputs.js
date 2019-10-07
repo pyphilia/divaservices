@@ -27,10 +27,8 @@ import {
   PARAMETER_INPUTS
 } from "../constants/selectors";
 import { objectToString } from "./utils";
-import { moveAllElements } from "../elements/moveElement";
 import { layoutSettingsApp } from "../layoutSettings";
-import { paper } from "./interface";
-import { app } from "../main";
+import { app } from "../app";
 
 export const setSelectValueInElement = (element, select) => {
   const s = select.find(":selected");
@@ -40,6 +38,8 @@ export const setSelectValueInElement = (element, select) => {
   const attr = selectEl.attr("name");
 
   element.attributes.defaultParams[attr] = { value, defaultValue };
+
+  app.setSelectValueInElement({ element, attr, value });
 };
 
 export const setInputValueInElement = (element, input) => {
@@ -418,16 +418,18 @@ export const setParametersInForeignObject = element => {
   // the select dropdown is still displayed
   // this event closes it
   element.on("change:position", (el, position, { multitranslate }) => {
+    console.log("changeposition");
     for (const select of document.querySelectorAll(Inputs.SELECT.tag)) {
       $(select).select2("close");
     }
     if (!multitranslate) {
+      const { paper, selectedElements: selection } = app;
       // fix ctrl + click on element + drag, select again the current element
       // induces a small delay in position from the other selected elements
-      if (app.selectedElements.indexOf(paper.findViewByModel(el)) == -1) {
-        app.addCellViewToSelection(paper.findViewByModel(el));
+      if (selection.indexOf(paper.findViewByModel(el)) == -1) {
+        //app.addCellViewToSelection(paper.findViewByModel(el));
       }
-      moveAllElements(app.selectedElements, el, position);
+      //moveAllElements(selection, el, position);
     }
   });
 

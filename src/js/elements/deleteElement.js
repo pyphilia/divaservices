@@ -1,26 +1,18 @@
-import { paper, graph } from "../layout/interface";
+import { graph } from "../layout/interface";
 import { getElementByBoxId } from "../layout/utils";
-import { app } from "../main";
 
-const deleteElement = (element, cellView) => {
-  if (!cellView) {
-    cellView = paper.findViewByModel(element);
-  }
-  app.removeElementFromSelection(cellView);
-
-  const copy = element.clone();
+const deleteElement = element => {
   element.remove();
-  return copy;
 };
 
-export const deleteElementById = (id, cellView) => {
+export const deleteElementById = id => {
   const cell = graph.getCell(id);
-  return deleteElement(cell, cellView);
+  deleteElement(cell);
 };
 
 export const deleteElementByBoxId = boxId => {
   const cell = getElementByBoxId(boxId);
-  return deleteElement(cell);
+  deleteElement(cell);
 };
 
 export const deleteElementsById = ids => {

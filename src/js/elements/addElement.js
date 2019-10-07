@@ -5,7 +5,7 @@
  * (in jointjs a deleted-recreated element is not the same)
  */
 import * as joint from "jointjs";
-import { paper, graph } from "../layout/interface";
+import { app } from "../app";
 import { webservices } from "../constants/globals";
 import {
   THEME,
@@ -35,6 +35,7 @@ import {
 import { layoutSettingsApp } from "../layoutSettings";
 
 const createBox = (e, { position, size, boxId, defaultParams = {} }) => {
+  const { graph } = app;
   const {
     category,
     label,
@@ -175,6 +176,7 @@ export const addElementFromTransformedJSON = (e, parameters = {}) => {
 // it tries to fill the canvas view first horizontally
 // then vertically
 const findEmptyPosition = size => {
+  const { paper, graph } = app;
   const { left, top, width, height } = paper.svg.getBoundingClientRect();
   const canvasDimensions = paper.clientToLocalRect({
     x: left,
@@ -250,6 +252,8 @@ export const addElementByName = (name, defaultParams = {}) => {
 };
 
 const addElementByCellView = (cellView, boxId) => {
+  const { graph } = app;
+
   const {
     defaultParams,
     size,
@@ -272,9 +276,27 @@ const addElementByCellView = (cellView, boxId) => {
   return { e, id };
 };
 
+export const addElementFromId = element => {
+  const { graph } = app;
+  const { boxId, size, defaultParams, fromId } = element; /*position*/
+  const e = getElementByBoxId(fromId).clone();
+  let id;
+  if (boxId) {
+    e.attributes.boxId = boxId;
+    id = boxId;
+  } else {
+    id = e.attributes.boxId;
+  }
+  // avoid cloning overlap
+  e.attributes.position = findEmptyPosition(size);
+
+  e.addTo(graph);
+  setParametersInForeignObject(e, defaultParams);
+  return { e, id };
+};
+
 // return for undo purpose
 export const addElementsByCellView = (elements, ids) => {
-  console.log("addlement");
   const addedElements = [];
   const boxIds = [];
   for (const [i, el] of elements.entries()) {
@@ -288,6 +310,7 @@ export const addElementsByCellView = (elements, ids) => {
 
 // return for undo purpose
 const restoreElement = element => {
+  const { graph } = app;
   element.addTo(graph);
   setParametersInForeignObject(element);
 };
@@ -302,12 +325,14 @@ export const restoreElements = elements => {
 /*ADD LINKS*/
 
 export const addLinkFromJSON = link => {
+  const { graph } = app;
   const linkEl = new joint.shapes.standard.Link(link);
   linkEl.addTo(graph);
   return { linkView: linkEl };
 };
 
 export const addLinkBySourceTarget = linkView => {
+  const { graph } = app;
   const source = linkView.model ? linkView.model.source() : linkView.source();
   const target = linkView.model ? linkView.model.target() : linkView.target();
 

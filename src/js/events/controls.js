@@ -8,11 +8,11 @@ import { fireAlert } from "../utils/alerts";
 import { addElementsByCellView } from "../elements/addElement";
 import { deleteElementsByCellView } from "../elements/deleteElement";
 import { generateUniqueId } from "../layout/utils";
-import { app } from "../main";
+import { app } from "../app";
 
 export const copy = elements => {
   if (elements.length) {
-    app.setCopiedElements();
+    app.copySelectedElements();
     fireAlert("success", MESSAGE_COPY_SUCCESS);
   } else {
     fireAlert("danger", MESSAGE_COPY_ERROR);

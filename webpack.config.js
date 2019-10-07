@@ -9,7 +9,7 @@ module.exports = {
    mode: 'development',
    devtool: 'inline-source-map',
    entry: {
-      "main": ["@babel/polyfill", path.join(__dirname, 'src/index.js')],
+      "main": ["@babel/polyfill", path.join(__dirname, 'src/main.js')],
       "css": path.join(__dirname, "src/styles/main.scss"),
    },
    output: {

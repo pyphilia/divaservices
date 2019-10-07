@@ -3,39 +3,42 @@
  */
 import Vue from "vue";
 import { MAX_SCALE, MIN_SCALE } from "../../constants/constants";
-import {
-  ACTION_DELETE_ELEMENTS,
-  ACTION_ADD_ELEMENTS
-} from "../../constants/actions";
+import { mapState, mapActions } from "vuex";
 
 const Toolsbar = Vue.component("Toolsbar", {
-  props: [
-    "scaleValue",
-    "existSelection",
-    "existHistory",
-    "existFuture",
-    "undoFunc",
-    "redoFunc",
-    "addActionFunc",
-    "selection",
-    "setZoomFunc",
-    "zoomInFunc",
-    "zoomOutFunc"
-  ],
+  props: ["selectedElements"],
+  // props: [
+  //   "scaleValue",
+  //   "existSelection",
+  //   "existHistory",
+  //   "existFuture",
+  //   "undoFunc",
+  //   "redoFunc",
+  //   "addActionFunc",
+  //   "selection",
+  //   "setZoomFunc",
+  //   "zoomInFunc",
+  //   "zoomOutFunc"
+  // ],
   methods: {
     updateZoom(event) {
       this.setZoomFunc(event.target.value / 100);
     },
     deleteAction() {
-      this.addActionFunc(ACTION_DELETE_ELEMENTS, { elements: this.selection });
+      this.deleteElements({ elements: this.selectedElements });
     },
     duplicateAction() {
-      this.addActionFunc(ACTION_ADD_ELEMENTS, {
-        elements: [...this.selection]
-      });
-    }
+      this.duplicateElements({ elements: this.selectedElements });
+    },
+    ...mapActions("Zoom", ["zoomIn", "zoomOut"]),
+    ...mapActions("Interface", ["duplicateElements", "deleteElements"])
   },
   computed: {
+    ...mapState("Zoom", ["scale"]),
+    ...mapState("Interface", ["elements", "paper"]),
+    existSelection() {
+      return this.selectedElements.length > 0;
+    },
     toolsbarIcons() {
       return [
         {
@@ -70,19 +73,23 @@ const Toolsbar = Vue.component("Toolsbar", {
         },
         {
           "zoom in": {
-            action: this.zoomInFunc,
+            action: () => {
+              this.zoomIn({ paper: this.paper });
+            },
             icon: "fas fa-search-plus",
             requireZoom: true,
             condition: () => {
-              return this.scaleValue >= MAX_SCALE;
+              return this.scale >= MAX_SCALE;
             }
           },
           "zoom out": {
-            action: this.zoomOutFunc,
+            action: () => {
+              this.zoomOut({ paper: this.paper });
+            },
             icon: "fas fa-search-minus",
             requireZoom: true,
             condition: () => {
-              return this.scaleValue <= MIN_SCALE;
+              return this.scale <= MIN_SCALE;
             }
           },
           "zoom slider": {
@@ -94,13 +101,14 @@ const Toolsbar = Vue.component("Toolsbar", {
       ];
     },
     sliderValue() {
-      return Math.ceil(this.scaleValue * 100);
+      return Math.ceil(this.scale * 100);
     }
   },
+  // || (requireHistory &&!existHistory) || (requireFuture && !existFuture)
   template: `<div id="toolsbar">
   <div v-for="group in toolsbarIcons" class="group">
-  <a v-for="({id, action, icon, element, model, requireHistory, requireFuture, requireSelection, requireZoom, condition}, name) in group" :id="id" :title="name" @click="action($event, {})"
-  :class="{disabled: (requireSelection && !existSelection) || (requireHistory &&!existHistory) || (requireFuture && !existFuture) || (requireZoom && condition())}">
+  <a v-for="({id, action, icon, element, model, requireHistory, requireFuture, requireSelection, requireZoom, condition}, name) in group" :id="id" :title="name" @click="action()"
+  :class="{disabled: (requireSelection && !existSelection) || (requireZoom && condition())}">
   
   <div v-if="name == 'zoom slider'" class="dropdown">
   <button class="btn btn-secondary btn-sm  dropdown-toggle" type="button" id="zoomDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

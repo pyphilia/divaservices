@@ -5,12 +5,12 @@ import Vue from "vue";
 import groupBy from "lodash.groupby";
 import { categoryName } from "../../constants/constants";
 import { webservices } from "../../constants/globals";
-import { ACTION_ADD_ELEMENT } from "../../constants/actions";
 import {
   ALGO_ITEM_CLASS,
   ALGO_ITEM_WRAPPER,
   ALGO_SEARCH_CONTAINER
 } from "../../constants/selectors";
+import { mapActions } from "vuex";
 
 const alphabeticalOrder = (a, b) => {
   const x = a.name.toLowerCase();
@@ -19,7 +19,6 @@ const alphabeticalOrder = (a, b) => {
 };
 
 const LeftSidebar = Vue.component("LeftSidebar", {
-  props: ["addActionFunc"],
   data: function() {
     return {
       services: (() => {
@@ -63,9 +62,6 @@ const LeftSidebar = Vue.component("LeftSidebar", {
           return string;
         }
       },
-      addElement: name => {
-        this.addActionFunc(ACTION_ADD_ELEMENT, { name });
-      },
       categoryClick: category => {
         this.resetSearch();
 
@@ -82,7 +78,8 @@ const LeftSidebar = Vue.component("LeftSidebar", {
             behavior: "smooth"
           });
         });
-      }
+      },
+      ...mapActions("Interface", ["addElementByName"])
     };
   },
   computed: {
@@ -128,7 +125,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
   </div>
   <div id="algo-items-wrapper">
   <div id="algo-items">
-  <div v-for="{type, name} in results" :class="'${ALGO_ITEM_CLASS} ' + type" :name="name" @click="addElement(name)"><span class="icon"></span><span class="name" v-html="boldRegInString(name)"></span></div>
+  <div v-for="{type, name} in results" :class="'${ALGO_ITEM_CLASS} ' + type" :name="name" @click="addElementByName(name)"><span class="icon"></span><span class="name" v-html="boldRegInString(name)"></span></div>
   </div>
   </div>
   </div>
