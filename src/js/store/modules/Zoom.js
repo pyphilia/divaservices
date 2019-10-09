@@ -61,6 +61,10 @@ const Zoom = {
       const nextScale = state.scale + 2 / zoomStep;
       const position = computePaperCenterPosition(paper);
       commit("CHANGE_ZOOM", { stateScale: nextScale, delta: 1, ...position });
+    },
+    setZoom({ commit }, { nextScale, paper }) {
+      const position = computePaperCenterPosition(paper);
+      commit("CHANGE_ZOOM", { stateScale: nextScale, delta: 1, ...position });
     }
   }
 };

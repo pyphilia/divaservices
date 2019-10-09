@@ -5,16 +5,17 @@ import {
   TOOLTIP_CLASS,
   NO_PARAMETER_CLASS
 } from "./constants/selectors";
-import { graph } from "./layout/interface";
 import {
   computeBoxWidth,
   computeTitleLength,
   computeBoxHeight
 } from "./layout/utils";
 import { DEFAULT_OPTIONS } from "../config";
+import { app } from "./app";
 
 const changePortDetails = event => {
   const prop = event.target.checked ? "block" : "none";
+  const { graph } = app;
   for (const el of graph.getElements()) {
     for (const { id } of el.getPorts()) {
       el.portProp(id, "attrs/text/display", prop);
@@ -24,6 +25,7 @@ const changePortDetails = event => {
 
 const changePorts = event => {
   const prop = event.target.checked ? "block" : "none";
+  const { graph } = app;
   // show prop details
   for (const el of graph.getElements()) {
     for (const { id } of el.getPorts()) {
@@ -65,6 +67,7 @@ const changeParameters = event => {
         el.style.display = "none";
       });
   }
+  const { graph } = app;
   for (const e of graph.getElements()) {
     const newWidth = computeBoxWidth(e, showParameters, true);
     const newHeight = computeBoxHeight(e, showParameters, true);

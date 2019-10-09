@@ -74,16 +74,11 @@
             
             <div class="col">
                 
-                <!-- <file-menu 
-                :add-action-func="addAction" 
-                :undo-func="undo" 
-                :redo-func="redo"
-                :copied-els="copiedElements"
-                :selection="selectedElements"
-                :exist-selection="selectedElements.length > 0" 
-                :exist-history='history.length > 0' 
-                :exist-future='future.length > 0'>
-            </file-menu>> -->
+                <file-menu 
+                :copied-elements="copiedElements"
+                :selected-elements="selectedElements"
+                >
+            </file-menu>
             
         </div>
         
@@ -94,7 +89,7 @@
         <div id="main" class="col p-0 h-100">
             
             <!-- minimap -->
-            <minimap :paper="paper" :graph="graph"></minimap>
+            <minimap :translation="translation" :paper="paper" :graph="graph"></minimap>
             
             <!-- trash    -->
             <!-- <div id="trash"><i class="fas fa-trash"></i></div> -->
@@ -104,19 +99,10 @@
             
             <div id="message"></div>
             
-            <toolsbar :selected-elements="selectedElements"></toolsbar>
+            <toolsbar  :paper="paper" :selected-elements="selectedElements"></toolsbar>
             
             
         </div>
-        <!-- <div id="right-sidebar" class="col-1">
-            <nav class="nav flex-column">
-                <button type="button" class="btn btn-primary" name="button" id="save">Save</button> 
-                <button type="button" class="btn btn-primary" name="button" id="clear">Clear</button> 
-                <button type="button" class="btn btn-primary" name="button" id="resetZoom">Reset Zoom</button> 
-                <button type="button" class="btn btn-primary" name="button" id="fitContent">Fit Content</button> 
-                <button type="button" class="btn btn-primary" name="button" id="read">read</button> 
-            </nav>
-        </div> -->
     </div>
 </div>
 <script src="main.js"></script>

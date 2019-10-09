@@ -2,6 +2,7 @@ import Vue from "vue";
 import * as joint from "jointjs";
 import { mapMutations, mapActions, mapState } from "vuex";
 import Toolsbar from "./layout/components/Toolsbar";
+import FileMenu from "./layout/components/FileMenu";
 import LeftSidebar from "./layout/components/LeftSidebar";
 import Minimap from "./layout/components/Minimap";
 import store from "./store/store";
@@ -12,7 +13,7 @@ import {
   highlightSelection,
   unHighlight
 } from "./store/modules/Selection/mutations";
-import { MAX_SCALE, MIN_SCALE } from "./constants/constants";
+import { MAX_SCALE, MIN_SCALE, Inputs, THEME } from "./constants/constants";
 import { addElementFromId, addElementByName } from "./elements/addElement";
 import { deleteElementByBoxId } from "./elements/deleteElement";
 import { initKeyboardEvents } from "./events/keyboardEvents";
@@ -22,6 +23,11 @@ import {
   ATTR_TYPE,
   ATTR_TYPE_ALLOWED
 } from "./constants/selectors";
+import {
+  setInputValueInElement,
+  setSelectValueInElement
+} from "./layout/inputs";
+import { equalObjects } from "./utils/utils";
 
 // matching algorithm for ports to be linked and highlighted
 /* eslint-disable-next-line no-unused-vars */
@@ -71,7 +77,8 @@ export let app;
     store,
     data: {
       graph: new joint.dia.Graph(),
-      paper: null
+      paper: null,
+      translation: { tx: 0, ty: 0 }
     },
     computed: {
       ...mapState("Interface", ["elements", "areaSelection"]),
@@ -88,12 +95,21 @@ export let app;
       },
       deletedElements() {
         return this.elements.filter(el => el.deleted);
+      },
+      // defaultParamsChangedElements() {
+      //   return this.elements.filter(el => el.paramsChanged);
+      // },
+      defaultParamsElements() {
+        return this.elements.map(({ boxId, defaultParams }) => {
+          return { boxId, defaultParams };
+        });
       }
     },
     components: {
       LeftSidebar,
       Minimap,
-      Toolsbar
+      Toolsbar,
+      FileMenu
     },
     methods: {
       unSelectAllElements() {
@@ -102,44 +118,73 @@ export let app;
       addElementToSelection(cellView) {
         this.addElementToSelection(cellView);
       },
+      translate(newX, newY) {
+        this.paper.translate(newX * this.scale, newY * this.scale);
+        this.translation = this.paper.translate();
+      },
+      zoomInFromApp() {
+        this.zoomIn({ paper: this.paper });
+      },
+
+      zoomOutFromApp() {
+        this.zoomOut({ paper: this.paper });
+      },
       ...mapActions("Interface", [
         "unSelectAllElements",
         "addElementToSelection",
         "copySelectedElements",
         "duplicateElements",
-        "deleteElements"
+        "deleteElements",
+        "setSelectValueInElement",
+        "setInputValueInElement"
       ]),
+      ...mapActions("Zoom", ["zoomIn", "zoomOut"]),
       ...mapMutations("Interface", [
         "initAreaSelection",
         "endAreaSelection",
-        "computeAreaSelection",
-        "setSelectValueInElement"
+        "computeAreaSelection"
       ]),
       ...mapMutations("Zoom", ["CHANGE_ZOOM"])
     },
     watch: {
-      currentElements(newValue, oldValue) {
-        console.log("qwert", this.graph.getElements());
-        for (const el of newValue) {
-          const { boxId, fromId, type } = el;
+      currentElements: {
+        handler(newValue, oldValue) {
+          console.log("currentelements changed");
 
           // if boxId element does not exist in the graph, we add it
-          if (!getElementByBoxId(boxId)) {
-            if (fromId) {
-              addElementFromId(el);
-            } else {
-              console.log(el);
-              addElementByName(type, el);
-            }
+          for (const el of newValue.filter(
+            ({ boxId }) => !getElementByBoxId(boxId)
+          )) {
+            const { fromId, type } = el;
+            fromId ? addElementFromId(el) : addElementByName(type, el);
+          }
+
+          // remove element removed from arr
+          // cannot use arr.includes because states are deep cloned
+          for (const el of oldValue.filter(
+            el => newValue.filter(v => v.boxId == el.boxId).length == 0
+          )) {
+            deleteElementByBoxId(el.boxId);
           }
         }
-
-        // remove element removed from arr
-        // cannot use arr.includes because states are deep cloned
-        for (const el of oldValue.filter(
-          el => newValue.filter(v => v.boxId == el.boxId).length == 0
-        )) {
-          deleteElementByBoxId(el.boxId);
+      },
+      defaultParamsElements: {
+        deep: true,
+        handler(newValue, oldValue) {
+          const difference = newValue.filter(el => {
+            const v = oldValue.find(e => e.boxId == el.boxId);
+            return v && !equalObjects(v.defaultParams, el.defaultParams);
+          });
+          for (const param of difference) {
+            setSelectValueInElement(
+              param.boxId,
+              param.defaultParams[Inputs.SELECT.type]
+            );
+            setInputValueInElement(
+              param.boxId,
+              param.defaultParams[Inputs.NUMBER.type]
+            );
+          }
         }
       },
       deletedElements(newValue) {
@@ -213,6 +258,9 @@ export let app;
         /*eslint no-unused-vars: ["error", { "args": "none" }]*/
         validateConnection
       });
+
+      this.paper.options.highlighting.magnetAvailability =
+        THEME.magnetAvailabilityHighlighter;
 
       this.$nextTick(() => {
         initPaperEvents();

@@ -24,29 +24,36 @@ import {
   TOOLTIP_CLASS,
   NO_PARAMETER_CLASS,
   PARAMETER_SELECTS,
-  PARAMETER_INPUTS
+  PARAMETER_INPUTS,
+  INTERFACE_ROOT
 } from "../constants/selectors";
 import { objectToString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
 
-export const setSelectValueInElement = (element, select) => {
-  const s = select.find(":selected");
-  const selectEl = select.parent().parent();
-  const value = s.attr("value");
-  const defaultValue = select.data("default");
-  const attr = selectEl.attr("name");
-
-  element.attributes.defaultParams[attr] = { value, defaultValue };
-
-  app.setSelectValueInElement({ element, attr, value });
+export const setSelectValueInElement = (boxId, parameters) => {
+  for (const [key, { value }] of Object.entries(parameters)) {
+    // we need to precise paper root because of the minimap duplicate elements
+    const el = $(
+      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] .select[name="${key}"] ${Inputs.SELECT.tag}`
+    );
+    if (el.find(":selected").val() != value) {
+      $(el)
+        .val(value)
+        .trigger("change.select2");
+    }
+  }
 };
 
-export const setInputValueInElement = (element, input) => {
-  const value = input.val();
-  const attr = input.attr("name");
-  const defaultValue = input.data("default");
-  element.attributes.defaultParams[attr] = { value, defaultValue };
+export const setInputValueInElement = (boxId, parameters) => {
+  for (const [key, { value }] of Object.entries(parameters)) {
+    // we need to precise paper root because of the minimap duplicate elements
+    const el = $(
+      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Inputs.NUMBER.tag}[name="${key}"]`
+    );
+    el.val(value);
+    checkInputValue(el);
+  }
 };
 
 export function resetValue(event) {
@@ -154,13 +161,13 @@ export const createSelect = (
 
   newSelect.append(nameEl, wrapperSelect, reset, tooltip);
 
-  // add select2 on elements
-  // avoid select click bug
-  setSelectValueInElement(element, selectEl);
-
   // update param
   selectEl.on("change", function() {
-    setSelectValueInElement(element, selectEl);
+    const select = $(this);
+    const s = select.find(":selected");
+    const value = s.attr("value");
+
+    app.setSelectValueInElement({ element, attr: name, value });
   });
 
   selectEl.on("select2:open", function() {
@@ -237,21 +244,19 @@ export const createInput = (
   // update param
   inputEl.on({
     blur: function() {
-      const el = $(this);
-      setInputValueInElement(element, el);
-      el.trigger("input");
+      const input = $(this);
+      const value = input.val();
+      const attr = input.attr("name");
+      app.setInputValueInElement({ element, attr, value });
+      checkInputValue(input);
     },
     click: function() {
       $(this).select();
     },
     input: function() {
-      const el = $(this);
-      setInputValueInElement(element, el);
-      checkInputValue($(this));
+      // do not save each time you write, or it would be annoying
     }
   });
-
-  setInputValueInElement(element, inputEl);
 
   // evaluate default parameters
   checkInputValue(inputEl);

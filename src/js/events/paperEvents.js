@@ -70,8 +70,7 @@ export const initPaperEvents = () => {
         const currentScale = paper.scale();
         const newX = event.offsetX / currentScale.sx - dragStartPosition.x;
         const newY = event.offsetY / currentScale.sy - dragStartPosition.y;
-        paper.translate(newX * currentScale.sx, newY * currentScale.sy);
-        // app.activity = true;
+        app.translate(newX, newY);
       }
 
       // area selection
@@ -133,7 +132,6 @@ export const initPaperEvents = () => {
     // if control key is not hold, a different
     // the current selection is reset
     if (!ctrlDown) {
-      console.log(app);
       app.unSelectAllElements();
     }
 

@@ -10,7 +10,7 @@ import { mapState } from "vuex";
 const SCALE_CONTENT_PADDING = 10;
 
 const Minimap = Vue.component("Minimap", {
-  props: ["graph", "paper"],
+  props: ["graph", "paper", "translation"],
   data: function() {
     return {
       mapDragFlag: false,
@@ -24,6 +24,13 @@ const Minimap = Vue.component("Minimap", {
     };
   },
   computed: {
+    // translation() {
+    //   console.log(this.paper);
+    //   if(this.paper) {
+    //     console.log(this.paper.translate());
+    //   }
+    //   return this.paper ? this.paper.translate() : {tx:0, ty:0}
+    // },
     ...mapState("Interface", ["elements"]),
     ...mapState("Zoom", ["scale"])
   },
@@ -60,6 +67,12 @@ const Minimap = Vue.component("Minimap", {
     }
   },
   watch: {
+    translation: {
+      deep: true,
+      handler() {
+        this.update();
+      }
+    },
     scale: function() {
       this.update();
     },
@@ -118,7 +131,8 @@ const Minimap = Vue.component("Minimap", {
   },
   template: `<div id="minimap-container">
     <div id="minimap-paper"></div>
-    <div id="minimap-navigator"></div>
+    <div id="minimap-navigator">
+    </div>
 </div>`
 });
 

@@ -4,25 +4,14 @@
 import Vue from "vue";
 import { MAX_SCALE, MIN_SCALE } from "../../constants/constants";
 import { mapState, mapActions } from "vuex";
+import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
+import { app } from "../../app";
 
 const Toolsbar = Vue.component("Toolsbar", {
-  props: ["selectedElements"],
-  // props: [
-  //   "scaleValue",
-  //   "existSelection",
-  //   "existHistory",
-  //   "existFuture",
-  //   "undoFunc",
-  //   "redoFunc",
-  //   "addActionFunc",
-  //   "selection",
-  //   "setZoomFunc",
-  //   "zoomInFunc",
-  //   "zoomOutFunc"
-  // ],
+  props: ["selectedElements", "paper"],
   methods: {
     updateZoom(event) {
-      this.setZoomFunc(event.target.value / 100);
+      this.setZoom({ nextScale: event.target.value / 100, paper: this.paper });
     },
     deleteAction() {
       this.deleteElements({ elements: this.selectedElements });
@@ -30,12 +19,18 @@ const Toolsbar = Vue.component("Toolsbar", {
     duplicateAction() {
       this.duplicateElements({ elements: this.selectedElements });
     },
-    ...mapActions("Zoom", ["zoomIn", "zoomOut"]),
+    existHistory() {
+      return UndoRedoHistory.canUndo();
+    },
+    existFuture() {
+      return UndoRedoHistory.canRedo();
+    },
+    ...mapActions("Zoom", ["zoomOut", "setZoom"]),
     ...mapActions("Interface", ["duplicateElements", "deleteElements"])
   },
   computed: {
     ...mapState("Zoom", ["scale"]),
-    ...mapState("Interface", ["elements", "paper"]),
+    ...mapState("Interface", ["elements"]),
     existSelection() {
       return this.selectedElements.length > 0;
     },
@@ -57,14 +52,18 @@ const Toolsbar = Vue.component("Toolsbar", {
         },
         {
           undo: {
-            action: this.undoFunc,
+            action: () => {
+              UndoRedoHistory.undo();
+            },
             id: "undo",
             classNames: "disabled",
             icon: "fas fa-undo",
             requireHistory: true
           },
           redo: {
-            action: this.redoFunc,
+            action: () => {
+              UndoRedoHistory.redo();
+            },
             classNames: "disabled",
             id: "redo",
             icon: "fas fa-redo",
@@ -74,7 +73,7 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           "zoom in": {
             action: () => {
-              this.zoomIn({ paper: this.paper });
+              app.zoomInFromApp();
             },
             icon: "fas fa-search-plus",
             requireZoom: true,
@@ -84,7 +83,7 @@ const Toolsbar = Vue.component("Toolsbar", {
           },
           "zoom out": {
             action: () => {
-              this.zoomOut({ paper: this.paper });
+              app.zoomOutFromApp();
             },
             icon: "fas fa-search-minus",
             requireZoom: true,
@@ -104,11 +103,10 @@ const Toolsbar = Vue.component("Toolsbar", {
       return Math.ceil(this.scale * 100);
     }
   },
-  // || (requireHistory &&!existHistory) || (requireFuture && !existFuture)
   template: `<div id="toolsbar">
   <div v-for="group in toolsbarIcons" class="group">
   <a v-for="({id, action, icon, element, model, requireHistory, requireFuture, requireSelection, requireZoom, condition}, name) in group" :id="id" :title="name" @click="action()"
-  :class="{disabled: (requireSelection && !existSelection) || (requireZoom && condition())}">
+  :class="{disabled: (requireSelection && !existSelection) || (requireZoom && condition()) || (requireHistory &&!existHistory()) || (requireFuture && !existFuture())}">
   
   <div v-if="name == 'zoom slider'" class="dropdown">
   <button class="btn btn-secondary btn-sm  dropdown-toggle" type="button" id="zoomDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

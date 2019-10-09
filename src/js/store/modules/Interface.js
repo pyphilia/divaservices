@@ -1,11 +1,19 @@
-import { addElementByName } from "../../elements/addElement";
+import Vue from "vue";
+import { buildElementFromName } from "../../elements/addElement";
 import selectionMutations from "./Selection/mutations";
 import areaSelectionMutations from "./AreaSelection/mutations";
 import areaSelectionState from "./AreaSelection/state";
 import { generateUniqueId } from "../../layout/utils";
+import { Inputs } from "../../constants/constants";
 
 const addElementToElements = (elements, element) => {
-  elements.push({ ...element, selected: false, deleted: false, copied: false });
+  elements.push({
+    ...element,
+    selected: false,
+    deleted: false,
+    copied: false,
+    paramsChanged: false
+  });
 };
 
 const deleteElement = element => {
@@ -36,8 +44,7 @@ const Interface = {
       state.copiedElements = state.selectedElements;
     },
 
-    ADD_ELEMENT(state, { element }) {
-      console.log("TCL: ADD_ELEMENT -> element", element);
+    ADD_ELEMENT(state, element) {
       addElementToElements(state.elements, element);
     },
     ADD_ELEMENTS(state, { elements }) {
@@ -73,29 +80,39 @@ const Interface = {
         .filter(el => el.selected)
         .forEach(el => (el.copied = true));
     },
-    // setSelectValueInElement(state, { element, value, attr }) {
-    // element might not exist in arr yet
-    // const el = state.elements.filter(el => el.boxId == element.attributes.boxId)[0]
-    // el.defaultParams[attr].value = value;
-    // console.log('el', el);
-    // },
+    SET_SELECT_VALUE(state, { element, value, attr }) {
+      const el = state.elements.find(
+        el => el.boxId == element.attributes.boxId
+      );
+      Vue.set(el.defaultParams, Inputs.SELECT.type, {
+        ...el.defaultParams[Inputs.SELECT.type],
+        [attr]: { value }
+      });
+    },
+    SET_INPUT_VALUE(state, { element, value, attr }) {
+      const el = state.elements.find(
+        el => el.boxId == element.attributes.boxId
+      );
+      Vue.set(el.defaultParams, Inputs.NUMBER.type, {
+        ...el.defaultParams[Inputs.NUMBER.type],
+        [attr]: { value }
+      });
+    },
     ...selectionMutations,
     ...areaSelectionMutations
   },
   actions: {
     addElementByName({ commit }, name) {
-      const element = addElementByName(name);
-      // boxId, size, position, defaultParams
-      commit("ADD_ELEMENT", { element });
+      // buils necessary data to build an element afterwards
+      const elementPayload = buildElementFromName(name);
+      commit("ADD_ELEMENT", elementPayload);
     },
     duplicateElements({ commit }, { elements }) {
-      console.log("TCL: duplicateElmts");
       commit("ADD_ELEMENTS", {
         elements
       });
     },
     deleteElements({ commit }, { elements }) {
-      console.log("TCL: delete selected");
       commit("DELETE_ELEMENTS", {
         elements
       });
@@ -108,9 +125,14 @@ const Interface = {
     },
     copySelectedElements({ commit }) {
       commit("COPY_SELECTION");
+    },
+    setSelectValueInElement({ commit }, payload) {
+      commit("SET_SELECT_VALUE", payload);
+    },
+    setInputValueInElement({ commit }, payload) {
+      commit("SET_INPUT_VALUE", payload);
     }
-  },
-  getters: {}
+  }
 };
 
 export default Interface;

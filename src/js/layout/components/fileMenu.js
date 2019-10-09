@@ -1,25 +1,30 @@
 import Vue from "vue";
 import * as $ from "jquery";
 import { copy } from "../../events/controls";
-import { ACTION_ADD_ELEMENTS } from "../../constants/actions";
-import { graph } from "../interface";
+import { app } from "../../app";
+import { mapActions, mapState } from "vuex";
+import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
+import { zoomInCondition, zoomOutCondition } from "./utils";
 
 const FileMenu = Vue.component("FileMenu", {
-  props: [
-    "existSelection",
-    "existFuture",
-    "existHistory",
-    "selection",
-    "copiedEls",
-    "redoFunc",
-    "undoFunc",
-    "addActionFunc"
-  ],
-  data: function() {
-    return {
-      // selection: this.selectedElements,
-      copyEls: this.copiedElements,
-      menu: {
+  props: ["selectedElements", "copiedElements"],
+  methods: {
+    ...mapActions("Interface", ["duplicateElements"]),
+
+    existHistory() {
+      return UndoRedoHistory.canUndo();
+    },
+    existFuture() {
+      return UndoRedoHistory.canRedo();
+    }
+  },
+  computed: {
+    ...mapState("Zoom", ["scale"]),
+    existSelection() {
+      return this.selectedElements.length > 0;
+    },
+    menu() {
+      return {
         File: [
           { name: "New", action: () => {} },
           { name: "Open", action: () => {} }
@@ -35,14 +40,14 @@ const FileMenu = Vue.component("FileMenu", {
           {
             name: "Paste",
             action: () => {
-              this.addActionFunc(ACTION_ADD_ELEMENTS, [...this.copiedEls]);
+              app.duplicateElements({ elements: this.copiedElements });
             },
             requireSelection: true
           },
           {
             name: "Cut",
             action: () => {
-              copy(this.selection);
+              copy(this.selectedElements);
               console.log("and i should delete but i am not implemented");
             },
             requireSelection: true
@@ -51,20 +56,20 @@ const FileMenu = Vue.component("FileMenu", {
           {
             name: "Clear",
             action: () => {
-              graph.clear();
+              app.graph.clear();
             }
           },
           {
             name: "Undo",
             action: () => {
-              this.undoFunc();
+              UndoRedoHistory.undo();
             },
             requireHistory: true
           },
           {
             name: "Redo",
             action: () => {
-              this.redoFunc();
+              UndoRedoHistory.redo();
             },
             requireFuture: true
           },
@@ -72,8 +77,26 @@ const FileMenu = Vue.component("FileMenu", {
           { name: "Select All", action: () => {} },
           { name: "Unselect", action: () => {}, requireSelection: true },
           { name: "separator" },
-          { name: "Zoom In", action: () => {} },
-          { name: "Zoom Out", action: () => {} },
+          {
+            name: "Zoom In",
+            action: () => {
+              app.zoomInFromApp();
+            },
+            requireZoom: true,
+            condition: () => {
+              return zoomInCondition(this.scale);
+            }
+          },
+          {
+            name: "Zoom Out",
+            action: () => {
+              app.zoomOutFromApp();
+            },
+            requireZoom: true,
+            condition: () => {
+              return zoomOutCondition(this.scale);
+            }
+          },
           { name: "Reset Zoom", action: () => {} },
           { name: "Fit Content", action: () => {} }
         ],
@@ -91,8 +114,8 @@ const FileMenu = Vue.component("FileMenu", {
             }
           }
         ]
-      }
-    };
+      };
+    }
   },
   template: `
   <nav id="navbar-menu" class="navbar navbar-expand-lg">
@@ -105,8 +128,8 @@ const FileMenu = Vue.component("FileMenu", {
   <li class="nav-item dropdown" v-for="(item, menuName) in menu">
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{menuName}}</a>
   <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-  <a v-for="{name, action, requireSelection, requireHistory, requireFuture} in item" v-if="name != 'separator'" @click="action"
-  :class="{'dropdown-item':true, disabled:  (requireSelection && !existSelection) || (requireHistory &&!existHistory) || (requireFuture && !existFuture)} " href="#">{{name}}</a>
+  <a v-for="{name, action, condition, requireSelection, requireZoom, requireHistory, requireFuture} in item" v-if="name != 'separator'" @click="action"
+  :class="{'dropdown-item':true, disabled:  (requireSelection && !existSelection) || (requireZoom && condition()) || (requireHistory && !existHistory()) || (requireFuture && !existFuture())} " href="#">{{name}}</a>
   <div v-else class="dropdown-divider"></div>
   </div>
   </li>

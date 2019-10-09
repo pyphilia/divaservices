@@ -1,11 +1,12 @@
-import { graph } from "../layout/interface";
 import { getElementByBoxId } from "../layout/utils";
+import { app } from "../app";
 
 const deleteElement = element => {
   element.remove();
 };
 
 export const deleteElementById = id => {
+  const { graph } = app;
   const cell = graph.getCell(id);
   deleteElement(cell);
 };

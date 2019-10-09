@@ -50,18 +50,18 @@ const createBox = (e, { position, size, boxId, defaultParams = {} }) => {
   }
 
   const template = `<g class="scalable"><rect></rect></g>
-      <foreignObject class="${FOREIGN_CLASS}" x="0" 
-      y="-${titleHeight}" width="${size.width}" height="${size.height +
+  <foreignObject class="${FOREIGN_CLASS}" x="0" boxId="${boxId}"
+  y="-${titleHeight}" width="${size.width}" height="${size.height +
     titleHeight}">
-      <body xmlns="http://www.w3.org/1999/xhtml">
-      <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
-      <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start" style="height:${titleHeight}px">
-      <div class="${ICON_COL} icon"></div>
-      <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${label}</${BOX_TITLE_HTML_TAG}>
-      </div>
-      </div>
-      </body>
-      </foreignObject>`;
+    <body xmlns="http://www.w3.org/1999/xhtml">
+    <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
+    <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start" style="height:${titleHeight}px">
+    <div class="${ICON_COL} icon"></div>
+    <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${label}</${BOX_TITLE_HTML_TAG}>
+    </div>
+    </div>
+    </body>
+    </foreignObject>`;
 
   const Box = joint.shapes.basic.Rect.define(label, {
     markup: template,
@@ -142,9 +142,20 @@ export const transformWebserviceForGraph = webservice => {
   // handle params
   const params = inputs.filter(inp => isParamInput(inp));
 
+  // build default parameters from
+  const defaultParams = { select: {}, number: {} };
+  for (const p of params) {
+    let { type, name, defaultValue, values } = p;
+    if (type == "select") {
+      defaultValue = values[defaultValue];
+    }
+    defaultParams[type][name] = { value: defaultValue, defaultValue };
+  }
+
   const ret = {
     name,
     description,
+    defaultParams,
     label,
     params,
     ports,
@@ -169,6 +180,24 @@ export const addElementFromTransformedJSON = (e, parameters = {}) => {
   setParametersInForeignObject(element);
 
   return element;
+};
+
+export const buildElementFromName = name => {
+  const webservice = webservices.filter(service => service.name == name)[0];
+  const el = transformWebserviceForGraph(webservice);
+
+  const boxId = generateUniqueId();
+  const { defaultParams } = el;
+
+  const showParameter =
+    layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
+  const size = {
+    width: computeBoxWidth(el, showParameter),
+    height: computeBoxHeight(el, showParameter)
+  };
+  const position = findEmptyPosition(size);
+
+  return { boxId, defaultParams, size, position, type: name };
 };
 
 // helper function to find an empty position to add

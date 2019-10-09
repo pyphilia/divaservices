@@ -1,4 +1,5 @@
 import cloneDeep from "lodash.clonedeep";
+import { equalObjects } from "../../utils/utils";
 
 class UndoRedoHistory {
   constructor() {
@@ -11,13 +12,30 @@ class UndoRedoHistory {
     this.store = store;
   }
 
+  canUndo() {
+    return this.currentIndex > 0;
+  }
+
+  canRedo() {
+    return this.currentIndex + 1 < this.history.length;
+  }
+
   addState(state) {
-    // may be we have to remove redo steps
+    // maybe we have to remove redo steps
     if (this.currentIndex + 1 < this.history.length) {
       this.history.splice(this.currentIndex + 1);
     }
+    if (!equalObjects(state, this.history[this.currentIndex])) {
+      this.history.push(state);
+      this.currentIndex++;
+      console.log(this.history);
+      console.log("HISTORY ->", this.history[this.currentIndex]);
+    }
+  }
+
+  replaceLastState(state) {
+    this.history.splice(-1);
     this.history.push(state);
-    this.currentIndex++;
     console.log("HISTORY ->", this.history[this.currentIndex]);
   }
 
@@ -31,14 +49,19 @@ class UndoRedoHistory {
       // (same on redo)
       this.store.replaceState(cloneDeep(prevState));
       this.currentIndex--;
-      console.log("HISTORY ->", this.history[this.currentIndex]);
+      console.log(this.history);
+      console.log(
+        "UNDO HISTORY ->",
+        this.history[this.currentIndex].Interface.elements
+      );
     }
   }
 
   redo() {
     if (this.currentIndex + 1 < this.history.length) {
       const nextState = this.history[this.currentIndex + 1];
-      console.log(nextState);
+      console.log(this.history);
+      console.log("REDO HISTORY ->", nextState.Interface.elements);
       this.store.replaceState(cloneDeep(nextState));
       this.currentIndex++;
     }
