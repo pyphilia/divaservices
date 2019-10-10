@@ -1,9 +1,11 @@
 import Vue from "vue";
+import Split from "split.js";
 import * as joint from "jointjs";
 import { mapMutations, mapActions, mapState } from "vuex";
 import Toolsbar from "./layout/components/Toolsbar";
 import FileMenu from "./layout/components/FileMenu";
 import LeftSidebar from "./layout/components/LeftSidebar";
+import ContextMenus from "./layout/components/ContextMenu";
 import Minimap from "./layout/components/Minimap";
 import store from "./store/store";
 import { initWebservices } from "./constants/globals";
@@ -14,14 +16,16 @@ import {
   unHighlight
 } from "./store/modules/Selection/mutations";
 import { MAX_SCALE, MIN_SCALE, Inputs, THEME } from "./constants/constants";
-import { addElementFromId, addElementByName } from "./elements/addElement";
+import { addElementByName } from "./elements/addElement";
 import { deleteElementByBoxId } from "./elements/deleteElement";
 import { initKeyboardEvents } from "./events/keyboardEvents";
 import {
   INTERFACE_ROOT,
   IN_PORT_CLASS,
   ATTR_TYPE,
-  ATTR_TYPE_ALLOWED
+  ATTR_TYPE_ALLOWED,
+  LEFT_SIDEBAR,
+  MAIN_INTERFACE
 } from "./constants/selectors";
 import {
   setInputValueInElement,
@@ -96,9 +100,6 @@ export let app;
       deletedElements() {
         return this.elements.filter(el => el.deleted);
       },
-      // defaultParamsChangedElements() {
-      //   return this.elements.filter(el => el.paramsChanged);
-      // },
       defaultParamsElements() {
         return this.elements.map(({ boxId, defaultParams }) => {
           return { boxId, defaultParams };
@@ -109,7 +110,8 @@ export let app;
       LeftSidebar,
       Minimap,
       Toolsbar,
-      FileMenu
+      FileMenu,
+      ContextMenus
     },
     methods: {
       unSelectAllElements() {
@@ -149,14 +151,12 @@ export let app;
     watch: {
       currentElements: {
         handler(newValue, oldValue) {
-          console.log("currentelements changed");
-
           // if boxId element does not exist in the graph, we add it
           for (const el of newValue.filter(
             ({ boxId }) => !getElementByBoxId(boxId)
           )) {
-            const { fromId, type } = el;
-            fromId ? addElementFromId(el) : addElementByName(type, el);
+            const { type } = el;
+            addElementByName(type, el);
           }
 
           // remove element removed from arr
@@ -266,6 +266,15 @@ export let app;
         initPaperEvents();
         initKeyboardEvents();
         console.log(this);
+      });
+
+      Split([LEFT_SIDEBAR, MAIN_INTERFACE], {
+        elementStyle: function(dimension, size, gutterSize) {
+          return { "flex-basis": "calc(" + size + "% - " + gutterSize + "px)" };
+        },
+        minSize: [300, 500],
+        sizes: [25, 75],
+        gutterSize: 6
       });
     }
   });

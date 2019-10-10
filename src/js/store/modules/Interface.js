@@ -1,4 +1,5 @@
 import Vue from "vue";
+import cloneDeep from "lodash.clonedeep";
 import { buildElementFromName } from "../../elements/addElement";
 import selectionMutations from "./Selection/mutations";
 import areaSelectionMutations from "./AreaSelection/mutations";
@@ -11,8 +12,7 @@ const addElementToElements = (elements, element) => {
     ...element,
     selected: false,
     deleted: false,
-    copied: false,
-    paramsChanged: false
+    copied: false
   });
 };
 
@@ -51,7 +51,7 @@ const Interface = {
       for (const el of elements) {
         const fromId = el.boxId; // duplicate case, reference to another element
         addElementToElements(state.elements, {
-          ...el,
+          ...cloneDeep(el),
           fromId,
           boxId: generateUniqueId()
         });
@@ -76,27 +76,19 @@ const Interface = {
       state.elements.map(el => (el.selected = false));
     },
     COPY_SELECTION(state) {
-      state.elements
-        .filter(el => el.selected)
-        .forEach(el => (el.copied = true));
+      state.elements.forEach(el => (el.copied = el.selected));
     },
     SET_SELECT_VALUE(state, { element, value, attr }) {
       const el = state.elements.find(
         el => el.boxId == element.attributes.boxId
       );
-      Vue.set(el.defaultParams, Inputs.SELECT.type, {
-        ...el.defaultParams[Inputs.SELECT.type],
-        [attr]: { value }
-      });
+      Vue.set(el.defaultParams[Inputs.SELECT.type][attr], "value", value);
     },
     SET_INPUT_VALUE(state, { element, value, attr }) {
       const el = state.elements.find(
         el => el.boxId == element.attributes.boxId
       );
-      Vue.set(el.defaultParams, Inputs.NUMBER.type, {
-        ...el.defaultParams[Inputs.NUMBER.type],
-        [attr]: { value }
-      });
+      Vue.set(el.defaultParams[Inputs.NUMBER.type][attr], "value", value);
     },
     ...selectionMutations,
     ...areaSelectionMutations

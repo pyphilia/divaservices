@@ -50,23 +50,14 @@ const changeTooltips = event => {
 
 const changeParameters = event => {
   const showParameters = event.target.checked;
-  if (showParameters) {
-    document
-      .querySelectorAll(
-        `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
-      )
-      .forEach(el => {
-        el.style.display = "block";
-      });
-  } else {
-    document
-      .querySelectorAll(
-        `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
-      )
-      .forEach(el => {
-        el.style.display = "none";
-      });
-  }
+  const displayValue = showParameters ? "block" : "none";
+  const els = document.querySelectorAll(
+    `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
+  );
+  els.forEach(el => {
+    el.style.display = displayValue;
+  });
+
   const { graph } = app;
   for (const e of graph.getElements()) {
     const newWidth = computeBoxWidth(e, showParameters, true);

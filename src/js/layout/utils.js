@@ -107,7 +107,9 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
   let nbParam;
   let portsItems;
   if (fromSVG) {
-    nbParam = Object.keys(attributes.defaultParams).length;
+    nbParam =
+      Object.keys(attributes.defaultParams[Inputs.SELECT.type]).length +
+      Object.keys(attributes.defaultParams[Inputs.NUMBER.type]).length;
     portsItems = attributes.ports.items;
   } else {
     nbParam = params.filter(x => isParamInput(x)).length;

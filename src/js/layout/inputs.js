@@ -176,8 +176,6 @@ export const createSelect = (
       ".select2-container--open .select2-dropdown--above"
     );
     if (above) {
-      console.log("TCL: above", above);
-      console.log(above.style.top);
       $(above)
         .find(".select2-results li")
         .height();
@@ -309,13 +307,11 @@ export const checkInputValue = input => {
   input.toggleClass("is-invalid", !isValid);
 };
 
-export const setParametersInForeignObject = element => {
-  const {
-    description,
-    type: label,
-    originalParams,
-    defaultParams
-  } = element.attributes;
+// cannot merge defaultParams in element, because element needs to be "pure"
+// in order to modify it with jointjs functions
+export const setParametersInForeignObject = (element, defaultParams = {}) => {
+  const { description, type: label, originalParams } = element.attributes;
+
   const showParameters =
     layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
 
@@ -340,8 +336,8 @@ export const setParametersInForeignObject = element => {
         "data-placement": "right"
       });
 
-    const defaultValue = defaultParams[paramName]
-      ? defaultParams[paramName].value || defaultParams[paramName]
+    const defaultValue = defaultParams[type][paramName]
+      ? defaultParams[type][paramName].value || defaultParams[type][paramName]
       : null;
     // const defaultValue = defaultParams.params
     //   ? defaultParams.params[paramName].value
@@ -372,6 +368,7 @@ export const setParametersInForeignObject = element => {
       }
       default:
         alert("not handled type : ", type);
+      // }
     }
   }
 

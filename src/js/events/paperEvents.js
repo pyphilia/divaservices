@@ -2,6 +2,7 @@ import * as joint from "jointjs";
 import { THEME } from "../constants/constants";
 import { INTERFACE_ROOT, PORT_SELECTOR } from "../constants/selectors";
 import { spaceDown, ctrlDown } from "./keyboardEvents";
+// import ContextMenu from "../layout/components/ContextMenu";
 
 import { app } from "../app";
 /**
@@ -10,6 +11,11 @@ import { app } from "../app";
  */
 export const initPaperEvents = () => {
   const { paper, graph } = app;
+  const contextMenu = app.$refs.contextmenu;
+
+  document.addEventListener("click", function() {
+    contextMenu.hideContextMenus();
+  });
 
   // paper.on("element:pointerup", () => {
   //   // const trash = document.querySelector(TRASH_SELECTOR);
@@ -35,7 +41,6 @@ export const initPaperEvents = () => {
   let dragStartPosition;
 
   paper.on("blank:pointerdown", (event, x, y) => {
-    // ContextMenuApp.hideContextMenus();
     dragStartPosition = { x: x, y: y };
 
     move = spaceDown;
@@ -128,7 +133,6 @@ export const initPaperEvents = () => {
    */
 
   paper.on("element:pointerdown", (cellView /*, evt, x, y*/) => {
-    // ContextMenuApp.hideContextMenus();
     // if control key is not hold, a different
     // the current selection is reset
     if (!ctrlDown) {
@@ -146,39 +150,26 @@ export const initPaperEvents = () => {
 
   // /**CONTEXT MENU*/
 
-  // paper.on("blank:contextmenu", () => {});
+  paper.on("blank:contextmenu", () => {});
 
-  // paper.on("element:contextmenu", (cellView, evt, x, y) => {
-  //   evt.preventDefault();
-  //   ContextMenuApp.hideContextMenus();
+  paper.on("element:contextmenu", (cellView, evt, x, y) => {
+    evt.preventDefault();
 
-  //   // if control key is not hold, a different
-  //   // the current selection is reset
-  //   if (!ctrlDown) {
-  //     app.unSelectAll();
-  //   }
-  //   app.addCellViewToSelection(cellView);
+    // if control key is not hold, a different
+    // the current selection is reset
+    if (!ctrlDown) {
+      app.unSelectAllElements();
+    }
 
-  //   const screenPos = paper.localToClientPoint(x, y);
-  //   const origin = {
-  //     left: screenPos.x,
-  //     top: screenPos.y
-  //   };
-  //   ContextMenuApp.setPositionToContextMenu("element", origin);
-  //   return false;
-  // });
+    app.addElementToSelection(cellView);
+    contextMenu.setPositionToContextMenu("element", { x, y });
+    return false;
+  });
 
-  // paper.on("blank:contextmenu", (evt, x, y) => {
-  //   evt.preventDefault();
+  paper.on("blank:contextmenu", (evt, x, y) => {
+    evt.preventDefault();
 
-  //   ContextMenuApp.hideContextMenus();
-
-  //   const screenPos = paper.localToClientPoint(x, y);
-  //   const origin = {
-  //     left: screenPos.x,
-  //     top: screenPos.y
-  //   };
-  //   ContextMenuApp.setPositionToContextMenu("paper", origin);
-  //   return false;
-  // });
+    contextMenu.setPositionToContextMenu("paper", { x, y });
+    return false;
+  });
 };

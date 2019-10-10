@@ -34,15 +34,12 @@ import {
 } from "../constants/selectors";
 import { layoutSettingsApp } from "../layoutSettings";
 
-const createBox = (e, { position, size, boxId, defaultParams = {} }) => {
+const createBox = (
+  e,
+  { position, size, boxId, defaultParams = {}, ports: { items } }
+) => {
   const { graph } = app;
-  const {
-    category,
-    label,
-    ports: { items },
-    description,
-    params = {}
-  } = e;
+  const { category, label, description, params = {} } = e;
   const { titleHeight } = computeTitleLength(e);
 
   if (!size) {
@@ -117,27 +114,10 @@ export const transformWebserviceForGraph = webservice => {
   const {
     name: label,
     description,
-    outputs = [],
     inputs = [],
-    type: category
+    type: category,
+    ports
   } = webservice;
-
-  // handle ports
-  const ports = { items: [] };
-  inputs
-    .filter(inp => isPortUserdefined(inp))
-    .forEach(inp => {
-      const port = createPort(inp, IN_PORT_CLASS);
-      if (port.group) {
-        ports.items.push(port);
-      }
-    });
-  outputs.forEach(out => {
-    const port = createPort(out, OUT_PORT_CLASS);
-    if (port.group) {
-      ports.items.push(port);
-    }
-  });
 
   // handle params
   const params = inputs.filter(inp => isParamInput(inp));
@@ -177,14 +157,34 @@ export const addElementFromTransformedJSON = (e, parameters = {}) => {
 
   const element = createBox(e, { ...parameters, boxId });
 
-  setParametersInForeignObject(element);
+  setParametersInForeignObject(element, parameters.defaultParams);
 
   return element;
 };
 
 export const buildElementFromName = name => {
   const webservice = webservices.filter(service => service.name == name)[0];
+  const { outputs = [], inputs = [] } = webservice;
+
   const el = transformWebserviceForGraph(webservice);
+
+  // handle ports
+  const ports = { items: [] };
+  inputs
+    .filter(inp => isPortUserdefined(inp))
+    .forEach(inp => {
+      const port = createPort(inp, IN_PORT_CLASS);
+      if (port.group) {
+        ports.items.push(port);
+      }
+    });
+  outputs.forEach(out => {
+    const port = createPort(out, OUT_PORT_CLASS);
+    if (port.group) {
+      ports.items.push(port);
+    }
+  });
+  el.ports = ports;
 
   const boxId = generateUniqueId();
   const { defaultParams } = el;
@@ -197,7 +197,7 @@ export const buildElementFromName = name => {
   };
   const position = findEmptyPosition(size);
 
-  return { boxId, defaultParams, size, position, type: name };
+  return { boxId, defaultParams, size, position, type: name, ports };
 };
 
 // helper function to find an empty position to add
@@ -244,15 +244,7 @@ export const addElementToGraphFromServiceDescription = (
 ) => {
   const transformedWebservice = transformWebserviceForGraph(webservice);
 
-  const showParameters =
-    layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
-
-  const size = {
-    width: computeBoxWidth(transformedWebservice, showParameters),
-    height: computeBoxHeight(transformedWebservice, showParameters)
-  };
-
-  let { position } = defaultParameters;
+  let { position, size } = defaultParameters;
   if (!position) {
     // avoid adding overlapping elements
     defaultParameters.position = findEmptyPosition(size);
@@ -272,9 +264,9 @@ export const addElementToGraphFromServiceDescription = (
 export const addElementByName = (name, defaultParams = {}) => {
   const algo = webservices.filter(service => service.name == name);
   if (algo.length) {
-    const e = addElementToGraphFromServiceDescription(algo[0], defaultParams);
+    addElementToGraphFromServiceDescription(algo[0], defaultParams);
 
-    return e.attributes; //{ boxId, position };
+    // return e.attributes; //{ boxId, position };
   } else {
     console.error(`${name} doesnt exist`);
   }
@@ -305,24 +297,25 @@ const addElementByCellView = (cellView, boxId) => {
   return { e, id };
 };
 
-export const addElementFromId = element => {
-  const { graph } = app;
-  const { boxId, size, defaultParams, fromId } = element; /*position*/
-  const e = getElementByBoxId(fromId).clone();
-  let id;
-  if (boxId) {
-    e.attributes.boxId = boxId;
-    id = boxId;
-  } else {
-    id = e.attributes.boxId;
-  }
-  // avoid cloning overlap
-  e.attributes.position = findEmptyPosition(size);
+// not that faster, and end in creating some foreignobject with identical boxid
+// export const addElementFromId = element => {
+//   const { graph } = app;
+//   const { boxId, size, defaultParams, fromId } = element; /*position*/
+//   const e = getElementByBoxId(fromId).clone();
+//   let id;
+//   if (boxId) {
+//     e.attributes.boxId = boxId;
+//     id = boxId;
+//   } else {
+//     id = e.attributes.boxId;
+//   }
+//   // avoid cloning overlap
+//   e.attributes.position = findEmptyPosition(size);
 
-  e.addTo(graph);
-  setParametersInForeignObject(e, defaultParams);
-  return { e, id };
-};
+//   e.addTo(graph);
+//   setParametersInForeignObject(e, defaultParams);
+//   return { e, id };
+// };
 
 // return for undo purpose
 export const addElementsByCellView = (elements, ids) => {
@@ -338,18 +331,18 @@ export const addElementsByCellView = (elements, ids) => {
 };
 
 // return for undo purpose
-const restoreElement = element => {
-  const { graph } = app;
-  element.addTo(graph);
-  setParametersInForeignObject(element);
-};
+// const restoreElement = element => {
+//   const { graph } = app;
+//   element.addTo(graph);
+//   setParametersInForeignObject(element);
+// };
 
-export const restoreElements = elements => {
-  for (const el of elements) {
-    restoreElement(el);
-  }
-  return { elements };
-};
+// export const restoreElements = elements => {
+//   for (const el of elements) {
+//     restoreElement(el);
+//   }
+//   return { elements };
+// };
 
 /*ADD LINKS*/
 
