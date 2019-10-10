@@ -29,10 +29,10 @@ export const readWorkflow = async () => {
         Service: [service]
       } = step;
 
-      const webserviceObj = webservices.filter(
+      const webserviceObj = webservices.find(
         //@TODO need to read key value --- workflow will keep key in parameters
         webservice => webservice.id == service.Key[0]
-      )[0];
+      );
       if (webserviceObj.length) {
         alert("step ", name, " not found");
       }
@@ -104,12 +104,10 @@ export const readWorkflow = async () => {
       const sMapedBox = idMap[source.boxId];
       const tMapedBox = idMap[target.boxId];
 
-      const sPortId = sMapedBox.ports.filter(
-        port => port.name == source.portName
-      )[0].id;
-      const tPortId = tMapedBox.ports.filter(
-        port => port.name == target.portName
-      )[0].id;
+      const sPortId = sMapedBox.ports.find(port => port.name == source.portName)
+        .id;
+      const tPortId = tMapedBox.ports.find(port => port.name == target.portName)
+        .id;
       const linkObj = {
         source: { id: sMapedBox.id, port: sPortId },
         target: { id: tMapedBox.id, port: tPortId }

@@ -30,6 +30,7 @@ import {
 import { objectToString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
+import { elementOnChangePosition } from "../events/paperEvents";
 
 export const setSelectValueInElement = (boxId, parameters) => {
   for (const [key, { value }] of Object.entries(parameters)) {
@@ -176,8 +177,6 @@ export const createSelect = (
       ".select2-container--open .select2-dropdown--above"
     );
     if (above) {
-      console.log("TCL: above", above);
-      console.log(above.style.top);
       $(above)
         .find(".select2-results li")
         .height();
@@ -309,13 +308,11 @@ export const checkInputValue = input => {
   input.toggleClass("is-invalid", !isValid);
 };
 
-export const setParametersInForeignObject = element => {
-  const {
-    description,
-    type: label,
-    originalParams,
-    defaultParams
-  } = element.attributes;
+// cannot merge defaultParams in element, because element needs to be "pure"
+// in order to modify it with jointjs functions
+export const setParametersInForeignObject = (element, defaultParams = {}) => {
+  const { description, type: label, originalParams } = element.attributes;
+
   const showParameters =
     layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
 
@@ -340,8 +337,8 @@ export const setParametersInForeignObject = element => {
         "data-placement": "right"
       });
 
-    const defaultValue = defaultParams[paramName]
-      ? defaultParams[paramName].value || defaultParams[paramName]
+    const defaultValue = defaultParams[type][paramName]
+      ? defaultParams[type][paramName].value || defaultParams[type][paramName]
       : null;
     // const defaultValue = defaultParams.params
     //   ? defaultParams.params[paramName].value
@@ -372,6 +369,7 @@ export const setParametersInForeignObject = element => {
       }
       default:
         alert("not handled type : ", type);
+      // }
     }
   }
 
@@ -422,21 +420,7 @@ export const setParametersInForeignObject = element => {
   // When the user clicks on a select and moves the bloc
   // the select dropdown is still displayed
   // this event closes it
-  element.on("change:position", (el, position, { multitranslate }) => {
-    console.log("changeposition");
-    for (const select of document.querySelectorAll(Inputs.SELECT.tag)) {
-      $(select).select2("close");
-    }
-    if (!multitranslate) {
-      const { paper, selectedElements: selection } = app;
-      // fix ctrl + click on element + drag, select again the current element
-      // induces a small delay in position from the other selected elements
-      if (selection.indexOf(paper.findViewByModel(el)) == -1) {
-        //app.addCellViewToSelection(paper.findViewByModel(el));
-      }
-      //moveAllElements(selection, el, position);
-    }
-  });
+  element.on("change:position", elementOnChangePosition);
 
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
     $(tooltip).tooltip(TOOLTIP_OPTIONS);

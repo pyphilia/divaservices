@@ -1,5 +1,5 @@
 import { AREA_SELECTION_ELEMENT } from "../../../constants/selectors";
-import { selectElementByBoxId } from "../Interface";
+import { selectElementByBoxId } from "../utils";
 
 const div = document.getElementById(AREA_SELECTION_ELEMENT);
 

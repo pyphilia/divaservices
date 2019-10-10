@@ -8,7 +8,10 @@ const savedOperations = [
   "Interface/ADD_ELEMENTS",
   "Interface/DELETE_ELEMENTS",
   "Interface/SET_INPUT_VALUE",
-  "Interface/SET_SELECT_VALUE"
+  "Interface/SET_SELECT_VALUE",
+  "Interface/ADD_LINK",
+  "Interface/DELETE_LINK",
+  "Interface/MOVE_ELEMENTS"
   // 'Interface/'
 ];
 

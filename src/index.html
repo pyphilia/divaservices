@@ -8,7 +8,6 @@
 </head>
 <body>
     
-    <div id="contextMenus"></div>
     
     <!-- area selection highlight element  -->
     <div id="areaSelectionHighlight"></div>
@@ -19,62 +18,16 @@
     <!-- Modal for settings -->
     <div id="layoutSettings"></div>
     
-    <!-- <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            File
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="#">New</a>
-            <a class="dropdown-item" href="#">Open</a>
-            <a class="dropdown-item" href="#">Save</a>
-            <a class="dropdown-item" href="#">Close</a>
-        </div>
-    </li>
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Edit
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="#">Copy</a>
-            <a class="dropdown-item" href="#">Paste</a>
-            <a class="dropdown-item" href="#">Cut</a>
-            
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Clear</a>
-            <a class="dropdown-item" href="#">Undo</a>
-            <a class="dropdown-item" href="#">Redo</a>
-            
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Select All</a>
-            <a class="dropdown-item" href="#">Unselect</a>
-            
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Zoom in</a>
-            <a class="dropdown-item" href="#">Zoom out</a>
-            <a class="dropdown-item" href="#">Reset Zoom</a>
-            <a class="dropdown-item" href="#">Fit Content</a>
-        </div>
-    </li>
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Workflow
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <a class="dropdown-item" href="#">Install</a>
-        </div>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#">Settings</a>
-    </li> -->
-    
     
     <div id="app" class="container-fluid no-gutters h-100">
+        
         <div id="header" class="row">
             <h1 class="col-3">Name</h1> 
             
             <div class="col">
                 
                 <file-menu 
+                :graph="graph"
                 :copied-elements="copiedElements"
                 :selected-elements="selectedElements"
                 >
@@ -87,9 +40,17 @@
     <div id="content-wrapper" class="row">
         <left-sidebar></left-sidebar>
         <div id="main" class="col p-0 h-100">
+
+                <context-menus
+                ref="contextmenu"
+                :paper="paper"
+                :copied-elements="copiedElements"
+                :selected-elements="selectedElements"></context-menus>
+        
+                
             
             <!-- minimap -->
-            <minimap :translation="translation" :paper="paper" :graph="graph"></minimap>
+            <minimap :moved-elements="movedElements" :translation="translation" :paper="paper" :graph="graph"></minimap>
             
             <!-- trash    -->
             <!-- <div id="trash"><i class="fas fa-trash"></i></div> -->

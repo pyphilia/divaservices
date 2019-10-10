@@ -4,7 +4,12 @@
  */
 import xml2js from "xml2js";
 import { webservices } from "../constants/globals";
+import { app } from "../app";
 
+// we use the actual graph nodes to get the workflow
+// because it contains vital ids (especially ports)
+// we make a connection with our store elements
+// to retrieve the actual parameters
 export const saveWorkflow = jsonGraph => {
   const allPorts = {};
 
@@ -13,17 +18,24 @@ export const saveWorkflow = jsonGraph => {
   jsonGraph.cells
     .filter(cell => cell.type != "standard.Link")
     .forEach((box, i) => {
-      const { id: Id, type, defaultParams, ports } = box;
+      const { id: Id, type, ports, boxId } = box;
       const Name = type.replace(/\s/g, "");
       const No = i;
       const Inputs = { Parameter: [], Data: [] };
-      for (const [Name, values] of Object.entries(defaultParams)) {
-        const { value: Value, defaultValue } = values;
-        if (Value != defaultValue.toString()) {
-          Inputs.Parameter.push({
-            Name,
-            Value
-          });
+
+      // get actual defaultParams in store
+      const defaultParams = app.elements.find(el => el.boxId == boxId)
+        .defaultParams;
+
+      for (const [, values] of Object.entries(defaultParams)) {
+        for (const [paramName, options] of Object.entries(values)) {
+          const { value: Value, defaultValue } = options;
+          if (Value != defaultValue.toString()) {
+            Inputs.Parameter.push({
+              paramName,
+              Value
+            });
+          }
         }
       }
 
@@ -36,7 +48,7 @@ export const saveWorkflow = jsonGraph => {
       });
 
       // key in webservices list
-      const Key = webservices.filter(algo => algo.name == type)[0].id;
+      const Key = webservices.find(algo => algo.name == type).id;
       const Service = { Key };
 
       const step = { Id, No, Name, Service, Inputs };
@@ -52,9 +64,9 @@ export const saveWorkflow = jsonGraph => {
         target: { port: targetPort }
       } = link;
       const targetBox = allPorts[targetPort];
-      const targetWebservice = Steps.Step.filter(
+      const targetWebservice = Steps.Step.find(
         step => step.Id == targetBox.boxId
-      )[0];
+      );
 
       const { boxId: Ref, name: ServiceOutputName } = allPorts[sourcePort];
       const p = {

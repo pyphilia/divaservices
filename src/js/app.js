@@ -1,72 +1,42 @@
 import Vue from "vue";
+import Split from "split.js";
 import * as joint from "jointjs";
 import { mapMutations, mapActions, mapState } from "vuex";
 import Toolsbar from "./layout/components/Toolsbar";
 import FileMenu from "./layout/components/FileMenu";
 import LeftSidebar from "./layout/components/LeftSidebar";
+import ContextMenus from "./layout/components/ContextMenu";
 import Minimap from "./layout/components/Minimap";
 import store from "./store/store";
 import { initWebservices } from "./constants/globals";
 import { initPaperEvents } from "./events/paperEvents";
-import { getElementByBoxId } from "./layout/utils";
+import { getElementByBoxId, getLinkBySourceTarget } from "./layout/utils";
 import {
   highlightSelection,
   unHighlight
 } from "./store/modules/Selection/mutations";
 import { MAX_SCALE, MIN_SCALE, Inputs, THEME } from "./constants/constants";
-import { addElementFromId, addElementByName } from "./elements/addElement";
-import { deleteElementByBoxId } from "./elements/deleteElement";
+import { addElementByName, addLinkFromLink } from "./elements/addElement";
+import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
 import { initKeyboardEvents } from "./events/keyboardEvents";
 import {
   INTERFACE_ROOT,
-  IN_PORT_CLASS,
-  ATTR_TYPE,
-  ATTR_TYPE_ALLOWED
+  LEFT_SIDEBAR,
+  MAIN_INTERFACE
 } from "./constants/selectors";
 import {
   setInputValueInElement,
   setSelectValueInElement
 } from "./layout/inputs";
 import { equalObjects } from "./utils/utils";
-
-// matching algorithm for ports to be linked and highlighted
-/* eslint-disable-next-line no-unused-vars */
-const validateConnection = (vS, mS, vT, mT, end, lV) => {
-  if (!mT) {
-    return false;
-  }
-  if (vS === vT) {
-    return false;
-  }
-  if (mT.getAttribute("port-group") !== IN_PORT_CLASS) {
-    return false;
-  }
-
-  // input accept only one source
-  const usedInPorts = vT.model.attributes.getUsedInPorts();
-  const matchId = usedInPorts.find(({ id }) => id === mT.getAttribute("port"));
-  if (matchId) {
-    return false;
-  }
-
-  // allow only same input-output type
-  if (
-    mT.getAttribute(ATTR_TYPE) === undefined ||
-    mS.getAttribute(ATTR_TYPE) === undefined
-  ) {
-    return false;
-  }
-
-  // check allowed type
-  const allowedS = mS.getAttribute(ATTR_TYPE_ALLOWED).split(",");
-  const allowedT = mT.getAttribute(ATTR_TYPE_ALLOWED).split(",");
-  const commonType = allowedS.filter(value => -1 !== allowedT.indexOf(value));
-  if (commonType.length == 0) {
-    return false;
-  }
-
-  return true;
-};
+import { validateConnection } from "./layout/components/utils";
+import { CHANGE_ZOOM } from "./store/mutationsTypes";
+import {
+  selectedElements,
+  copiedElements,
+  deletedElements
+} from "./store/modules/utils";
+import { moveElements } from "./elements/moveElement";
 
 export let app;
 
@@ -80,36 +50,42 @@ export let app;
       paper: null,
       translation: { tx: 0, ty: 0 }
     },
-    computed: {
-      ...mapState("Interface", ["elements", "areaSelection"]),
-      ...mapState("Zoom", ["scale", "x", "y"]),
-      ...mapState("Keyboard", ["ctrl", "space"]),
-      currentElements() {
-        return this.elements.filter(el => !el.deleted);
-      },
-      selectedElements() {
-        return this.elements.filter(el => el.selected && !el.deleted);
-      },
-      copiedElements() {
-        return this.elements.filter(el => el.copied);
-      },
-      deletedElements() {
-        return this.elements.filter(el => el.deleted);
-      },
-      // defaultParamsChangedElements() {
-      //   return this.elements.filter(el => el.paramsChanged);
-      // },
-      defaultParamsElements() {
-        return this.elements.map(({ boxId, defaultParams }) => {
-          return { boxId, defaultParams };
-        });
-      }
-    },
     components: {
       LeftSidebar,
       Minimap,
       Toolsbar,
-      FileMenu
+      FileMenu,
+      ContextMenus
+    },
+    computed: {
+      // this computed method is necessary since we shouldn't
+      // listen to the store directly
+      // we should use getters but for some reason (namespace?) it is not working
+      currentElements() {
+        return [...this.elements];
+      },
+      selectedElements() {
+        return selectedElements(this.elements);
+      },
+      copiedElements() {
+        return copiedElements(this.elements);
+      },
+      deletedElements() {
+        return deletedElements(this.elements);
+      },
+      defaultParamsElements() {
+        return this.elements.map(({ boxId, defaultParams }) => {
+          return { boxId, defaultParams };
+        });
+      },
+      movedElements() {
+        return this.elements.map(({ boxId, position }) => {
+          return { boxId, position };
+        });
+      },
+      ...mapState("Interface", ["elements", "areaSelection", "links"]),
+      ...mapState("Zoom", ["scale", "x", "y"]),
+      ...mapState("Keyboard", ["ctrl", "space"])
     },
     methods: {
       unSelectAllElements() {
@@ -122,13 +98,24 @@ export let app;
         this.paper.translate(newX * this.scale, newY * this.scale);
         this.translation = this.paper.translate();
       },
+      addLinkFromApp(payload) {
+        this.addLink({ ...payload, graph: this.graph });
+      },
+      deleteLinkFromApp(payload) {
+        this.deleteLink({ ...payload, graph: this.graph });
+      },
       zoomInFromApp() {
         this.zoomIn({ paper: this.paper });
       },
-
       zoomOutFromApp() {
         this.zoomOut({ paper: this.paper });
       },
+      ...mapMutations("Interface", [
+        "initAreaSelection",
+        "endAreaSelection",
+        "computeAreaSelection"
+      ]),
+      ...mapMutations("Zoom", [CHANGE_ZOOM]),
       ...mapActions("Interface", [
         "unSelectAllElements",
         "addElementToSelection",
@@ -136,33 +123,28 @@ export let app;
         "duplicateElements",
         "deleteElements",
         "setSelectValueInElement",
-        "setInputValueInElement"
+        "setInputValueInElement",
+        "addLink",
+        "deleteLink",
+        "moveSelectedElements"
       ]),
-      ...mapActions("Zoom", ["zoomIn", "zoomOut"]),
-      ...mapMutations("Interface", [
-        "initAreaSelection",
-        "endAreaSelection",
-        "computeAreaSelection"
-      ]),
-      ...mapMutations("Zoom", ["CHANGE_ZOOM"])
+      ...mapActions("Zoom", ["zoomIn", "zoomOut"])
     },
     watch: {
       currentElements: {
         handler(newValue, oldValue) {
-          console.log("currentelements changed");
-
           // if boxId element does not exist in the graph, we add it
           for (const el of newValue.filter(
             ({ boxId }) => !getElementByBoxId(boxId)
           )) {
-            const { fromId, type } = el;
-            fromId ? addElementFromId(el) : addElementByName(type, el);
+            const { type } = el;
+            addElementByName(type, el);
           }
 
           // remove element removed from arr
           // cannot use arr.includes because states are deep cloned
           for (const el of oldValue.filter(
-            el => newValue.filter(v => v.boxId == el.boxId).length == 0
+            el => !newValue.find(v => v.boxId == el.boxId)
           )) {
             deleteElementByBoxId(el.boxId);
           }
@@ -187,6 +169,34 @@ export let app;
           }
         }
       },
+      movedElements: {
+        deep: true,
+        handler(newValue, oldValue) {
+          const difference = newValue.filter(el => {
+            const v = oldValue.find(e => e.boxId == el.boxId);
+            return v && !equalObjects(v.position, el.position);
+          });
+          moveElements(difference);
+        }
+      },
+      links(newValue, oldValue) {
+        for (const l of newValue) {
+          const { source, target } = l;
+          const link = getLinkBySourceTarget(source, target);
+          if (!link) {
+            addLinkFromLink(l);
+          }
+        }
+
+        // remove links removed from arr
+        // cannot use arr.includes because states are deep cloned
+        for (const el of oldValue.filter(
+          el => newValue.filter(v => equalObjects(v, el)).length == 0
+        )) {
+          const link = getLinkBySourceTarget(el.source, el.target);
+          deleteLink(link);
+        }
+      },
       deletedElements(newValue) {
         // if element is not in elements but exist in graph, delete it
         for (const element of newValue.filter(el =>
@@ -196,19 +206,16 @@ export let app;
         }
       },
       selectedElements(newValue, oldValue) {
-        //@TODO optimize
-        const cellViews = newValue.map(({ boxId, selected }) => [
-          getElementByBoxId(boxId).findView(this.paper),
-          selected
-        ]);
-        for (const [cellView, selected] of cellViews) {
-          if (selected) {
-            highlightSelection(cellView);
-          }
+        // highlight current selection
+        for (const { boxId } of newValue) {
+          const cellView = getElementByBoxId(boxId).findView(this.paper);
+          highlightSelection(cellView);
         }
         // remove unselected element if not deleted
         for (const { boxId } of oldValue.filter(el => !newValue.includes(el))) {
           const el = getElementByBoxId(boxId);
+
+          // on delete, these might be still be selected
           if (el) {
             const cellView = el.findView(this.paper);
             unHighlight(cellView);
@@ -236,7 +243,6 @@ export let app;
 
           this.paper.matrix(ctm);
         }
-        // app.activity = true;
       }
     },
     mounted() {
@@ -255,7 +261,6 @@ export let app;
         defaultConnector: { name: "smooth" },
         defaultConnectionPoint: { name: "boundary" },
         markAvailable: true,
-        /*eslint no-unused-vars: ["error", { "args": "none" }]*/
         validateConnection
       });
 
@@ -266,6 +271,15 @@ export let app;
         initPaperEvents();
         initKeyboardEvents();
         console.log(this);
+      });
+
+      Split([LEFT_SIDEBAR, MAIN_INTERFACE], {
+        elementStyle: function(dimension, size, gutterSize) {
+          return { "flex-basis": "calc(" + size + "% - " + gutterSize + "px)" };
+        },
+        minSize: [300, 500],
+        sizes: [25, 75],
+        gutterSize: 6
       });
     }
   });

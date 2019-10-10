@@ -5,9 +5,10 @@ import { app } from "../../app";
 import { mapActions, mapState } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { zoomInCondition, zoomOutCondition } from "./utils";
+import { saveWorkflow } from "../../workflows/saveWorkflow";
 
 const FileMenu = Vue.component("FileMenu", {
-  props: ["selectedElements", "copiedElements"],
+  props: ["selectedElements", "copiedElements", "graph"],
   methods: {
     ...mapActions("Interface", ["duplicateElements"]),
 
@@ -102,8 +103,10 @@ const FileMenu = Vue.component("FileMenu", {
         ],
         Workflow: [
           {
-            name: "Install",
-            action: () => {}
+            name: "Save",
+            action: () => {
+              saveWorkflow(this.graph.toJSON());
+            }
           }
         ],
         Settings: [

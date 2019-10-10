@@ -28,15 +28,15 @@ class UndoRedoHistory {
     if (!equalObjects(state, this.history[this.currentIndex])) {
       this.history.push(state);
       this.currentIndex++;
-      console.log(this.history);
-      console.log("HISTORY ->", this.history[this.currentIndex]);
+      // console.log(this.history);
+      // console.log("HISTORY ->", this.history[this.currentIndex]);
     }
   }
 
   replaceLastState(state) {
     this.history.splice(-1);
     this.history.push(state);
-    console.log("HISTORY ->", this.history[this.currentIndex]);
+    // console.log("HISTORY ->", this.history[this.currentIndex]);
   }
 
   undo() {
@@ -50,18 +50,13 @@ class UndoRedoHistory {
       this.store.replaceState(cloneDeep(prevState));
       this.currentIndex--;
       console.log(this.history);
-      console.log(
-        "UNDO HISTORY ->",
-        this.history[this.currentIndex].Interface.elements
-      );
+      console.log("HISTORY ->", this.history[this.currentIndex]);
     }
   }
 
   redo() {
     if (this.currentIndex + 1 < this.history.length) {
       const nextState = this.history[this.currentIndex + 1];
-      console.log(this.history);
-      console.log("REDO HISTORY ->", nextState.Interface.elements);
       this.store.replaceState(cloneDeep(nextState));
       this.currentIndex++;
     }

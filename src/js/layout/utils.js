@@ -11,7 +11,36 @@ const titleHeightOneLine = 60;
 const titleHeightTwoLine = 80;
 
 export const getElementByBoxId = id => {
-  return app.graph.getElements().filter(el => el.attributes.boxId == id)[0];
+  return app.graph.getElements().find(el => el.attributes.boxId == id);
+};
+
+export const getLinkBySourceTarget = (source, target) => {
+  const { graph } = app;
+  return graph.getLinks().find(link => {
+    const s = link.source();
+    const t = link.target();
+
+    const sourceCell = graph.getCell(s.id);
+    const targetCell = graph.getCell(t.id);
+
+    if (!sourceCell || !targetCell) {
+      return false;
+    }
+    const sourceBoxId = sourceCell.attributes.boxId;
+    const sPortId = s.port;
+    const sPortName = sourceCell.getPort(sPortId).name;
+
+    const targetBoxId = targetCell.attributes.boxId;
+    const tPortId = t.port;
+    const tPortName = targetCell.getPort(tPortId).name;
+
+    return (
+      sourceBoxId == source.boxId &&
+      targetBoxId == target.boxId &&
+      sPortName == source.portname &&
+      tPortName == target.portname
+    );
+  });
 };
 
 export const generateUniqueId = () => {
@@ -107,7 +136,9 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
   let nbParam;
   let portsItems;
   if (fromSVG) {
-    nbParam = Object.keys(attributes.defaultParams).length;
+    nbParam =
+      Object.keys(attributes.defaultParams[Inputs.SELECT.type]).length +
+      Object.keys(attributes.defaultParams[Inputs.NUMBER.type]).length;
     portsItems = attributes.ports.items;
   } else {
     nbParam = params.filter(x => isParamInput(x)).length;

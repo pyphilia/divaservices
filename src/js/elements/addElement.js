@@ -34,15 +34,12 @@ import {
 } from "../constants/selectors";
 import { layoutSettingsApp } from "../layoutSettings";
 
-const createBox = (e, { position, size, boxId, defaultParams = {} }) => {
+const createBox = (
+  e,
+  { position, size, boxId, defaultParams = {}, ports: { items } }
+) => {
   const { graph } = app;
-  const {
-    category,
-    label,
-    ports: { items },
-    description,
-    params = {}
-  } = e;
+  const { category, label, description, params = {} } = e;
   const { titleHeight } = computeTitleLength(e);
 
   if (!size) {
@@ -117,27 +114,10 @@ export const transformWebserviceForGraph = webservice => {
   const {
     name: label,
     description,
-    outputs = [],
     inputs = [],
-    type: category
+    type: category,
+    ports
   } = webservice;
-
-  // handle ports
-  const ports = { items: [] };
-  inputs
-    .filter(inp => isPortUserdefined(inp))
-    .forEach(inp => {
-      const port = createPort(inp, IN_PORT_CLASS);
-      if (port.group) {
-        ports.items.push(port);
-      }
-    });
-  outputs.forEach(out => {
-    const port = createPort(out, OUT_PORT_CLASS);
-    if (port.group) {
-      ports.items.push(port);
-    }
-  });
 
   // handle params
   const params = inputs.filter(inp => isParamInput(inp));
@@ -177,14 +157,34 @@ export const addElementFromTransformedJSON = (e, parameters = {}) => {
 
   const element = createBox(e, { ...parameters, boxId });
 
-  setParametersInForeignObject(element);
+  setParametersInForeignObject(element, parameters.defaultParams);
 
   return element;
 };
 
 export const buildElementFromName = name => {
-  const webservice = webservices.filter(service => service.name == name)[0];
+  const webservice = webservices.find(service => service.name == name);
+  const { outputs = [], inputs = [] } = webservice;
+
   const el = transformWebserviceForGraph(webservice);
+
+  // handle ports
+  const ports = { items: [] };
+  inputs
+    .filter(inp => isPortUserdefined(inp))
+    .forEach(inp => {
+      const port = createPort(inp, IN_PORT_CLASS);
+      if (port.group) {
+        ports.items.push(port);
+      }
+    });
+  outputs.forEach(out => {
+    const port = createPort(out, OUT_PORT_CLASS);
+    if (port.group) {
+      ports.items.push(port);
+    }
+  });
+  el.ports = ports;
 
   const boxId = generateUniqueId();
   const { defaultParams } = el;
@@ -197,14 +197,14 @@ export const buildElementFromName = name => {
   };
   const position = findEmptyPosition(size);
 
-  return { boxId, defaultParams, size, position, type: name };
+  return { boxId, defaultParams, size, position, type: name, ports };
 };
 
 // helper function to find an empty position to add
 // an element without overlapping other ones
 // it tries to fill the canvas view first horizontally
 // then vertically
-const findEmptyPosition = size => {
+const findEmptyPosition = (size, startingPoint) => {
   const { paper, graph } = app;
   const { left, top, width, height } = paper.svg.getBoundingClientRect();
   const canvasDimensions = paper.clientToLocalRect({
@@ -215,7 +215,9 @@ const findEmptyPosition = size => {
   });
 
   const { x: canvasX, y: canvasY, width: canvasW } = canvasDimensions;
-  const position = { x: canvasX + BOX_MARGIN, y: canvasY + BOX_MARGIN };
+  const position = startingPoint
+    ? startingPoint
+    : { x: canvasX + BOX_MARGIN, y: canvasY + BOX_MARGIN };
   const { width: sizeWidth, height: sizeHeight } = size;
 
   while (
@@ -244,19 +246,9 @@ export const addElementToGraphFromServiceDescription = (
 ) => {
   const transformedWebservice = transformWebserviceForGraph(webservice);
 
-  const showParameters =
-    layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
-
-  const size = {
-    width: computeBoxWidth(transformedWebservice, showParameters),
-    height: computeBoxHeight(transformedWebservice, showParameters)
-  };
-
-  let { position } = defaultParameters;
-  if (!position) {
-    // avoid adding overlapping elements
-    defaultParameters.position = findEmptyPosition(size);
-  }
+  let { position, size } = defaultParameters;
+  // avoid adding overlapping elements
+  defaultParameters.position = findEmptyPosition(size, position);
 
   const element = addElementFromTransformedJSON(transformedWebservice, {
     size,
@@ -270,11 +262,11 @@ export const addElementToGraphFromServiceDescription = (
 // info from the services xml descriptions
 // returns boxId and position for undo-redo purpose
 export const addElementByName = (name, defaultParams = {}) => {
-  const algo = webservices.filter(service => service.name == name);
-  if (algo.length) {
-    const e = addElementToGraphFromServiceDescription(algo[0], defaultParams);
+  const algo = webservices.find(service => service.name == name);
+  if (algo) {
+    addElementToGraphFromServiceDescription(algo, defaultParams);
 
-    return e.attributes; //{ boxId, position };
+    // return e.attributes; //{ boxId, position };
   } else {
     console.error(`${name} doesnt exist`);
   }
@@ -305,24 +297,25 @@ const addElementByCellView = (cellView, boxId) => {
   return { e, id };
 };
 
-export const addElementFromId = element => {
-  const { graph } = app;
-  const { boxId, size, defaultParams, fromId } = element; /*position*/
-  const e = getElementByBoxId(fromId).clone();
-  let id;
-  if (boxId) {
-    e.attributes.boxId = boxId;
-    id = boxId;
-  } else {
-    id = e.attributes.boxId;
-  }
-  // avoid cloning overlap
-  e.attributes.position = findEmptyPosition(size);
+// not that faster, and end in creating some foreignobject with identical boxid
+// export const addElementFromId = element => {
+//   const { graph } = app;
+//   const { boxId, size, defaultParams, fromId } = element; /*position*/
+//   const e = getElementByBoxId(fromId).clone();
+//   let id;
+//   if (boxId) {
+//     e.attributes.boxId = boxId;
+//     id = boxId;
+//   } else {
+//     id = e.attributes.boxId;
+//   }
+//   // avoid cloning overlap
+//   e.attributes.position = findEmptyPosition(size);
 
-  e.addTo(graph);
-  setParametersInForeignObject(e, defaultParams);
-  return { e, id };
-};
+//   e.addTo(graph);
+//   setParametersInForeignObject(e, defaultParams);
+//   return { e, id };
+// };
 
 // return for undo purpose
 export const addElementsByCellView = (elements, ids) => {
@@ -338,52 +331,40 @@ export const addElementsByCellView = (elements, ids) => {
 };
 
 // return for undo purpose
-const restoreElement = element => {
-  const { graph } = app;
-  element.addTo(graph);
-  setParametersInForeignObject(element);
-};
+// const restoreElement = element => {
+//   const { graph } = app;
+//   element.addTo(graph);
+//   setParametersInForeignObject(element);
+// };
 
-export const restoreElements = elements => {
-  for (const el of elements) {
-    restoreElement(el);
-  }
-  return { elements };
-};
+// export const restoreElements = elements => {
+//   for (const el of elements) {
+//     restoreElement(el);
+//   }
+//   return { elements };
+// };
 
 /*ADD LINKS*/
 
 export const addLinkFromJSON = link => {
   const { graph } = app;
   const linkEl = new joint.shapes.standard.Link(link);
-  linkEl.addTo(graph);
-  return { linkView: linkEl };
+  graph.addCell(linkEl);
 };
 
-export const addLinkBySourceTarget = linkView => {
-  const { graph } = app;
-  const source = linkView.model ? linkView.model.source() : linkView.source();
-  const target = linkView.model ? linkView.model.target() : linkView.target();
+export const addLinkFromLink = link => {
+  const { source, target } = link;
 
-  const sourceCell = graph.getCell(source.id);
-  const sourceBoxId = sourceCell.attributes.boxId;
-  const sPortId = source.port;
-  const sPortName = sourceCell.getPort(sPortId).name;
+  const s = getElementByBoxId(source.boxId);
+  const t = getElementByBoxId(target.boxId);
 
-  const targetCell = graph.getCell(target.id);
-  const targetBoxId = targetCell.attributes.boxId;
-  const tPortId = target.port;
-  const tPortName = targetCell.getPort(tPortId).name;
+  const sPort = s.getPorts().find(p => p.name == source.portname).id;
+  const tPort = t.getPorts().find(p => p.name == target.portname).id;
 
-  const s = getElementByBoxId(sourceBoxId);
-  const sPort = s.getPorts().filter(p => p.name == sPortName)[0].id;
-  const t = getElementByBoxId(targetBoxId);
-  const tPort = t.getPorts().filter(p => p.name == tPortName)[0].id;
-
-  const link = {
+  const newLink = {
     source: { id: s.id, port: sPort },
     target: { id: t.id, port: tPort }
   };
 
-  return addLinkFromJSON(link);
+  return addLinkFromJSON(newLink);
 };

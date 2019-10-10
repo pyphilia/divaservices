@@ -10,7 +10,7 @@ import { mapState } from "vuex";
 const SCALE_CONTENT_PADDING = 10;
 
 const Minimap = Vue.component("Minimap", {
-  props: ["graph", "paper", "translation"],
+  props: ["graph", "paper", "translation", "movedElements"],
   data: function() {
     return {
       mapDragFlag: false,
@@ -68,6 +68,12 @@ const Minimap = Vue.component("Minimap", {
   },
   watch: {
     translation: {
+      deep: true,
+      handler() {
+        this.update();
+      }
+    },
+    movedElements: {
       deep: true,
       handler() {
         this.update();

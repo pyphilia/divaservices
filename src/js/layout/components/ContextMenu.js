@@ -2,36 +2,44 @@ import Vue from "vue";
 import {
   CONTEXT_MENU_ELEMENT,
   CONTEXT_MENU_PAPER
-} from "./constants/selectors";
-import { app } from "./main";
-import {
-  ACTION_ADD_ELEMENTS,
-  ACTION_DELETE_ELEMENTS
-} from "./constants/actions";
-import { copy } from "./events/controls";
+} from "../../constants/selectors";
+import { app } from "../../app";
+import { copy } from "../../events/controls";
+import { mapActions } from "vuex";
 
-export const ContextMenuApp = new Vue({
-  el: "#contextMenus",
-  data: {
-    contextMenus: {
-      element: {
-        visible: false,
-        el: CONTEXT_MENU_ELEMENT
-      },
-      paper: {
-        visible: false,
-        el: CONTEXT_MENU_PAPER
+const ContextMenus = Vue.component("ContextMenus", {
+  props: ["selectedElements", "copiedElements", "paper"],
+  data() {
+    return {
+      contextMenus: {
+        element: {
+          visible: false,
+          el: CONTEXT_MENU_ELEMENT
+        },
+        paper: {
+          visible: false,
+          el: CONTEXT_MENU_PAPER
+        }
       }
-    }
+    };
   },
+  computed: {},
   methods: {
-    setPositionToContextMenu(menuName, { top, left }) {
+    ...mapActions("Interface", ["duplicateElements", "deleteElements"]),
+    setPositionToContextMenu(menuName, { x, y }) {
+      const screenPos = this.paper.localToClientPoint(x, y);
+      const offset = this.paper.clientOffset();
+
+      const left = screenPos.x - offset.x;
+      const top = screenPos.y - offset.y;
+
       const menu = document.querySelector(this.contextMenus[menuName].el);
       menu.style.left = `${left}px`;
       menu.style.top = `${top}px`;
       this.showContextMenu(this.contextMenus[menuName]);
     },
     showContextMenu(menuObj) {
+      this.hideContextMenus();
       const menu = document.querySelector(menuObj.el);
       menu.style.display = "block";
       menuObj.visible = !menuObj.visible;
@@ -76,15 +84,15 @@ export const ContextMenuApp = new Vue({
     document
       .querySelector(`${CONTEXT_MENU_ELEMENT} .copy`)
       .addEventListener("click", () => {
-        copy(app.selectedElements);
+        copy(this.selectedElements);
       });
 
     document
       .querySelector(`${CONTEXT_MENU_ELEMENT} .duplicate`)
       .addEventListener("click", async () => {
         if (app.selectedElements.length) {
-          app.addAction(ACTION_ADD_ELEMENTS, {
-            elements: app.selectedElements
+          this.duplicateElements({
+            elements: this.selectedElements
           });
         }
       });
@@ -92,16 +100,16 @@ export const ContextMenuApp = new Vue({
     document
       .querySelector(`${CONTEXT_MENU_ELEMENT} .delete`)
       .addEventListener("click", () => {
-        app.addAction(ACTION_DELETE_ELEMENTS, {
-          elements: app.selectedElements
+        this.deleteElements({
+          elements: this.selectedElements
         });
       });
 
     document
       .querySelector(`${CONTEXT_MENU_PAPER} .paste`)
       .addEventListener("click", async () => {
-        app.addAction(ACTION_ADD_ELEMENTS, {
-          elements: [...app.copiedElements]
+        this.duplicateElements({
+          elements: this.copiedElements
         });
       });
   },
@@ -120,3 +128,5 @@ export const ContextMenuApp = new Vue({
     </div>
     `
 });
+
+export default ContextMenus;
