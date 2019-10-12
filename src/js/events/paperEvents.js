@@ -3,6 +3,7 @@ import * as joint from "jointjs";
 import { THEME, Inputs } from "../constants/constants";
 import { INTERFACE_ROOT, PORT_SELECTOR } from "../constants/selectors";
 import { spaceDown, ctrlDown } from "./keyboardEvents";
+// import ContextMenu from "../layout/components/ContextMenu";
 
 import { app } from "../app";
 import { moveAllElements } from "../elements/moveElement";

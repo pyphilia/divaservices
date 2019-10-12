@@ -49,8 +49,6 @@ class UndoRedoHistory {
       // (same on redo)
       this.store.replaceState(cloneDeep(prevState));
       this.currentIndex--;
-      console.log(this.history);
-      console.log("HISTORY ->", this.history[this.currentIndex]);
     }
   }
 
