@@ -172,10 +172,9 @@ export const elementOnChangePosition = (
   changePosition = true;
   $(`.select ${Inputs.SELECT.tag}`).select2("close");
 
+  const { selectedElements } = app;
   // need to move all elements at the same time
-  if (!multitranslate) {
-    const { selectedElements } = app;
-
+  if (!multitranslate && selectedElements.length) {
     // move all elements except current moved element
     const { boxId: currentBoxId } = el.attributes;
     const { position: oldPosition } = selectedElements.find(

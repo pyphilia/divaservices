@@ -6,6 +6,7 @@ import { mapActions } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { zoomInCondition, zoomOutCondition } from "./utils";
 import { saveWorkflow } from "../../workflows/saveWorkflow";
+import { orderGraph } from "../../elements/orderElement";
 
 const FileMenu = Vue.component("FileMenu", {
   props: ["selectedElements", "copiedElements", "graph", "scale"],
@@ -126,6 +127,12 @@ const FileMenu = Vue.component("FileMenu", {
             name: "Save",
             action: () => {
               saveWorkflow(this.graph.toJSON());
+            }
+          },
+          {
+            name: "Order Workflow",
+            action: () => {
+              orderGraph(this.graph);
             }
           }
         ],

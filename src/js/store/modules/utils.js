@@ -1,5 +1,4 @@
 export const buildLinkForStore = (graph, link) => {
-  console.log("TCL: buildLinkForStore -> link", link);
   const source = link.source;
   const target = link.target;
 
