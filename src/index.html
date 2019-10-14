@@ -27,6 +27,7 @@
             <div class="col">
                 
                 <file-menu 
+                :scale="scale"
                 :graph="graph"
                 :copied-elements="copiedElements"
                 :selected-elements="selectedElements"
@@ -50,7 +51,7 @@
                 
             
             <!-- minimap -->
-            <minimap :moved-elements="movedElements" :translation="translation" :paper="paper" :graph="graph"></minimap>
+            <minimap :scale="scale" :moved-elements="movedElements" :translation="translation" :paper="paper" :graph="graph"></minimap>
             
             <!-- trash    -->
             <!-- <div id="trash"><i class="fas fa-trash"></i></div> -->
@@ -60,7 +61,7 @@
             
             <div id="message"></div>
             
-            <toolsbar  :paper="paper" :selected-elements="selectedElements"></toolsbar>
+            <toolsbar :scale="scale"  :paper="paper" :selected-elements="selectedElements"></toolsbar>
             
             
         </div>

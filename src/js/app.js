@@ -30,18 +30,19 @@ import {
 } from "./layout/inputs";
 import { equalObjects } from "./utils/utils";
 import { validateConnection } from "./layout/components/utils";
-import { CHANGE_ZOOM } from "./store/mutationsTypes";
 import {
   selectedElements,
   copiedElements,
   deletedElements
 } from "./store/modules/utils";
 import { moveElements } from "./elements/moveElement";
+import ZoomPlugin from "./plugins/ZoomPlugin";
 
 export let app;
 
 (async () => {
   await initWebservices();
+  Vue.use(ZoomPlugin);
   app = new Vue({
     el: "#app",
     store,
@@ -83,8 +84,10 @@ export let app;
           return { boxId, position };
         });
       },
+      scale() {
+        return this.$zoom.scale;
+      },
       ...mapState("Interface", ["elements", "areaSelection", "links"]),
-      ...mapState("Zoom", ["scale", "x", "y"]),
       ...mapState("Keyboard", ["ctrl", "space"])
     },
     methods: {
@@ -105,17 +108,16 @@ export let app;
         this.deleteLink({ ...payload, graph: this.graph });
       },
       zoomInFromApp() {
-        this.zoomIn({ paper: this.paper });
+        this.$zoomIn(this.paper);
       },
       zoomOutFromApp() {
-        this.zoomOut({ paper: this.paper });
+        this.$zoomOut(this.paper);
       },
       ...mapMutations("Interface", [
         "initAreaSelection",
         "endAreaSelection",
         "computeAreaSelection"
       ]),
-      ...mapMutations("Zoom", [CHANGE_ZOOM]),
       ...mapActions("Interface", [
         "unSelectAllElements",
         "addElementToSelection",
@@ -127,8 +129,7 @@ export let app;
         "addLink",
         "deleteLink",
         "moveSelectedElements"
-      ]),
-      ...mapActions("Zoom", ["zoomIn", "zoomOut"])
+      ])
     },
     watch: {
       currentElements: {
@@ -226,8 +227,8 @@ export let app;
         if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
           const beta = currentScale / nextScale;
 
-          const ax = this.x - this.x * beta;
-          const ay = this.y - this.y * beta;
+          const ax = this.$zoom.x - this.$zoom.x * beta;
+          const ay = this.$zoom.y - this.$zoom.y * beta;
 
           const translate = this.paper.translate();
 

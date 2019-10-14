@@ -27,6 +27,8 @@ import {
   UNSELECT_ALL_ELEMENTS,
   MOVE_ELEMENTS
 } from "../mutationsTypes";
+import { fireAlert } from "../../utils/alerts";
+import { MESSAGE_PASTE_SUCCESS } from "../../constants/messages";
 
 const Interface = {
   namespaced: true,
@@ -109,6 +111,7 @@ const Interface = {
       commit(ADD_ELEMENTS, {
         elements
       });
+      fireAlert("success", MESSAGE_PASTE_SUCCESS);
     },
     deleteElements({ commit }, { elements }) {
       commit(DELETE_ELEMENTS, {

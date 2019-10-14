@@ -1,5 +1,6 @@
 import * as $ from "jquery";
 import * as joint from "jointjs";
+import Vue from "vue";
 import { THEME, Inputs } from "../constants/constants";
 import { INTERFACE_ROOT, PORT_SELECTOR } from "../constants/selectors";
 import { spaceDown, ctrlDown } from "./keyboardEvents";
@@ -24,11 +25,11 @@ export const initPaperEvents = () => {
   // /*------------ZOOM */
 
   paper.on("blank:mousewheel", (evt, x, y, delta) => {
-    app.CHANGE_ZOOM({ delta, x, y });
+    Vue.prototype.$changeZoom(delta, x, y);
   });
 
   paper.on("element:mousewheel", (e, evt, x, y, delta) => {
-    app.CHANGE_ZOOM({ delta, x, y });
+    Vue.prototype.$changeZoom(delta, x, y);
   });
 
   // /*------------PAN */

@@ -8,10 +8,10 @@ import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { app } from "../../app";
 
 const Toolsbar = Vue.component("Toolsbar", {
-  props: ["selectedElements", "paper"],
+  props: ["selectedElements", "paper", "scale"],
   methods: {
     updateZoom(event) {
-      this.setZoom({ nextScale: event.target.value / 100, paper: this.paper });
+      this.$setZoom(event.target.value / 100, this.paper);
     },
     deleteAction() {
       this.deleteElements({ elements: this.selectedElements });
@@ -25,11 +25,9 @@ const Toolsbar = Vue.component("Toolsbar", {
     existFuture() {
       return UndoRedoHistory.canRedo();
     },
-    ...mapActions("Zoom", ["zoomOut", "setZoom"]),
     ...mapActions("Interface", ["duplicateElements", "deleteElements"])
   },
   computed: {
-    ...mapState("Zoom", ["scale"]),
     ...mapState("Interface", ["elements"]),
     existSelection() {
       return this.selectedElements.length > 0;

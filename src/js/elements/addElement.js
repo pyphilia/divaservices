@@ -272,36 +272,16 @@ export const addElementByName = (name, defaultParams = {}) => {
   }
 };
 
-const addElementByCellView = (cellView, boxId) => {
-  const { graph } = app;
-
-  const {
-    defaultParams,
-    size,
-    boxId: currentBoxId
-  } = cellView.model.attributes;
-
-  const e = getElementByBoxId(currentBoxId).clone();
-  let id;
-  if (boxId) {
-    e.attributes.boxId = boxId;
-    id = boxId;
-  } else {
-    id = e.attributes.boxId;
-  }
-  // avoid cloning overlap
-  e.attributes.position = findEmptyPosition(size);
-
-  e.addTo(graph);
-  setParametersInForeignObject(e, defaultParams);
-  return { e, id };
-};
-
-// not that faster, and end in creating some foreignobject with identical boxid
-// export const addElementFromId = element => {
+// const addElementByCellView = (cellView, boxId) => {
 //   const { graph } = app;
-//   const { boxId, size, defaultParams, fromId } = element; /*position*/
-//   const e = getElementByBoxId(fromId).clone();
+
+//   const {
+//     defaultParams,
+//     size,
+//     boxId: currentBoxId
+//   } = cellView.model.attributes;
+
+//   const e = getElementByBoxId(currentBoxId).clone();
 //   let id;
 //   if (boxId) {
 //     e.attributes.boxId = boxId;
@@ -318,30 +298,16 @@ const addElementByCellView = (cellView, boxId) => {
 // };
 
 // return for undo purpose
-export const addElementsByCellView = (elements, ids) => {
-  const addedElements = [];
-  const boxIds = [];
-  for (const [i, el] of elements.entries()) {
-    const boxId = ids ? ids[i] : undefined;
-    const { e, id } = addElementByCellView(el, boxId);
-    addedElements.push(e);
-    boxIds.push(id);
-  }
-  return { addedElements, boxIds };
-};
-
-// return for undo purpose
-// const restoreElement = element => {
-//   const { graph } = app;
-//   element.addTo(graph);
-//   setParametersInForeignObject(element);
-// };
-
-// export const restoreElements = elements => {
-//   for (const el of elements) {
-//     restoreElement(el);
+// export const addElementsByCellView = (elements, ids) => {
+//   const addedElements = [];
+//   const boxIds = [];
+//   for (const [i, el] of elements.entries()) {
+//     const boxId = ids ? ids[i] : undefined;
+//     const { e, id } = addElementByCellView(el, boxId);
+//     addedElements.push(e);
+//     boxIds.push(id);
 //   }
-//   return { elements };
+//   return { addedElements, boxIds };
 // };
 
 /*ADD LINKS*/

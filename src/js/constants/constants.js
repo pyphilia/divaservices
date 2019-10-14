@@ -30,6 +30,8 @@ export const BOX_HIGHLIGHTER = {
   }
 };
 
+export const ZOOM_STEP = 75;
+
 export const BOX_MARGIN = 100;
 
 export const MINIMAP_WIDTH = 150;

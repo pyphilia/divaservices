@@ -2,13 +2,13 @@ import Vue from "vue";
 import * as $ from "jquery";
 import { copy } from "../../events/controls";
 import { app } from "../../app";
-import { mapActions, mapState } from "vuex";
+import { mapActions } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { zoomInCondition, zoomOutCondition } from "./utils";
 import { saveWorkflow } from "../../workflows/saveWorkflow";
 
 const FileMenu = Vue.component("FileMenu", {
-  props: ["selectedElements", "copiedElements", "graph"],
+  props: ["selectedElements", "copiedElements", "graph", "scale"],
   methods: {
     ...mapActions("Interface", ["duplicateElements"]),
 
@@ -20,7 +20,6 @@ const FileMenu = Vue.component("FileMenu", {
     }
   },
   computed: {
-    ...mapState("Zoom", ["scale"]),
     existSelection() {
       return this.selectedElements.length > 0;
     },
