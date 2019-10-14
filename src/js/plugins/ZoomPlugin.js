@@ -1,4 +1,3 @@
-// import Vue from 'vue';
 import {
   MIN_SCALE,
   MAX_SCALE,

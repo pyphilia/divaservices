@@ -15,7 +15,7 @@ let changePosition = false;
  * links management
  */
 export const initPaperEvents = () => {
-  const { paper, graph } = app;
+  const { paper } = app;
   const contextMenu = app.$refs.contextmenu;
 
   document.addEventListener("click", function() {
@@ -53,7 +53,7 @@ export const initPaperEvents = () => {
 
     // init area selection
     if (!spaceDown) {
-      app.initAreaSelection(event);
+      app.$initAreaSelection(event);
     }
   });
 
@@ -61,7 +61,7 @@ export const initPaperEvents = () => {
     move = false;
 
     if (!spaceDown) {
-      app.endAreaSelection({ paper, graph });
+      app.$endAreaSelection(paper);
     }
   });
 
@@ -76,8 +76,8 @@ export const initPaperEvents = () => {
       }
 
       // area selection
-      if (!spaceDown && app.areaSelection.active) {
-        app.computeAreaSelection();
+      if (!spaceDown && app.$areaSelection.active) {
+        app.$computeAreaSelection();
       }
     });
 

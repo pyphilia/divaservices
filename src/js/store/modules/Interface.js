@@ -1,9 +1,9 @@
 import Vue from "vue";
 import cloneDeep from "lodash.clonedeep";
-import { buildElementFromName } from "../../elements/addElement";
-import selectionMutations from "./Selection/mutations";
-import areaSelectionMutations from "./AreaSelection/mutations";
-import areaSelectionState from "./AreaSelection/state";
+import {
+  buildElementFromName,
+  findEmptyPosition
+} from "../../elements/addElement";
 import { generateUniqueId, getElementByBoxId } from "../../layout/utils";
 import { Inputs } from "../../constants/constants";
 import {
@@ -34,8 +34,7 @@ const Interface = {
   namespaced: true,
   state: {
     elements: [],
-    links: [],
-    ...areaSelectionState
+    links: []
   },
   mutations: {
     [ADD_ELEMENT](state, element) {
@@ -47,6 +46,7 @@ const Interface = {
         addElementToElements(state.elements, {
           ...cloneDeep(el),
           fromId,
+          position: findEmptyPosition(el.size, { ...el.position }),
           boxId: generateUniqueId()
         });
       }
@@ -97,9 +97,7 @@ const Interface = {
         const graphEl = getElementByBoxId(boxId);
         el.position = graphEl.position();
       }
-    },
-    ...selectionMutations,
-    ...areaSelectionMutations
+    }
   },
   actions: {
     addElementByName({ commit }, name) {

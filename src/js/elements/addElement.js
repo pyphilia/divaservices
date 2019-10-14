@@ -195,7 +195,7 @@ export const buildElementFromName = name => {
     width: computeBoxWidth(el, showParameter),
     height: computeBoxHeight(el, showParameter)
   };
-  const position = findEmptyPosition(size);
+  const position = position ? position : findEmptyPosition(size);
 
   return { boxId, defaultParams, size, position, type: name, ports };
 };
@@ -204,7 +204,7 @@ export const buildElementFromName = name => {
 // an element without overlapping other ones
 // it tries to fill the canvas view first horizontally
 // then vertically
-const findEmptyPosition = (size, startingPoint) => {
+export const findEmptyPosition = (size, startingPoint) => {
   const { paper, graph } = app;
   const { left, top, width, height } = paper.svg.getBoundingClientRect();
   const canvasDimensions = paper.clientToLocalRect({

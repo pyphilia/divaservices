@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Split from "split.js";
 import * as joint from "jointjs";
-import { mapMutations, mapActions, mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 import Toolsbar from "./layout/components/Toolsbar";
 import FileMenu from "./layout/components/FileMenu";
 import LeftSidebar from "./layout/components/LeftSidebar";
@@ -11,10 +11,7 @@ import store from "./store/store";
 import { initWebservices } from "./constants/globals";
 import { initPaperEvents } from "./events/paperEvents";
 import { getElementByBoxId, getLinkBySourceTarget } from "./layout/utils";
-import {
-  highlightSelection,
-  unHighlight
-} from "./store/modules/Selection/mutations";
+import { highlightSelection, unHighlight } from "./store/modules/highlight";
 import { MAX_SCALE, MIN_SCALE, Inputs, THEME } from "./constants/constants";
 import { addElementByName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
@@ -37,12 +34,14 @@ import {
 } from "./store/modules/utils";
 import { moveElements } from "./elements/moveElement";
 import ZoomPlugin from "./plugins/ZoomPlugin";
+import AreaSelectionPlugin from "./plugins/AreaSelectionPlugin";
 
 export let app;
 
 (async () => {
   await initWebservices();
   Vue.use(ZoomPlugin);
+  Vue.use(AreaSelectionPlugin);
   app = new Vue({
     el: "#app",
     store,
@@ -63,6 +62,7 @@ export let app;
       // listen to the store directly
       // we should use getters but for some reason (namespace?) it is not working
       currentElements() {
+        console.log(this.elements);
         return [...this.elements];
       },
       selectedElements() {
@@ -87,7 +87,10 @@ export let app;
       scale() {
         return this.$zoom.scale;
       },
-      ...mapState("Interface", ["elements", "areaSelection", "links"]),
+      // areaSelection() {
+      //   return this.$areaSelection.active;
+      // },
+      ...mapState("Interface", ["elements", "links"]),
       ...mapState("Keyboard", ["ctrl", "space"])
     },
     methods: {
@@ -113,11 +116,6 @@ export let app;
       zoomOutFromApp() {
         this.$zoomOut(this.paper);
       },
-      ...mapMutations("Interface", [
-        "initAreaSelection",
-        "endAreaSelection",
-        "computeAreaSelection"
-      ]),
       ...mapActions("Interface", [
         "unSelectAllElements",
         "addElementToSelection",
