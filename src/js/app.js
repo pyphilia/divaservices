@@ -30,7 +30,8 @@ import { validateConnection } from "./layout/components/utils";
 import {
   selectedElements,
   copiedElements,
-  deletedElements
+  deletedElements,
+  currentElements
 } from "./store/modules/utils";
 import { moveElements } from "./elements/moveElement";
 import ZoomPlugin from "./plugins/ZoomPlugin";
@@ -62,8 +63,7 @@ export let app;
       // listen to the store directly
       // we should use getters but for some reason (namespace?) it is not working
       currentElements() {
-        console.log(this.elements);
-        return [...this.elements];
+        return currentElements(this.elements);
       },
       selectedElements() {
         return selectedElements(this.elements);
@@ -94,9 +94,6 @@ export let app;
       ...mapState("Keyboard", ["ctrl", "space"])
     },
     methods: {
-      unSelectAllElements() {
-        this.unSelectAllElements();
-      },
       addElementToSelection(cellView) {
         this.addElementToSelection(cellView);
       },
@@ -118,6 +115,7 @@ export let app;
       },
       ...mapActions("Interface", [
         "unSelectAllElements",
+        "selectAllElements",
         "addElementToSelection",
         "copySelectedElements",
         "duplicateElements",
@@ -269,10 +267,9 @@ export let app;
       this.$nextTick(() => {
         initPaperEvents();
         initKeyboardEvents();
-        console.log(this);
       });
 
-      Split([LEFT_SIDEBAR, MAIN_INTERFACE], {
+      Split([`#${LEFT_SIDEBAR}`, MAIN_INTERFACE], {
         elementStyle: function(dimension, size, gutterSize) {
           return { "flex-basis": "calc(" + size + "% - " + gutterSize + "px)" };
         },

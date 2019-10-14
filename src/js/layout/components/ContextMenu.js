@@ -1,24 +1,74 @@
 import Vue from "vue";
 import {
   CONTEXT_MENU_ELEMENT,
-  CONTEXT_MENU_PAPER
+  CONTEXT_MENU_PAPER,
+  CONTEXT_MENU_ELEMENT_SELECTOR,
+  CONTEXT_MENU_PAPER_SELECTOR,
+  COPY_CLASS,
+  DELETE_CLASS,
+  DUPLICATE_CLASS,
+  PASTE_CLASS,
+  CLEAR_CLASS
 } from "../../constants/selectors";
-import { app } from "../../app";
 import { copy } from "../../events/controls";
 import { mapActions } from "vuex";
 
 const ContextMenus = Vue.component("ContextMenus", {
-  props: ["selectedElements", "copiedElements", "paper"],
+  props: ["selectedElements", "copiedElements", "paper", "currentElements"],
   data() {
     return {
       contextMenus: {
-        element: {
+        [CONTEXT_MENU_ELEMENT]: {
           visible: false,
-          el: CONTEXT_MENU_ELEMENT
+          el: CONTEXT_MENU_ELEMENT_SELECTOR,
+          menu: {
+            Copy: {
+              className: COPY_CLASS,
+              action: () => {
+                copy(this.selectedElements);
+              }
+            },
+            Duplicate: {
+              className: DUPLICATE_CLASS,
+              action: () => {
+                if (this.selectedElements.length) {
+                  this.duplicateElements({
+                    elements: this.selectedElements
+                  });
+                }
+              }
+            },
+            Delete: {
+              className: DELETE_CLASS,
+              action: () => {
+                this.deleteElements({
+                  elements: this.selectedElements
+                });
+              }
+            }
+          }
         },
-        paper: {
+        [CONTEXT_MENU_PAPER]: {
           visible: false,
-          el: CONTEXT_MENU_PAPER
+          el: CONTEXT_MENU_PAPER_SELECTOR,
+          menu: {
+            Paste: {
+              className: PASTE_CLASS,
+              action: () => {
+                this.duplicateElements({
+                  elements: this.copiedElements
+                });
+              }
+            },
+            Clear: {
+              className: CLEAR_CLASS,
+              action: () => {
+                this.deleteElements({
+                  elements: this.currentElements
+                });
+              }
+            }
+          }
         }
       }
     };
@@ -33,19 +83,19 @@ const ContextMenus = Vue.component("ContextMenus", {
       const left = screenPos.x - offset.x;
       const top = screenPos.y - offset.y;
 
-      const menu = document.querySelector(this.contextMenus[menuName].el);
+      const menu = document.querySelector(`#${this.contextMenus[menuName].el}`);
       menu.style.left = `${left}px`;
       menu.style.top = `${top}px`;
       this.showContextMenu(this.contextMenus[menuName]);
     },
     showContextMenu(menuObj) {
       this.hideContextMenus();
-      const menu = document.querySelector(menuObj.el);
+      const menu = document.querySelector(`#${menuObj.el}`);
       menu.style.display = "block";
       menuObj.visible = !menuObj.visible;
     },
     hideContextMenu(menuObj) {
-      const menu = document.querySelector(menuObj.el);
+      const menu = document.querySelector(`#${menuObj.el}`);
       menu.style.display = "none";
       menuObj.visible = !menuObj.visible;
     },
@@ -66,7 +116,7 @@ const ContextMenus = Vue.component("ContextMenus", {
 
     // prevent right click on custom context menus
     for (const [, menuObj] of Object.entries(this.contextMenus)) {
-      document.querySelector(menuObj.el).addEventListener(
+      document.querySelector(`#${menuObj.el}`).addEventListener(
         "contextmenu",
         event => {
           event.preventDefault();
@@ -74,56 +124,11 @@ const ContextMenus = Vue.component("ContextMenus", {
         false
       );
     }
-
-    document
-      .querySelector(`${CONTEXT_MENU_ELEMENT}`)
-      .addEventListener("click", () => {
-        this.hideContextMenus();
-      });
-
-    document
-      .querySelector(`${CONTEXT_MENU_ELEMENT} .copy`)
-      .addEventListener("click", () => {
-        copy(this.selectedElements);
-      });
-
-    document
-      .querySelector(`${CONTEXT_MENU_ELEMENT} .duplicate`)
-      .addEventListener("click", async () => {
-        if (app.selectedElements.length) {
-          this.duplicateElements({
-            elements: this.selectedElements
-          });
-        }
-      });
-
-    document
-      .querySelector(`${CONTEXT_MENU_ELEMENT} .delete`)
-      .addEventListener("click", () => {
-        this.deleteElements({
-          elements: this.selectedElements
-        });
-      });
-
-    document
-      .querySelector(`${CONTEXT_MENU_PAPER} .paste`)
-      .addEventListener("click", async () => {
-        this.duplicateElements({
-          elements: this.copiedElements
-        });
-      });
   },
   template: `
     <div>
-    <div class="contextmenu" id="contextmenu-element">
-    <span class="copy">Copy</span>
-    <span class="duplicate">Duplicate</span>
-    <span class="delete">Delete</span>
-    </div>
-    
-    <div class="contextmenu" id="contextmenu-paper">
-    <span class="paste">Paste</span>
-    <span class="delete">Clear</span>
+    <div v-for="menu in contextMenus" class="contextmenu" :id="menu.el" @click="hideContextMenus()">
+    <span v-for="({className, action}, name) in menu.menu" :class="className" @click="action()">{{name}}</span>
     </div>
     </div>
     `

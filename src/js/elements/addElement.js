@@ -12,7 +12,8 @@ import {
   BOX_TITLE_HTML_TAG,
   ICON_COL,
   TITLE_COL,
-  BOX_MARGIN
+  BOX_MARGIN,
+  Inputs
 } from "../constants/constants";
 import {
   isParamInput,
@@ -106,6 +107,18 @@ const createBox = (
   return element;
 };
 
+const buildDefaultParameters = params => {
+  const defaultParams = { select: {}, number: {} };
+  for (const p of params) {
+    let { type, name, defaultValue, values } = p;
+    if (type == Inputs.SELECT.type) {
+      defaultValue = values[defaultValue];
+    }
+    defaultParams[type][name] = { value: defaultValue, defaultValue };
+  }
+  return defaultParams;
+};
+
 export const transformWebserviceForGraph = webservice => {
   if (!webservice.name) {
     alert("problem with ", webservice);
@@ -122,15 +135,8 @@ export const transformWebserviceForGraph = webservice => {
   // handle params
   const params = inputs.filter(inp => isParamInput(inp));
 
-  // build default parameters from
-  const defaultParams = { select: {}, number: {} };
-  for (const p of params) {
-    let { type, name, defaultValue, values } = p;
-    if (type == "select") {
-      defaultValue = values[defaultValue];
-    }
-    defaultParams[type][name] = { value: defaultValue, defaultValue };
-  }
+  // build default parameters object
+  const defaultParams = buildDefaultParameters(params);
 
   const ret = {
     name,
@@ -162,13 +168,7 @@ export const addElementFromTransformedJSON = (e, parameters = {}) => {
   return element;
 };
 
-export const buildElementFromName = name => {
-  const webservice = webservices.find(service => service.name == name);
-  const { outputs = [], inputs = [] } = webservice;
-
-  const el = transformWebserviceForGraph(webservice);
-
-  // handle ports
+const createPortsFromInputOutput = (inputs, outputs) => {
   const ports = { items: [] };
   inputs
     .filter(inp => isPortUserdefined(inp))
@@ -184,6 +184,18 @@ export const buildElementFromName = name => {
       ports.items.push(port);
     }
   });
+  return ports;
+};
+
+export const buildElementFromName = name => {
+  // find webservice given name
+  const webservice = webservices.find(service => service.name == name);
+  const { outputs = [], inputs = [] } = webservice;
+
+  const el = transformWebserviceForGraph(webservice);
+
+  // handle ports
+  const ports = createPortsFromInputOutput(inputs, outputs);
   el.ports = ports;
 
   const boxId = generateUniqueId();
@@ -195,6 +207,7 @@ export const buildElementFromName = name => {
     width: computeBoxWidth(el, showParameter),
     height: computeBoxHeight(el, showParameter)
   };
+
   const position = position ? position : findEmptyPosition(size);
 
   return { boxId, defaultParams, size, position, type: name, ports };
@@ -265,50 +278,10 @@ export const addElementByName = (name, defaultParams = {}) => {
   const algo = webservices.find(service => service.name == name);
   if (algo) {
     addElementToGraphFromServiceDescription(algo, defaultParams);
-
-    // return e.attributes; //{ boxId, position };
   } else {
     console.error(`${name} doesnt exist`);
   }
 };
-
-// const addElementByCellView = (cellView, boxId) => {
-//   const { graph } = app;
-
-//   const {
-//     defaultParams,
-//     size,
-//     boxId: currentBoxId
-//   } = cellView.model.attributes;
-
-//   const e = getElementByBoxId(currentBoxId).clone();
-//   let id;
-//   if (boxId) {
-//     e.attributes.boxId = boxId;
-//     id = boxId;
-//   } else {
-//     id = e.attributes.boxId;
-//   }
-//   // avoid cloning overlap
-//   e.attributes.position = findEmptyPosition(size);
-
-//   e.addTo(graph);
-//   setParametersInForeignObject(e, defaultParams);
-//   return { e, id };
-// };
-
-// return for undo purpose
-// export const addElementsByCellView = (elements, ids) => {
-//   const addedElements = [];
-//   const boxIds = [];
-//   for (const [i, el] of elements.entries()) {
-//     const boxId = ids ? ids[i] : undefined;
-//     const { e, id } = addElementByCellView(el, boxId);
-//     addedElements.push(e);
-//     boxIds.push(id);
-//   }
-//   return { addedElements, boxIds };
-// };
 
 /*ADD LINKS*/
 

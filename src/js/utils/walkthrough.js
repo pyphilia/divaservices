@@ -51,7 +51,7 @@ export const initTour = () => {
       text:
         "The left sidebar displays all available webservices you can use to construct your workflow.<br><br>Choose one to begin your working on your workflow.",
       attachTo: {
-        element: LEFT_SIDEBAR,
+        element: `#${LEFT_SIDEBAR}`,
         on: "right"
       },
       when: {

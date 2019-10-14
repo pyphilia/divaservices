@@ -6,6 +6,7 @@ import { MAX_SCALE, MIN_SCALE } from "../../constants/constants";
 import { mapState, mapActions } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { app } from "../../app";
+import { TOOLSBAR } from "../../constants/selectors";
 
 const Toolsbar = Vue.component("Toolsbar", {
   props: ["selectedElements", "paper", "scale"],
@@ -101,7 +102,7 @@ const Toolsbar = Vue.component("Toolsbar", {
       return Math.ceil(this.scale * 100);
     }
   },
-  template: `<div id="toolsbar">
+  template: `<div id="${TOOLSBAR}">
   <div v-for="group in toolsbarIcons" class="group">
   <a v-for="({id, action, icon, element, model, requireHistory, requireFuture, requireSelection, requireZoom, condition}, name) in group" :id="id" :title="name" @click="action()"
   :class="{disabled: (requireSelection && !existSelection) || (requireZoom && condition()) || (requireHistory &&!existHistory()) || (requireFuture && !existFuture())}">

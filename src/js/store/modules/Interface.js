@@ -11,7 +11,8 @@ import {
   addElementToElements,
   deleteElement,
   selectElementByBoxId,
-  selectedElements
+  selectedElements,
+  selectElement
 } from "./utils";
 import {
   ADD_ELEMENT,
@@ -53,7 +54,7 @@ const Interface = {
     },
     [DELETE_ELEMENTS](state, { elements }) {
       for (const el of elements) {
-        deleteElement(state.elements, el);
+        deleteElement(el);
       }
     },
     [ADD_ELEMENT_TO_SELECTION](state, { model }) {
@@ -61,9 +62,8 @@ const Interface = {
       selectElementByBoxId(state.elements, boxId);
     },
     [ADD_ELEMENTS_TO_SELECTION](state, { elements }) {
-      for (const { model } of elements) {
-        const { boxId } = model.attributes;
-        selectElementByBoxId(state.elements, boxId);
+      for (const el of elements) {
+        selectElement(el);
       }
     },
     [UNSELECT_ALL_ELEMENTS](state) {
@@ -121,6 +121,9 @@ const Interface = {
     },
     unSelectAllElements({ commit }) {
       commit(UNSELECT_ALL_ELEMENTS);
+    },
+    selectAllElements({ commit, state }) {
+      commit(ADD_ELEMENTS_TO_SELECTION, { elements: state.elements });
     },
     copySelectedElements({ commit }) {
       commit(COPY_SELECTION);

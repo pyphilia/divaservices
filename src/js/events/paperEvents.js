@@ -2,9 +2,13 @@ import * as $ from "jquery";
 import * as joint from "jointjs";
 import Vue from "vue";
 import { THEME, Inputs } from "../constants/constants";
-import { INTERFACE_ROOT, PORT_SELECTOR } from "../constants/selectors";
+import {
+  INTERFACE_ROOT,
+  PORT_SELECTOR,
+  CONTEXT_MENU_PAPER,
+  CONTEXT_MENU_ELEMENT
+} from "../constants/selectors";
 import { spaceDown, ctrlDown } from "./keyboardEvents";
-// import ContextMenu from "../layout/components/ContextMenu";
 
 import { app } from "../app";
 import { moveAllElements } from "../elements/moveElement";
@@ -119,11 +123,6 @@ export const initPaperEvents = () => {
 
   /**SELECTION*/
 
-  /**
-   * Initialize the element selection feature
-   * It also handles the highlight effect of the elements
-   */
-
   paper.on("element:pointerdown", cellView => {
     // if control key is not hold, a different
     // the current selection is reset
@@ -136,8 +135,6 @@ export const initPaperEvents = () => {
 
   // /**CONTEXT MENU*/
 
-  paper.on("blank:contextmenu", () => {});
-
   paper.on("element:contextmenu", (cellView, evt, x, y) => {
     evt.preventDefault();
 
@@ -148,14 +145,14 @@ export const initPaperEvents = () => {
     }
 
     app.addElementToSelection(cellView);
-    contextMenu.setPositionToContextMenu("element", { x, y });
+    contextMenu.setPositionToContextMenu(CONTEXT_MENU_ELEMENT, { x, y });
     return false;
   });
 
   paper.on("blank:contextmenu", (evt, x, y) => {
     evt.preventDefault();
 
-    contextMenu.setPositionToContextMenu("paper", { x, y });
+    contextMenu.setPositionToContextMenu(CONTEXT_MENU_PAPER, { x, y });
     return false;
   });
 

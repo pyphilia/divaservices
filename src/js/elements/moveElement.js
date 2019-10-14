@@ -1,13 +1,5 @@
 import { getElementByBoxId } from "../layout/utils";
 
-export const moveElementsByBoxId = (elementBoxIds, positions) => {
-  for (const id of elementBoxIds) {
-    const el = getElementByBoxId(id);
-    const { x, y } = positions[id];
-    el.position(x, y, { multitranslate: true });
-  }
-};
-
 export const moveElements = elements => {
   for (const { boxId, position } of elements) {
     const el = getElementByBoxId(boxId);

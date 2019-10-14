@@ -1,6 +1,7 @@
 import { copy } from "./controls";
 import { app } from "../app";
 import UndoRedoHistory from "../store/plugins/UndoRedoHistory";
+import { getElementByBoxId } from "../layout/utils";
 
 export let ctrlDown;
 export let spaceDown;
@@ -42,26 +43,30 @@ export const initKeyboardEvents = () => {
       } else {
         switch (keyName) {
           case "ArrowDown": {
-            for (const el of app.selectedElements) {
-              el.model.translate(0, 50);
+            for (const { boxId } of app.selectedElements) {
+              getElementByBoxId(boxId).translate(0, 50);
+              app.moveSelectedElements();
             }
             break;
           }
           case "ArrowUp": {
-            for (const el of app.selectedElements) {
-              el.model.translate(0, -50);
+            for (const { boxId } of app.selectedElements) {
+              getElementByBoxId(boxId).translate(0, -50);
+              app.moveSelectedElements();
             }
             break;
           }
           case "ArrowRight": {
-            for (const el of app.selectedElements) {
-              el.model.translate(50, 0);
+            for (const { boxId } of app.selectedElements) {
+              getElementByBoxId(boxId).translate(50, 0);
+              app.moveSelectedElements();
             }
             break;
           }
           case "ArrowLeft": {
-            for (const el of app.selectedElements) {
-              el.model.translate(-50, 0);
+            for (const { boxId } of app.selectedElements) {
+              getElementByBoxId(boxId).translate(-50, 0);
+              app.moveSelectedElements();
             }
             break;
           }

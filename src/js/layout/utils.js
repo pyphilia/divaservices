@@ -49,12 +49,6 @@ export const generateUniqueId = () => {
     .substr(2, 9);
 };
 
-export const getWebServiceFromUrl = async url => {
-  const data = await fetch(url);
-  const json = await data.json();
-  return json;
-};
-
 export const isParamInput = input => {
   if (input.type) {
     return input.type == Inputs.SELECT.type || input.type == Inputs.NUMBER.type;
@@ -156,16 +150,4 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
   const maxPortEntry = Math.max(inPorts.length, outPorts.length);
   // @TODO count input + output port
   return Math.max(defaultHeight, maxPortEntry * 50, inputsHeight);
-};
-
-export const computeDisplayOffset = (el, { height, width }) => {
-  const mainPosition = document.querySelector("#main").getBoundingClientRect();
-
-  const sPosition = el.offset();
-  const dist = {
-    x: (sPosition.left - mainPosition.x + width) * 0.1,
-    y: (sPosition.top - mainPosition.y + height) * 0.09,
-    elementOffset: sPosition
-  };
-  return dist;
 };

@@ -8,7 +8,9 @@ import { webservices } from "../../constants/globals";
 import {
   ALGO_ITEM_CLASS,
   ALGO_ITEM_WRAPPER,
-  ALGO_SEARCH_CONTAINER
+  ALGO_SEARCH_CONTAINER,
+  LEFT_SIDEBAR,
+  ALGO_ITEMS
 } from "../../constants/selectors";
 import { mapActions } from "vuex";
 
@@ -67,12 +69,12 @@ const LeftSidebar = Vue.component("LeftSidebar", {
 
         this.$nextTick(function() {
           const searchHeight = document
-            .querySelector(ALGO_SEARCH_CONTAINER)
+            .querySelector(`#${ALGO_SEARCH_CONTAINER}`)
             .getBoundingClientRect().height;
 
           const firstEl = document.querySelector(`#algo-items .${category}`);
           // @TODO cross browser solutions https://stackoverflow.com/questions/52276194/window-scrollto-with-options-not-working-on-microsoft-edge
-          document.querySelector(ALGO_ITEM_WRAPPER).scrollTo({
+          document.querySelector(`#${ALGO_ITEM_WRAPPER}`).scrollTo({
             top: firstEl.offsetTop - searchHeight,
             left: 0,
             behavior: "smooth"
@@ -86,7 +88,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
     results() {
       // if search sth
       if (this.search && this.search.length) {
-        document.querySelector(ALGO_ITEM_WRAPPER).scrollTo(0, 0);
+        document.querySelector(`#${ALGO_ITEM_WRAPPER}`).scrollTo(0, 0);
 
         const searchQuery = this.search.toLowerCase();
 
@@ -113,7 +115,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
       }
     }
   },
-  template: `<div id="left-sidebar" class="col">
+  template: `<div id="${LEFT_SIDEBAR}" class="col">
   <div class="row  h-100">
   <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
   <a v-for="category in categories" :class="'category-tab ' + category" @click="categoryClick(category)"><div class="icon"></div>{{getCategoryName(category)}}</a>
@@ -123,8 +125,8 @@ const LeftSidebar = Vue.component("LeftSidebar", {
   <div id="algo-search">
   <input v-model="search" type="search" class="form-control" placeholder="Search for a webservice..." aria-label="Username" aria-describedby="basic-addon1">
   </div>
-  <div id="algo-items-wrapper">
-  <div id="algo-items">
+  <div id="${ALGO_ITEM_WRAPPER}">
+  <div id="${ALGO_ITEMS}">
   <div v-for="{type, name} in results" :class="'${ALGO_ITEM_CLASS} ' + type" :name="name" @click="addElementByName(name)"><span class="icon"></span><span class="name" v-html="boldRegInString(name)"></span></div>
   </div>
   </div>

@@ -2,7 +2,8 @@ import Vue from "vue";
 import * as joint from "jointjs";
 import {
   MINIMAP_NAVIGATOR_SELECTOR,
-  MINIMAP_PAPER_ID
+  MINIMAP_PAPER_ID,
+  MINIMAP_CONTAINER
 } from "../../constants/selectors";
 import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../../constants/constants";
 import { mapState } from "vuex";
@@ -93,7 +94,7 @@ const Minimap = Vue.component("Minimap", {
       this.minimapPaper.scaleContentToFit();
       this.mapScale = this.minimapPaper.scale().sx;
 
-      this.navigator = document.querySelector(MINIMAP_NAVIGATOR_SELECTOR);
+      this.navigator = document.querySelector(`#${MINIMAP_NAVIGATOR_SELECTOR}`);
 
       this.navigator.addEventListener("mousedown", e => {
         this.mapDragFlag = true;
@@ -127,9 +128,9 @@ const Minimap = Vue.component("Minimap", {
       });
     });
   },
-  template: `<div id="minimap-container">
-    <div id="minimap-paper"></div>
-    <div id="minimap-navigator">
+  template: `<div id="${MINIMAP_CONTAINER}">
+    <div id="${MINIMAP_PAPER_ID}"></div>
+    <div id="${MINIMAP_NAVIGATOR_SELECTOR}">
     </div>
 </div>`
 });

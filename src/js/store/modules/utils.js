@@ -29,13 +29,23 @@ export const addElementToElements = (elements, element) => {
   });
 };
 
-export const deleteElement = (elements, element) => {
-  elements.splice(elements.indexOf(element), 1);
+// we use a deleted flag, in order to be able to paste deleted copied
+// elements
+export const deleteElement = element => {
+  element.deleted = true;
 };
 
 export const selectElementByBoxId = (elements, boxId) => {
   const el = elements.find(el => el.boxId == boxId);
   el.selected = true;
+};
+
+export const selectElement = element => {
+  element.selected = true;
+};
+
+export const currentElements = elements => {
+  return elements.filter(el => !el.deleted);
 };
 
 export const copiedElements = elements => {

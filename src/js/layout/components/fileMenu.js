@@ -74,8 +74,19 @@ const FileMenu = Vue.component("FileMenu", {
             requireFuture: true
           },
           { name: "separator" },
-          { name: "Select All", action: () => {} },
-          { name: "Unselect", action: () => {}, requireSelection: true },
+          {
+            name: "Select All",
+            action: () => {
+              app.selectAllElements();
+            }
+          },
+          {
+            name: "Unselect All",
+            action: () => {
+              app.unSelectAllElements();
+            },
+            requireSelection: true
+          },
           { name: "separator" },
           {
             name: "Zoom In",
@@ -97,8 +108,18 @@ const FileMenu = Vue.component("FileMenu", {
               return zoomOutCondition(this.scale);
             }
           },
-          { name: "Reset Zoom", action: () => {} },
-          { name: "Fit Content", action: () => {} }
+          {
+            name: "Reset Zoom",
+            action: () => {
+              app.$setZoom(1, app.paper);
+            }
+          },
+          {
+            name: "Fit Content",
+            action: () => {
+              app.paper.scaleContentToFit();
+            }
+          }
         ],
         Workflow: [
           {
@@ -120,26 +141,26 @@ const FileMenu = Vue.component("FileMenu", {
     }
   },
   template: `
-  <nav id="navbar-menu" class="navbar navbar-expand-lg">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-  <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-  <ul class="navbar-nav">
-  
-  <li class="nav-item dropdown" v-for="(item, menuName) in menu">
-  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{menuName}}</a>
-  <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-  <a v-for="{name, action, condition, requireSelection, requireZoom, requireHistory, requireFuture} in item" v-if="name != 'separator'" @click="action"
-  :class="{'dropdown-item':true, disabled:  (requireSelection && !existSelection) || (requireZoom && condition()) || (requireHistory && !existHistory()) || (requireFuture && !existFuture())} " href="#">{{name}}</a>
-  <div v-else class="dropdown-divider"></div>
-  </div>
-  </li>
-  
-  </ul>
-  </div>
-  </nav>
-  `
+<nav id="navbar-menu" class="navbar navbar-expand-lg">
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarNavDropdown">
+<ul class="navbar-nav">
+
+<li class="nav-item dropdown" v-for="(item, menuName) in menu">
+<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{menuName}}</a>
+<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+<a v-for="{name, action, condition, requireSelection, requireZoom, requireHistory, requireFuture} in item" v-if="name != 'separator'" @click="action"
+:class="{'dropdown-item':true, disabled:  (requireSelection && !existSelection) || (requireZoom && condition()) || (requireHistory && !existHistory()) || (requireFuture && !existFuture())} " href="#">{{name}}</a>
+<div v-else class="dropdown-divider"></div>
+</div>
+</li>
+
+</ul>
+</div>
+</nav>
+`
 });
 
 export default FileMenu;
