@@ -26,15 +26,29 @@ const Toolsbar = Vue.component("Toolsbar", {
     existFuture() {
       return UndoRedoHistory.canRedo();
     },
+    toggleLeftSidebar() {
+      this.$root.$refs.leftsidebar.toggle();
+    },
     ...mapActions("Interface", ["duplicateElements", "deleteElements"])
   },
   computed: {
+    isLeftsidebarOpen() {
+      return this.$root.$refs.leftsidebar.open;
+    },
     ...mapState("Interface", ["elements"]),
     existSelection() {
       return this.selectedElements.length > 0;
     },
     toolsbarIcons() {
       return [
+        {
+          collapse: {
+            action: this.toggleLeftSidebar,
+            icon: "fas fa-caret-square-left",
+            id: "collapseLeftSidebar"
+            // requireLeftSidebar: true,
+          }
+        },
         {
           delete: {
             action: this.deleteAction,
@@ -102,30 +116,39 @@ const Toolsbar = Vue.component("Toolsbar", {
       return Math.ceil(this.scale * 100);
     }
   },
-  template: `<div id="${TOOLSBAR}">
-  <div v-for="group in toolsbarIcons" class="group">
-  <a v-for="({id, action, icon, element, model, requireHistory, requireFuture, requireSelection, requireZoom, condition}, name) in group" :id="id" :title="name" @click="action()"
-  :class="{disabled: (requireSelection && !existSelection) || (requireZoom && condition()) || (requireHistory &&!existHistory()) || (requireFuture && !existFuture())}">
-  
-  <div v-if="name == 'zoom slider'" class="dropdown">
-  <button class="btn btn-secondary btn-sm  dropdown-toggle" type="button" id="zoomDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  {{sliderValue}}%
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="zoomDropdown">
-  <div class="slidecontainer">
-  <input type="range" :value="sliderValue" @input="updateZoom($event)" min="${Math.ceil(
-    MIN_SCALE * 100
-  )}" max="${Math.ceil(MAX_SCALE * 100)}" class="slider" id="zoomSlider">
+  template: `
+  <div id="${TOOLSBAR}">
+    <div v-for="group in toolsbarIcons" class="group">
+
+      <a v-for="({id, action, icon, element, model, requireHistory, requireFuture, requireSelection, requireLeftSidebar, requireZoom, condition}, name) in group" 
+      :id="id" :title="name" @click="action()"
+      :class="{disabled: (requireSelection && !existSelection) || 
+        (requireZoom && condition()) || 
+        (requireHistory &&!existHistory()) || 
+        (requireFuture && !existFuture())
+      }">
+      
+        <div v-if="name == 'zoom slider'" class="dropdown">
+          <button class="btn btn-secondary btn-sm  dropdown-toggle" type="button" id="zoomDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          {{sliderValue}}%
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="zoomDropdown">
+              <div class="slidecontainer">
+                <input type="range" :value="sliderValue" @input="updateZoom($event)" min="${Math.ceil(
+                  MIN_SCALE * 100
+                )}" max="${Math.ceil(
+    MAX_SCALE * 100
+  )}" class="slider" id="zoomSlider">
+              </div>
+          </div>
+        </div>
+          
+        <i v-if="icon" :class="icon"></i>
+          
+        <div v-if="element" v-html="element"></div>
+      </a>
     </div>
-    </div>
-    </div>
-    
-    <i v-if="icon" :class="icon"></i>
-    
-    <div v-if="element" v-html="element"></div>
-    </a>
-    </div>
-    </div>`
+  </div>`
 });
 
 export default Toolsbar;

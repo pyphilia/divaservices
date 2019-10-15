@@ -13,6 +13,7 @@ import {
   ALGO_ITEMS
 } from "../../constants/selectors";
 import { mapActions } from "vuex";
+import { split } from "../../app";
 
 const alphabeticalOrder = (a, b) => {
   const x = a.name.toLowerCase();
@@ -23,6 +24,7 @@ const alphabeticalOrder = (a, b) => {
 const LeftSidebar = Vue.component("LeftSidebar", {
   data: function() {
     return {
+      open: true,
       services: (() => {
         const mapped = webservices.map(service => {
           const { type, name } = service;
@@ -72,7 +74,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
             .querySelector(`#${ALGO_SEARCH_CONTAINER}`)
             .getBoundingClientRect().height;
 
-          const firstEl = document.querySelector(`#algo-items .${category}`);
+          const firstEl = document.querySelector(`#${ALGO_ITEMS} .${category}`);
           // @TODO cross browser solutions https://stackoverflow.com/questions/52276194/window-scrollto-with-options-not-working-on-microsoft-edge
           document.querySelector(`#${ALGO_ITEM_WRAPPER}`).scrollTo({
             top: firstEl.offsetTop - searchHeight,
@@ -115,13 +117,22 @@ const LeftSidebar = Vue.component("LeftSidebar", {
       }
     }
   },
-  template: `<div id="${LEFT_SIDEBAR}" class="col">
-  <div class="row  h-100">
+  methods: {
+    toggle() {
+      if (!this.open || split.getSizes()[0] < 1) {
+        split.setSizes([25, 75]);
+        this.open = true;
+      } else {
+        split.collapse(0);
+        this.open = false;
+      }
+    }
+  },
+  template: `<div id="${LEFT_SIDEBAR}" class="d-flex p-0 flex-nowrap">
   <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
   <a v-for="category in categories" :class="'category-tab ' + category" @click="categoryClick(category)"><div class="icon"></div>{{getCategoryName(category)}}</a>
   </div>
-  
-  <div  class="col pr-0" id="algo-tab">
+  <div class="col pr-0" id="algo-tab">
   <div id="algo-search">
   <input v-model="search" type="search" class="form-control" placeholder="Search for a webservice..." aria-label="Username" aria-describedby="basic-addon1">
   </div>
@@ -132,7 +143,6 @@ const LeftSidebar = Vue.component("LeftSidebar", {
   </div>
   </div>
   
-  </div>
   </div>`
 });
 

@@ -38,6 +38,7 @@ import ZoomPlugin from "./plugins/ZoomPlugin";
 import AreaSelectionPlugin from "./plugins/AreaSelectionPlugin";
 
 export let app;
+export let split;
 
 (async () => {
   await initWebservices();
@@ -87,9 +88,6 @@ export let app;
       scale() {
         return this.$zoom.scale;
       },
-      // areaSelection() {
-      //   return this.$areaSelection.active;
-      // },
       ...mapState("Interface", ["elements", "links"]),
       ...mapState("Keyboard", ["ctrl", "space"])
     },
@@ -269,11 +267,11 @@ export let app;
         initKeyboardEvents();
       });
 
-      Split([`#${LEFT_SIDEBAR}`, MAIN_INTERFACE], {
+      split = Split([`#${LEFT_SIDEBAR}`, MAIN_INTERFACE], {
         elementStyle: function(dimension, size, gutterSize) {
           return { "flex-basis": "calc(" + size + "% - " + gutterSize + "px)" };
         },
-        minSize: [300, 500],
+        minSize: [10, 500],
         sizes: [25, 75],
         gutterSize: 6
       });

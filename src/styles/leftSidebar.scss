@@ -1,5 +1,6 @@
 #left-sidebar {
   height: 100%;
+  overflow: hidden;
 }
 
 #algo-tab {
@@ -50,6 +51,7 @@
 
 #algo-categories {
   border-right: 1px solid black;
+  min-width: 90px;
 }
 
 #algo-categories a.category-tab {

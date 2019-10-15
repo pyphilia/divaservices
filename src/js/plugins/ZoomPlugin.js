@@ -55,8 +55,8 @@ const plugin = {
       paper.scaleContentToFit({
         minScaleX: MIN_SCALE,
         minScaleY: MIN_SCALE,
-        minmaxScaleX: MAX_SCALE,
-        minmaxScaleY: MAX_SCALE
+        maxScaleX: MAX_SCALE,
+        maxScaleY: MAX_SCALE
       });
       Vue.prototype.$zoom.scale = paper.scale().sx;
     };
