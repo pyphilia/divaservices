@@ -132,3 +132,25 @@ export const THEME = {
     }
   }
 };
+
+export const Shortcuts = {
+  COPY: {
+    ctrl: true,
+    key: "c"
+  },
+  PASTE: {
+    ctrl: true,
+    key: "v"
+  },
+  DELETE: {
+    key: "Delete"
+  },
+  UNDO: {
+    ctrl: true,
+    key: "z"
+  },
+  REDO: {
+    ctrl: true,
+    key: "y"
+  }
+};

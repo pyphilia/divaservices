@@ -2,15 +2,19 @@
  * Initialize toolsbar
  */
 import Vue from "vue";
-import { MAX_SCALE, MIN_SCALE } from "../../constants/constants";
+import { MAX_SCALE, MIN_SCALE, Shortcuts } from "../../constants/constants";
 import { mapState, mapActions } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { app } from "../../app";
 import { TOOLSBAR } from "../../constants/selectors";
+import { shortcutToString } from "../../utils/utils";
 
 const Toolsbar = Vue.component("Toolsbar", {
   props: ["selectedElements", "paper", "scale"],
   methods: {
+    shortcutToString(shortcut) {
+      return shortcutToString(shortcut);
+    },
     updateZoom(event) {
       this.$setZoom(event.target.value / 100, this.paper);
     },
@@ -54,7 +58,8 @@ const Toolsbar = Vue.component("Toolsbar", {
             action: this.deleteAction,
             icon: "fas fa-trash",
             id: "delete",
-            requireSelection: true
+            requireSelection: true,
+            shortcut: Shortcuts.DELETE
           },
           duplicate: {
             action: this.duplicateAction,
@@ -71,7 +76,8 @@ const Toolsbar = Vue.component("Toolsbar", {
             id: "undo",
             classNames: "disabled",
             icon: "fas fa-undo",
-            requireHistory: true
+            requireHistory: true,
+            shortcut: Shortcuts.UNDO
           },
           redo: {
             action: () => {
@@ -80,7 +86,8 @@ const Toolsbar = Vue.component("Toolsbar", {
             classNames: "disabled",
             id: "redo",
             icon: "fas fa-redo",
-            requireFuture: true
+            requireFuture: true,
+            shortcut: Shortcuts.REDO
           }
         },
         {
@@ -120,8 +127,8 @@ const Toolsbar = Vue.component("Toolsbar", {
   <div id="${TOOLSBAR}">
     <div v-for="group in toolsbarIcons" class="group">
 
-      <a v-for="({id, action, icon, element, model, requireHistory, requireFuture, requireSelection, requireLeftSidebar, requireZoom, condition}, name) in group" 
-      :id="id" :title="name" @click="action()"
+      <a v-for="({id, action, icon, element, shortcut, model, requireHistory, requireFuture, requireSelection, requireLeftSidebar, requireZoom, condition}, name) in group" 
+      :id="id" :title="name + ' ' + shortcutToString(shortcut)" @click="action()"
       :class="{disabled: (requireSelection && !existSelection) || 
         (requireZoom && condition()) || 
         (requireHistory &&!existHistory()) || 
