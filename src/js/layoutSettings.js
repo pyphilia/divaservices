@@ -5,11 +5,6 @@ import {
   TOOLTIP_CLASS,
   NO_PARAMETER_CLASS
 } from "./constants/selectors";
-import {
-  computeBoxWidth,
-  computeTitleLength,
-  computeBoxHeight
-} from "./layout/utils";
 import { DEFAULT_OPTIONS } from "../config";
 import { app } from "./app";
 
@@ -58,21 +53,22 @@ const changeParameters = event => {
     el.style.display = displayValue;
   });
 
-  const { graph } = app;
-  for (const e of graph.getElements()) {
-    const newWidth = computeBoxWidth(e, showParameters, true);
-    const newHeight = computeBoxHeight(e, showParameters, true);
-    e.resize(newWidth, newHeight);
-    document
-      .querySelectorAll(`g[model-id='${e.id}'] foreignObject`)
-      .forEach(el => {
-        el.setAttribute("width", newWidth);
-        el.setAttribute(
-          "height",
-          newHeight + computeTitleLength(e, true).titleHeight
-        );
-      });
-  }
+  // automatic resize of boxes
+  // const { graph } = app;
+  // for (const e of graph.getElements()) {
+  //   const newWidth = computeBoxWidth(e, showParameters, true);
+  //   const newHeight = computeBoxHeight(e, showParameters, true);
+  //   e.resize(newWidth, newHeight);
+  //   document
+  //     .querySelectorAll(`g[model-id='${e.id}'] foreignObject`)
+  //     .forEach(el => {
+  //       el.setAttribute("width", newWidth);
+  //       el.setAttribute(
+  //         "height",
+  //         newHeight + computeTitleLength(e, true).titleHeight
+  //       );
+  //     });
+  // }
 };
 
 const defaultSettings = {

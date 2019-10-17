@@ -36,7 +36,11 @@ export const deleteElement = element => {
 
 export const selectElementByBoxId = (elements, boxId) => {
   const el = elements.find(el => el.boxId == boxId);
-  el.selected = true;
+  if (el) {
+    el.selected = true;
+  } else {
+    console.log("ERROR");
+  }
 };
 
 export const selectElement = element => {

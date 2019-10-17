@@ -8,6 +8,7 @@ import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { app } from "../../app";
 import { TOOLSBAR } from "../../constants/selectors";
 import { shortcutToString } from "../../utils/utils";
+import { getElementByBoxId } from "../utils";
 
 const Toolsbar = Vue.component("Toolsbar", {
   props: ["selectedElements", "paper", "scale"],
@@ -23,12 +24,6 @@ const Toolsbar = Vue.component("Toolsbar", {
     },
     duplicateAction() {
       this.duplicateElements({ elements: this.selectedElements });
-    },
-    existHistory() {
-      return UndoRedoHistory.canUndo();
-    },
-    existFuture() {
-      return UndoRedoHistory.canRedo();
     },
     toggleLeftSidebar() {
       this.$root.$refs.leftsidebar.toggle();
@@ -49,8 +44,8 @@ const Toolsbar = Vue.component("Toolsbar", {
           collapse: {
             action: this.toggleLeftSidebar,
             icon: "fas fa-caret-square-left",
-            id: "collapseLeftSidebar"
-            // requireLeftSidebar: true,
+            id: "collapseLeftSidebar",
+            enabledCondition: true
           }
         },
         {
@@ -58,14 +53,14 @@ const Toolsbar = Vue.component("Toolsbar", {
             action: this.deleteAction,
             icon: "fas fa-trash",
             id: "delete",
-            requireSelection: true,
+            enabledCondition: this.existSelection,
             shortcut: Shortcuts.DELETE
           },
           duplicate: {
             action: this.duplicateAction,
             icon: "fas fa-clone",
             id: "duplicate",
-            requireSelection: true
+            enabledCondition: this.existSelection
           }
         },
         {
@@ -74,19 +69,19 @@ const Toolsbar = Vue.component("Toolsbar", {
               UndoRedoHistory.undo();
             },
             id: "undo",
-            classNames: "disabled",
+            // classNames: "disabled",
             icon: "fas fa-undo",
-            requireHistory: true,
+            enabledCondition: UndoRedoHistory.canUndo(),
             shortcut: Shortcuts.UNDO
           },
           redo: {
             action: () => {
               UndoRedoHistory.redo();
             },
-            classNames: "disabled",
+            // classNames: "disabled",
             id: "redo",
             icon: "fas fa-redo",
-            requireFuture: true,
+            enabledCondition: UndoRedoHistory.canRedo(),
             shortcut: Shortcuts.REDO
           }
         },
@@ -96,25 +91,30 @@ const Toolsbar = Vue.component("Toolsbar", {
               app.zoomInFromApp();
             },
             icon: "fas fa-search-plus",
-            requireZoom: true,
-            condition: () => {
-              return this.scale >= MAX_SCALE;
-            }
+            enabledCondition: this.scale >= MAX_SCALE
           },
           "zoom out": {
             action: () => {
               app.zoomOutFromApp();
             },
             icon: "fas fa-search-minus",
-            requireZoom: true,
-            condition: () => {
-              return this.scale <= MIN_SCALE;
-            }
+            enabledCondition: this.scale <= MIN_SCALE
           },
           "zoom slider": {
             action: () => {},
-            element: `
-          `
+            element: ""
+          }
+        },
+        {
+          resize: {
+            action: () => {
+              const cellView = getElementByBoxId(
+                this.selectedElements[0].boxId
+              ).findView(app.paper);
+              app.$createResizer(cellView);
+            },
+            icon: "fas fa-expand",
+            enabledCondition: this.selectedElements.length == 1
           }
         }
       ];
@@ -127,13 +127,9 @@ const Toolsbar = Vue.component("Toolsbar", {
   <div id="${TOOLSBAR}">
     <div v-for="group in toolsbarIcons" class="group">
 
-      <a v-for="({id, action, icon, element, shortcut, model, requireHistory, requireFuture, requireSelection, requireLeftSidebar, requireZoom, condition}, name) in group" 
-      :id="id" :title="name + ' ' + shortcutToString(shortcut)" @click="action()"
-      :class="{disabled: (requireSelection && !existSelection) || 
-        (requireZoom && condition()) || 
-        (requireHistory &&!existHistory()) || 
-        (requireFuture && !existFuture())
-      }">
+      <a v-for="({id, action, icon, element, shortcut, model, enabledCondition}, name) in group" 
+      :id="id" :title="name + ' ' + shortcutToString(shortcut)" @click="enabledCondition ? action($event) : $event.preventDefault()"
+      :class="{disabled: !enabledCondition}">
       
         <div v-if="name == 'zoom slider'" class="dropdown">
           <button class="btn btn-secondary btn-sm  dropdown-toggle" type="button" id="zoomDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

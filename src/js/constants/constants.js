@@ -21,14 +21,16 @@ export const Inputs = {
 };
 Object.freeze(Inputs);
 
-export const BOX_HIGHLIGHTER = {
-  highlighter: {
-    name: "stroke",
-    options: {
-      width: 3
+export const BOX_HIGHLIGHTERS = [
+  {
+    highlighter: {
+      name: "stroke",
+      options: {
+        width: 3
+      }
     }
   }
-};
+];
 
 export const ZOOM_STEP = 75;
 
@@ -54,6 +56,9 @@ export const RESET_COL = "col-2";
 export const ICON_COL = "col-1";
 export const TITLE_COL = "col-9";
 export const TOOLTIP_BOX_COL = "col-2";
+
+export const MIN_ELEMENT_WIDTH = 150;
+export const MIN_ELEMENT_HEIGHT = 100;
 
 export const MimeTypes = {
   folder: {

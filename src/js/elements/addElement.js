@@ -50,7 +50,7 @@ const createBox = (
   const template = `<g class="scalable"><rect></rect></g>
   <foreignObject class="${FOREIGN_CLASS}" x="0" boxId="${boxId}"
   y="-${titleHeight}" width="${size.width}" height="${size.height +
-    titleHeight}">
+    titleHeight}" style="">
     <body xmlns="http://www.w3.org/1999/xhtml">
     <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
     <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start" style="height:${titleHeight}px">
@@ -73,6 +73,7 @@ const createBox = (
     boxId,
     position,
     size,
+    titleHeight,
     ports: {
       groups: THEME.groups,
       items

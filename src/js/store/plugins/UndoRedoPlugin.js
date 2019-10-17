@@ -11,6 +11,7 @@ const savedOperations = [
   "Interface/SET_SELECT_VALUE",
   "Interface/ADD_LINK",
   "Interface/DELETE_LINK",
+  "Interface/RESIZE_ELEMENT",
   "Interface/MOVE_ELEMENTS"
 ];
 

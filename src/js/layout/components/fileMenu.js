@@ -6,6 +6,7 @@ import { mapActions } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { zoomInCondition, zoomOutCondition } from "./utils";
 import { saveWorkflow } from "../../workflows/saveWorkflow";
+import { readWorkflow } from "../../workflows/readWorkflow";
 import { orderGraph } from "../../elements/orderElement";
 
 const FileMenu = Vue.component("FileMenu", {
@@ -28,7 +29,12 @@ const FileMenu = Vue.component("FileMenu", {
       return {
         File: [
           { name: "New", action: () => {} },
-          { name: "Open", action: () => {} }
+          {
+            name: "Open",
+            action: () => {
+              readWorkflow();
+            }
+          }
         ],
         Edit: [
           {
@@ -57,7 +63,7 @@ const FileMenu = Vue.component("FileMenu", {
           {
             name: "Clear",
             action: () => {
-              app.graph.clear();
+              app.clearElements();
             }
           },
           {

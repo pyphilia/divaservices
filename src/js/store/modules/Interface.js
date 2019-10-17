@@ -26,7 +26,9 @@ import {
   SET_SELECT_VALUE,
   COPY_SELECTION,
   UNSELECT_ALL_ELEMENTS,
-  MOVE_ELEMENTS
+  MOVE_ELEMENTS,
+  CLEAR_ELEMENTS,
+  RESIZE_ELEMENT
 } from "../mutationsTypes";
 import { fireAlert } from "../../utils/alerts";
 import { MESSAGE_PASTE_SUCCESS } from "../../constants/messages";
@@ -51,6 +53,9 @@ const Interface = {
           boxId: generateUniqueId()
         });
       }
+    },
+    [CLEAR_ELEMENTS](state) {
+      state.elements = [];
     },
     [DELETE_ELEMENTS](state, { elements }) {
       for (const el of elements) {
@@ -97,6 +102,9 @@ const Interface = {
         const graphEl = getElementByBoxId(boxId);
         el.position = graphEl.position();
       }
+    },
+    [RESIZE_ELEMENT](state, { element, size }) {
+      element.size = size;
     }
   },
   actions: {
@@ -104,6 +112,9 @@ const Interface = {
       // buils necessary data to build an element afterwards
       const elementPayload = buildElementFromName(name);
       commit(ADD_ELEMENT, elementPayload);
+    },
+    clearElements({ commit }) {
+      commit(CLEAR_ELEMENTS);
     },
     duplicateElements({ commit }, { elements }) {
       commit(ADD_ELEMENTS, {
@@ -142,6 +153,9 @@ const Interface = {
     },
     moveSelectedElements({ commit, state }) {
       commit(MOVE_ELEMENTS, { elements: selectedElements(state.elements) });
+    },
+    resizeElement({ commit }, payload) {
+      commit(RESIZE_ELEMENT, payload);
     }
   }
 };

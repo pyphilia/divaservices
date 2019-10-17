@@ -8,8 +8,10 @@ import { HOST } from "../../config";
 import { webservices } from "../constants/globals";
 import {
   addElementToGraphFromServiceDescription,
-  addLinkFromJSON
+  addLinkFromJSON,
+  buildElementFromName
 } from "../elements/addElement";
+import { Inputs } from "../constants/constants";
 
 export const readWorkflow = async () => {
   const filepath = path.join(HOST, "files/tmp.xml");
@@ -39,14 +41,22 @@ export const readWorkflow = async () => {
 
       //@TODO check defaultParams match with definition
       const { Parameter, Data } = inputs;
-      const defaultParams = {};
+      const defaultParams = {
+        [Inputs.SELECT.type]: {},
+        [Inputs.NUMBER.type]: {}
+      };
+
       if (Parameter) {
         for (const param of Parameter) {
           const {
-            Name: [name],
+            paramName: [name],
             Value: [value]
           } = param;
-          defaultParams[name] = value;
+
+          const type = webserviceObj.inputs.find(input => input.name == name)
+            .type;
+
+          defaultParams[type][name] = value;
         }
       }
 
@@ -77,8 +87,11 @@ export const readWorkflow = async () => {
       const information = { id };
       const position = { x: totalWidth, y: 100 };
 
+      console.log(defaultParams);
       // add element
+      const param = buildElementFromName(webserviceObj.name);
       const element = addElementToGraphFromServiceDescription(webserviceObj, {
+        ...param,
         information,
         defaultParams,
         boxId: id,

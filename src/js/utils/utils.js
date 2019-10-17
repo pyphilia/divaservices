@@ -17,3 +17,13 @@ export const shortcutToString = shortcut => {
   }
   return "(" + string + ")";
 };
+
+export const clearSelection = () => {
+  // older browsers
+  if (document.selection) {
+    document.selection.empty();
+  }
+
+  // other browsers
+  window.getSelection().removeAllRanges();
+};

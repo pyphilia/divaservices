@@ -56,7 +56,7 @@ export const initPaperEvents = () => {
     }
 
     // init area selection
-    if (!spaceDown) {
+    if (!spaceDown && !app.$resizing) {
       app.$initAreaSelection(event);
     }
   });
@@ -66,6 +66,10 @@ export const initPaperEvents = () => {
 
     if (!spaceDown) {
       app.$endAreaSelection(paper);
+    }
+
+    if (app.$resizing) {
+      Vue.prototype.$endResize(paper);
     }
   });
 
@@ -84,6 +88,12 @@ export const initPaperEvents = () => {
         app.$computeAreaSelection();
       }
     });
+
+  document.body.addEventListener("mouseup", () => {
+    if (app.$resizing) {
+      app.$endResize(paper);
+    }
+  });
 
   // /*------------LINK EVENTS */
 
@@ -123,14 +133,19 @@ export const initPaperEvents = () => {
 
   /**SELECTION*/
 
-  paper.on("element:pointerdown", cellView => {
-    // if control key is not hold, a different
-    // the current selection is reset
-    if (!ctrlDown) {
-      app.unSelectAllElements();
-    }
+  paper.on("element:pointerdown", (cellView, e) => {
+    if (cellView.model.attributes.class != "resizer") {
+      // if control key is not hold, a different
+      // the current selection is reset
 
-    app.addElementToSelection(cellView);
+      if (!ctrlDown) {
+        app.unSelectAllElements();
+      }
+
+      app.addElementToSelection(cellView);
+    } else {
+      app.$initResize(e);
+    }
   });
 
   // /**CONTEXT MENU*/
@@ -171,6 +186,7 @@ export const elementOnChangePosition = (
 ) => {
   changePosition = true;
   $(`.select ${Inputs.SELECT.tag}`).select2("close");
+  app.$removeResizer();
 
   const { selectedElements } = app;
   // need to move all elements at the same time

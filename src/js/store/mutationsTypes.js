@@ -10,5 +10,7 @@ export const SET_INPUT_VALUE = "SET_INPUT_VALUE";
 export const ADD_LINK = "ADD_LINK";
 export const DELETE_LINK = "DELETE_LINK";
 export const MOVE_ELEMENTS = "MOVE_ELEMENTS";
+export const CLEAR_ELEMENTS = "CLEAR_ELEMENTS";
+export const RESIZE_ELEMENT = "RESIZE_ELEMENT";
 
 export const CHANGE_ZOOM = "CHANGE_ZOOM";

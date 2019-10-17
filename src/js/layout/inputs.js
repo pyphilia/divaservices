@@ -417,11 +417,14 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
 
   // ELEMENT EVENTS
 
+  element.on("change:position", elementOnChangePosition);
+
+  // remove resizer if exists
+  app.$removeResizer();
+
   // When the user clicks on a select and moves the bloc
   // the select dropdown is still displayed
   // this event closes it
-  element.on("change:position", elementOnChangePosition);
-
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
     $(tooltip).tooltip(TOOLTIP_OPTIONS);
   }

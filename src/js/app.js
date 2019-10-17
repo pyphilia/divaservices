@@ -15,6 +15,7 @@ import { highlightSelection, unHighlight } from "./store/modules/highlight";
 import { MAX_SCALE, MIN_SCALE, Inputs, THEME } from "./constants/constants";
 import { addElementByName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
+import { resizeElements } from "./elements/resizeElement";
 import { initKeyboardEvents } from "./events/keyboardEvents";
 import {
   INTERFACE_ROOT,
@@ -36,6 +37,7 @@ import {
 import { moveElements } from "./elements/moveElement";
 import ZoomPlugin from "./plugins/ZoomPlugin";
 import AreaSelectionPlugin from "./plugins/AreaSelectionPlugin";
+import ResizePlugin from "./plugins/ResizePlugin";
 
 export let app;
 export let split;
@@ -43,6 +45,7 @@ export let split;
 (async () => {
   await initWebservices();
   Vue.use(ZoomPlugin);
+  Vue.use(ResizePlugin);
   Vue.use(AreaSelectionPlugin);
   app = new Vue({
     el: "#app",
@@ -85,6 +88,11 @@ export let split;
           return { boxId, position };
         });
       },
+      resizedElements() {
+        return this.elements.map(({ boxId, size }) => {
+          return { boxId, size };
+        });
+      },
       scale() {
         return this.$zoom.scale;
       },
@@ -105,14 +113,25 @@ export let split;
       deleteLinkFromApp(payload) {
         this.deleteLink({ ...payload, graph: this.graph });
       },
+      deleteElementByCellView(cellView) {
+        const boxId = cellView.model.attributes.boxId;
+        this.deleteElements({
+          elements: [this.elements.find(el => el.boxId == boxId)]
+        });
+      },
       zoomInFromApp() {
         this.$zoomIn(this.paper);
       },
       zoomOutFromApp() {
         this.$zoomOut(this.paper);
       },
+      resizeElementByBoxId(boxId, size) {
+        const element = this.elements.find(el => el.boxId == boxId);
+        this.resizeElement({ element, size });
+      },
       ...mapActions("Interface", [
         "unSelectAllElements",
+        "clearElements",
         "selectAllElements",
         "addElementToSelection",
         "copySelectedElements",
@@ -122,7 +141,8 @@ export let split;
         "setInputValueInElement",
         "addLink",
         "deleteLink",
-        "moveSelectedElements"
+        "moveSelectedElements",
+        "resizeElement"
       ])
     },
     watch: {
@@ -172,6 +192,16 @@ export let split;
             return v && !equalObjects(v.position, el.position);
           });
           moveElements(difference);
+        }
+      },
+      resizedElements: {
+        deep: true,
+        handler(newValue, oldValue) {
+          const difference = newValue.filter(el => {
+            const v = oldValue.find(e => e.boxId == el.boxId);
+            return v && !equalObjects(v.size, el.size);
+          });
+          resizeElements(difference, this.paper);
         }
       },
       links(newValue, oldValue) {
