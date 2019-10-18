@@ -6,33 +6,27 @@ import xml2js from "xml2js";
 import path from "path";
 import { HOST } from "../../config";
 import { webservices } from "../constants/globals";
-import {
-  addElementToGraphFromServiceDescription,
-  addLinkFromJSON,
-  buildElementFromName
-} from "../elements/addElement";
+import { buildElementFromName } from "../elements/addElement";
 import { Inputs } from "../constants/constants";
+import { app } from "../app";
 
 export const readWorkflow = async () => {
   const filepath = path.join(HOST, "files/tmp.xml");
 
   let xml = await fetch(filepath).then(response => response.text());
   const elements = [];
+  const links = [];
 
   xml2js.parseString(xml, async (err, json) => {
-    let totalWidth = 100;
-    const idMap = {}; // we construct new boxes, so the id are different
-    const links = [];
     for (const step of json.WorkflowDefinition.Steps[0].Step) {
       const {
-        Id: [id],
+        Id: [id], // from saveWorkflow, id  is defined with the boxId
         Inputs: [inputs],
         Name: [name],
         Service: [service]
       } = step;
 
       const webserviceObj = webservices.find(
-        //@TODO need to read key value --- workflow will keep key in parameters
         webservice => webservice.id == service.Key[0]
       );
       if (webserviceObj.length) {
@@ -85,51 +79,20 @@ export const readWorkflow = async () => {
       }
 
       const information = { id };
-      const position = { x: totalWidth, y: 100 };
 
-      console.log(defaultParams);
       // add element
       const param = buildElementFromName(webserviceObj.name);
-      const element = addElementToGraphFromServiceDescription(webserviceObj, {
+
+      const element = {
         ...param,
         information,
         defaultParams,
-        boxId: id,
-        position
-      });
-
-      // update position to avoid overlap
-      totalWidth += element.attributes.size.width + 250;
+        boxId: id
+      };
 
       elements.push(element);
-
-      // map ids and ports
-      idMap[step.Id[0]] = {
-        id: element.attributes.id,
-        ports: element.getPorts()
-      };
-    }
-
-    // remap all link to correct box and port ids
-    for (const link of links) {
-      const { source, target } = link;
-
-      const sMapedBox = idMap[source.boxId];
-      const tMapedBox = idMap[target.boxId];
-
-      const sPortId = sMapedBox.ports.find(port => port.name == source.portName)
-        .id;
-      const tPortId = tMapedBox.ports.find(port => port.name == target.portName)
-        .id;
-      const linkObj = {
-        source: { id: sMapedBox.id, port: sPortId },
-        target: { id: tMapedBox.id, port: tPortId }
-      };
-
-      addLinkFromJSON(linkObj);
     }
   });
 
-  const boxIds = elements.map(element => element.attributes.boxId);
-  return { boxIds };
+  app.openWorkflow({ elements, links });
 };

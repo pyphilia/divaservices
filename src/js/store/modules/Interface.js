@@ -7,12 +7,12 @@ import {
 import { generateUniqueId, getElementByBoxId } from "../../layout/utils";
 import { Inputs } from "../../constants/constants";
 import {
-  buildLinkForStore,
   addElementToElements,
   deleteElement,
   selectElementByBoxId,
   selectedElements,
-  selectElement
+  selectElement,
+  addLinktoLinks
 } from "./utils";
 import {
   ADD_ELEMENT,
@@ -28,7 +28,8 @@ import {
   UNSELECT_ALL_ELEMENTS,
   MOVE_ELEMENTS,
   CLEAR_ELEMENTS,
-  RESIZE_ELEMENT
+  RESIZE_ELEMENT,
+  OPEN_WORKFLOW
 } from "../mutationsTypes";
 import { fireAlert } from "../../utils/alerts";
 import { MESSAGE_PASTE_SUCCESS } from "../../constants/messages";
@@ -45,13 +46,7 @@ const Interface = {
     },
     [ADD_ELEMENTS](state, { elements }) {
       for (const el of elements) {
-        const fromId = el.boxId; // duplicate case, reference to another element
-        addElementToElements(state.elements, {
-          ...cloneDeep(el),
-          fromId,
-          position: findEmptyPosition(el.size, { ...el.position }),
-          boxId: generateUniqueId()
-        });
+        addElementToElements(state.elements, el);
       }
     },
     [CLEAR_ELEMENTS](state) {
@@ -90,8 +85,7 @@ const Interface = {
       Vue.set(el.defaultParams[Inputs.NUMBER.type][attr], "value", value);
     },
     [ADD_LINK](state, { link, graph }) {
-      const l = buildLinkForStore(graph, link);
-      state.links.push(l);
+      addLinktoLinks(state.links, link, graph);
     },
     [DELETE_LINK](state, { link }) {
       state.links = state.links.filter(thisL => thisL.id != link.id);
@@ -105,6 +99,14 @@ const Interface = {
     },
     [RESIZE_ELEMENT](state, { element, size }) {
       element.size = size;
+    },
+    [OPEN_WORKFLOW](state, { elements, links }) {
+      for (const el of elements) {
+        addElementToElements(state.elements, el);
+      }
+      for (const link of links) {
+        state.links.push(link);
+      }
     }
   },
   actions: {
@@ -117,8 +119,19 @@ const Interface = {
       commit(CLEAR_ELEMENTS);
     },
     duplicateElements({ commit }, { elements }) {
+      const newElements = [];
+      for (const el of elements) {
+        const fromId = el.boxId; // duplicate case, reference to another element
+        newElements.push({
+          ...cloneDeep(el),
+          fromId,
+          position: findEmptyPosition(el.size, { ...el.position }),
+          boxId: generateUniqueId()
+        });
+      }
+
       commit(ADD_ELEMENTS, {
-        elements
+        elements: newElements
       });
       fireAlert("success", MESSAGE_PASTE_SUCCESS);
     },
@@ -156,6 +169,9 @@ const Interface = {
     },
     resizeElement({ commit }, payload) {
       commit(RESIZE_ELEMENT, payload);
+    },
+    openWorkflow({ commit }, payload) {
+      commit(OPEN_WORKFLOW, payload);
     }
   }
 };

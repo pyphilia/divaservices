@@ -298,8 +298,8 @@ export const addLinkFromLink = link => {
   const s = getElementByBoxId(source.boxId);
   const t = getElementByBoxId(target.boxId);
 
-  const sPort = s.getPorts().find(p => p.name == source.portname).id;
-  const tPort = t.getPorts().find(p => p.name == target.portname).id;
+  const sPort = s.getPorts().find(p => p.name == source.portName).id;
+  const tPort = t.getPorts().find(p => p.name == target.portName).id;
 
   const newLink = {
     source: { id: s.id, port: sPort },

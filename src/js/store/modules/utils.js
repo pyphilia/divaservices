@@ -34,6 +34,11 @@ export const deleteElement = element => {
   element.deleted = true;
 };
 
+export const addLinktoLinks = (links, link, graph) => {
+  const l = buildLinkForStore(graph, link);
+  links.push(l);
+};
+
 export const selectElementByBoxId = (elements, boxId) => {
   const el = elements.find(el => el.boxId == boxId);
   if (el) {

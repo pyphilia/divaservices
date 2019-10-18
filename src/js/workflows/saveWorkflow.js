@@ -18,7 +18,7 @@ export const saveWorkflow = jsonGraph => {
   jsonGraph.cells
     .filter(cell => cell.type != "standard.Link")
     .forEach((box, i) => {
-      const { id: Id, type, ports, boxId } = box;
+      const { type, ports, boxId } = box;
       const Name = type.replace(/\s/g, "");
       const No = i;
       const Inputs = { Parameter: [], Data: [] };
@@ -41,7 +41,7 @@ export const saveWorkflow = jsonGraph => {
 
       ports.items.forEach(port => {
         allPorts[port.id] = {
-          boxId: Id,
+          boxId,
           boxNo: i,
           name: port.name
         };
@@ -51,7 +51,7 @@ export const saveWorkflow = jsonGraph => {
       const Key = webservices.find(algo => algo.name == type).id;
       const Service = { Key };
 
-      const step = { Id, No, Name, Service, Inputs };
+      const step = { Id: boxId, No, Name, Service, Inputs };
       Steps.Step.push(step);
     });
 

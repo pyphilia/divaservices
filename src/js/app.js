@@ -142,7 +142,8 @@ export let split;
         "addLink",
         "deleteLink",
         "moveSelectedElements",
-        "resizeElement"
+        "resizeElement",
+        "openWorkflow"
       ])
     },
     watch: {

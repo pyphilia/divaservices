@@ -12,5 +12,6 @@ export const DELETE_LINK = "DELETE_LINK";
 export const MOVE_ELEMENTS = "MOVE_ELEMENTS";
 export const CLEAR_ELEMENTS = "CLEAR_ELEMENTS";
 export const RESIZE_ELEMENT = "RESIZE_ELEMENT";
+export const OPEN_WORKFLOW = "OPEN_WORKFLOW";
 
 export const CHANGE_ZOOM = "CHANGE_ZOOM";
