@@ -2,7 +2,7 @@
  * Initialize the left sidebar
  */
 import Vue from "vue";
-import groupBy from "lodash.groupby";
+import { groupBy } from "lodash"; // we use lodash since it is a dependency of jointjs
 import { categoryName } from "../../constants/constants";
 import { webservices } from "../../constants/globals";
 import {
@@ -128,21 +128,21 @@ const LeftSidebar = Vue.component("LeftSidebar", {
       }
     }
   },
-  template: `<div id="${LEFT_SIDEBAR}" class="d-flex p-0 flex-nowrap">
-  <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
-  <a v-for="category in categories" :class="'category-tab ' + category" @click="categoryClick(category)"><div class="icon"></div>{{getCategoryName(category)}}</a>
-  </div>
-  <div class="col pr-0" id="algo-tab">
-  <div id="algo-search">
-  <input v-model="search" type="search" class="form-control" placeholder="Search for a webservice..." aria-label="Username" aria-describedby="basic-addon1">
-  </div>
-  <div id="${ALGO_ITEM_WRAPPER}">
-  <div id="${ALGO_ITEMS}">
-  <div v-for="{type, name} in results" :class="'${ALGO_ITEM_CLASS} ' + type" :name="name" @click="addElementByName(name)"><span class="icon"></span><span class="name" v-html="boldRegInString(name)"></span></div>
-  </div>
-  </div>
-  </div>
-  
+  template: `
+  <div id="${LEFT_SIDEBAR}" class="d-flex p-0 flex-nowrap">
+    <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
+      <a v-for="category in categories" :class="'category-tab ' + category" @click="categoryClick(category)"><div class="icon"></div>{{getCategoryName(category)}}</a>
+    </div>
+    <div class="col pr-0" id="algo-tab">
+      <div id="algo-search">
+        <input v-model="search" type="search" class="form-control" placeholder="Search for a webservice..." aria-label="Username" aria-describedby="basic-addon1">
+      </div>
+      <div id="${ALGO_ITEM_WRAPPER}">
+        <div id="${ALGO_ITEMS}">
+          <div v-for="{type, name} in results" :class="'${ALGO_ITEM_CLASS} ' + type" :name="name" @click="addElementByName(name)"><span class="icon"></span><span class="name" v-html="boldRegInString(name)"></span></div>
+        </div>
+      </div>
+    </div>
   </div>`
 });
 

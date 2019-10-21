@@ -1,5 +1,5 @@
 import Vue from "vue";
-import cloneDeep from "lodash.clonedeep";
+import { cloneDeep } from "lodash";
 import {
   buildElementFromName,
   findEmptyPosition

@@ -14,8 +14,8 @@ export const buildLinkForStore = (graph, link) => {
 
   return {
     id: link.id,
-    source: { boxId: sourceBoxId, portname: sPortName },
-    target: { boxId: targetBoxId, portname: tPortName }
+    source: { boxId: sourceBoxId, portName: sPortName },
+    target: { boxId: targetBoxId, portName: tPortName }
   };
 };
 

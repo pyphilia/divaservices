@@ -1,4 +1,4 @@
-import "select2";
+import "select2js";
 import { TOOLTIP_BREAK_LINE, Inputs } from "../constants/constants";
 import { IN_PORT_CLASS, OUT_PORT_CLASS } from "../constants/selectors";
 import { app } from "./../app";
@@ -37,8 +37,8 @@ export const getLinkBySourceTarget = (source, target) => {
     return (
       sourceBoxId == source.boxId &&
       targetBoxId == target.boxId &&
-      sPortName == source.portname &&
-      tPortName == target.portname
+      sPortName == source.portName &&
+      tPortName == target.portName
     );
   });
 };

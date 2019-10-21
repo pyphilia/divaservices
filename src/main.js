@@ -1,4 +1,4 @@
-import "bootstrap";
+import "bootstrapjs";
 
 // html files
 import "./index.html";

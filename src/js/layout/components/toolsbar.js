@@ -91,14 +91,14 @@ const Toolsbar = Vue.component("Toolsbar", {
               app.zoomInFromApp();
             },
             icon: "fas fa-search-plus",
-            enabledCondition: this.scale >= MAX_SCALE
+            enabledCondition: this.scale < MAX_SCALE
           },
           "zoom out": {
             action: () => {
               app.zoomOutFromApp();
             },
             icon: "fas fa-search-minus",
-            enabledCondition: this.scale <= MIN_SCALE
+            enabledCondition: this.scale > MIN_SCALE
           },
           "zoom slider": {
             action: () => {},
@@ -137,11 +137,10 @@ const Toolsbar = Vue.component("Toolsbar", {
           </button>
           <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="zoomDropdown">
               <div class="slidecontainer">
-                <input type="range" :value="sliderValue" @input="updateZoom($event)" min="${Math.ceil(
-                  MIN_SCALE * 100
-                )}" max="${Math.ceil(
-    MAX_SCALE * 100
-  )}" class="slider" id="zoomSlider">
+                <input type="range" :value="sliderValue" @input="updateZoom($event)" 
+                min="${Math.ceil(MIN_SCALE * 100)}" 
+                max="${Math.ceil(MAX_SCALE * 100)}" 
+                class="slider" id="zoomSlider">
               </div>
           </div>
         </div>

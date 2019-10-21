@@ -17,6 +17,7 @@ import { addElementByName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
 import { resizeElements } from "./elements/resizeElement";
 import { initKeyboardEvents } from "./events/keyboardEvents";
+import { initTour } from "./utils/walkthrough";
 import {
   INTERFACE_ROOT,
   LEFT_SIDEBAR,
@@ -306,6 +307,8 @@ export let split;
         sizes: [25, 75],
         gutterSize: 6
       });
+
+      initTour();
     }
   });
 })();

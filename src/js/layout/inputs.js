@@ -3,7 +3,7 @@ import jQuery from "jquery";
 const $ = jQuery;
 global.$ = global.jQuery = $;
 
-import "select2";
+import "select2js";
 import {
   TOOLTIP_BREAK_LINE,
   Inputs,

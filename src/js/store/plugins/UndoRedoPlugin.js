@@ -1,4 +1,4 @@
-import cloneDeep from "lodash.clonedeep";
+import { cloneDeep } from "lodash";
 import UndoRedoHistory from "./UndoRedoHistory";
 
 const savedOperations = [
