@@ -8,6 +8,7 @@ export const ALGO_SEARCH_CONTAINER = "algo-search";
 export const FILE_MENU = "#navbar-menu";
 
 export const DATA_BOX_FOREIGNOBJECT_CLASS = "data-foreignobj";
+export const DATA_INPUT_CONTENT_CLASS = "content";
 
 export const PARAMETER_INPUTS = "inputs";
 export const PARAMETER_SELECTS = "selects";

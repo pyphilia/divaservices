@@ -1,3 +1,5 @@
+import { getElementByBoxId, getLinkBySourceTarget } from "../layout/utils";
+
 export const equalObjects = (a, b) => {
   return JSON.stringify(a) === JSON.stringify(b);
 };
@@ -26,4 +28,29 @@ export const clearSelection = () => {
 
   // other browsers
   window.getSelection().removeAllRanges();
+};
+
+export const findDifferenceBy = (a, b, param) => {
+  return a.filter(el => {
+    const v = b.find(e => e.boxId == el.boxId);
+    return v && !equalObjects(v[param], el[param]);
+  });
+};
+
+export const getNewElements = arr => {
+  return arr.filter(({ boxId }) => !getElementByBoxId(boxId));
+};
+
+export const getDeletedElements = (arr, newValue) => {
+  return arr.filter(el => !newValue.find(v => v.boxId == el.boxId));
+};
+
+export const getNewLinks = links => {
+  return links.filter(
+    ({ source, target }) => !getLinkBySourceTarget(source, target)
+  );
+};
+
+export const getElementsInGraph = arr => {
+  return arr.filter(el => getElementByBoxId(el.boxId));
 };

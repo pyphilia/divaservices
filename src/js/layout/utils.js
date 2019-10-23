@@ -1,5 +1,10 @@
 import "select2js";
-import { TOOLTIP_BREAK_LINE, Inputs, MimeTypes } from "../constants/constants";
+import {
+  TOOLTIP_BREAK_LINE,
+  Inputs,
+  MimeTypes,
+  BOX_MARGIN
+} from "../constants/constants";
 import {
   IN_PORT_CLASS,
   OUT_PORT_CLASS,
@@ -178,9 +183,8 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
 };
 
 export const buildPortAttrs = (name, type, typeAllowed) => {
-  const showPortDetails =
-    layoutSettingsApp.checkedOptions.indexOf("showPortDetails") != -1;
-  const showPorts = layoutSettingsApp.checkedOptions.indexOf("showPorts") != -1;
+  const showPortDetails = layoutSettingsApp.isShowPortsDetailsChecked();
+  const showPorts = layoutSettingsApp.isShowPortsChecked();
   return {
     [PORT_SELECTOR]: {
       fill: MimeTypes[type].color,
@@ -228,4 +232,41 @@ export const createPort = (param, group) => {
     };
   }
   return port;
+};
+
+// helper function to find an empty position to add
+// an element without overlapping other ones
+// it tries to fill the canvas view first horizontally
+// then vertically
+export const findEmptyPosition = (size, startingPoint) => {
+  const { paper, graph } = app;
+  const { left, top, width, height } = paper.svg.getBoundingClientRect();
+  const canvasDimensions = paper.clientToLocalRect({
+    x: left,
+    y: top,
+    width,
+    height
+  });
+
+  const { x: canvasX, y: canvasY, width: canvasW } = canvasDimensions;
+  const position = startingPoint
+    ? startingPoint
+    : { x: canvasX + BOX_MARGIN, y: canvasY + BOX_MARGIN };
+  const { width: sizeWidth, height: sizeHeight } = size;
+
+  while (
+    graph.findModelsInArea({
+      ...position,
+      width: sizeWidth + BOX_MARGIN,
+      height: sizeHeight + BOX_MARGIN
+    }).length
+  ) {
+    position.x += sizeWidth + BOX_MARGIN;
+    if (canvasX + canvasW < position.x + sizeWidth) {
+      position.x = canvasX + BOX_MARGIN;
+      position.y += sizeHeight + BOX_MARGIN;
+    }
+  }
+
+  return position;
 };

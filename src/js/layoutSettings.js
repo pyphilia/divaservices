@@ -3,9 +3,10 @@ import {
   PARAMETER_SELECTS,
   PARAMETER_INPUTS,
   TOOLTIP_CLASS,
-  NO_PARAMETER_CLASS
+  NO_PARAMETER_CLASS,
+  DATA_BOX_FOREIGNOBJECT_CLASS,
+  DATA_INPUT_CONTENT_CLASS
 } from "./constants/selectors";
-import { DEFAULT_OPTIONS } from "../config";
 import { app } from "./app";
 
 const changePortDetails = event => {
@@ -47,45 +48,36 @@ const changeParameters = event => {
   const showParameters = event.target.checked;
   const displayValue = showParameters ? "block" : "none";
   const els = document.querySelectorAll(
-    `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}`
+    `.${PARAMETER_INPUTS}, .${PARAMETER_SELECTS}, .${NO_PARAMETER_CLASS}, .${DATA_BOX_FOREIGNOBJECT_CLASS} .${DATA_INPUT_CONTENT_CLASS}`
   );
   els.forEach(el => {
     el.style.display = displayValue;
   });
-
-  // automatic resize of boxes
-  // const { graph } = app;
-  // for (const e of graph.getElements()) {
-  //   const newWidth = computeBoxWidth(e, showParameters, true);
-  //   const newHeight = computeBoxHeight(e, showParameters, true);
-  //   e.resize(newWidth, newHeight);
-  //   document
-  //     .querySelectorAll(`g[model-id='${e.id}'] foreignObject`)
-  //     .forEach(el => {
-  //       el.setAttribute("width", newWidth);
-  //       el.setAttribute(
-  //         "height",
-  //         newHeight + computeTitleLength(e, true).titleHeight
-  //       );
-  //     });
-  // }
 };
 
 const defaultSettings = {
   showParameters: {
-    checked: DEFAULT_OPTIONS.showParameters || false,
+    name: "showParameters",
+    text: "Show Box Parameters",
+    checked: true,
     change: changeParameters
   },
   showPortDetails: {
-    checked: DEFAULT_OPTIONS.showPortDetails || false,
+    name: "showPortDetails",
+    text: "Show Port Details",
+    checked: true,
     change: changePortDetails
   },
   showPorts: {
-    checked: DEFAULT_OPTIONS.showPorts || false,
+    name: "showPorts",
+    text: "Show ports",
+    checked: true,
     change: changePorts
   },
   showTooltips: {
-    checked: DEFAULT_OPTIONS.showTooltips || false,
+    name: "showTooltips",
+    text: "Show tooltips",
+    checked: true,
     change: changeTooltips
   }
 };
@@ -96,30 +88,47 @@ export const layoutSettingsApp = new Vue({
     layout: defaultSettings,
     checkedOptions: Object.entries(defaultSettings)
       .filter(x => x[1].checked)
-      .map(x => x[0])
+      .map(x => x[1].name)
   },
-  methods: {},
+  methods: {
+    isShowParametersChecked() {
+      return this.isChecked(this.layout.showParameters.name);
+    },
+    isShowPortsChecked() {
+      return this.isChecked(this.layout.showPorts.name);
+    },
+    isShowPortsDetailsChecked() {
+      return this.isChecked(this.layout.showPortDetails.name);
+    },
+    isShowTooltipsChecked() {
+      return this.isChecked(this.layout.showTooltips.name);
+    },
+    isChecked(name) {
+      return this.checkedOptions.indexOf(name) != -1;
+    }
+  },
   computed: {},
-  template: `<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  template: `
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
-      <div class="modal-content">
-      <div class="modal-header">
-      <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-      </button>
-      </div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Settings</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
 
-      <div class="modal-body"  id="theme-options">
-      <span v-for="({change}, key) in layout">
-      <input type="checkbox" id="'option-' + key" :value="key" v-model="checkedOptions" @change="change($event)" /> {{key}} <br>
-      </span>
-      </div>
+          <div class="modal-body"  id="theme-options">
+            <span v-for="({change}, key) in layout">
+              <input type="checkbox" id="'option-' + key" :value="key" v-model="checkedOptions" @change="change($event)" /> {{key}} <br>
+            </span>
+          </div>
       
-      <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+          </div>
+        </div>
       </div>
-      </div>
-      </div>
-      </div>`
+    </div>`
 });

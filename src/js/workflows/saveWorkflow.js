@@ -3,7 +3,7 @@
  * and translates it into a xml file
  */
 import xml2js from "xml2js";
-import { webservices } from "../constants/globals";
+import { getWebserviceByName } from "../constants/globals";
 import { app } from "../app";
 import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "../constants/constants";
 
@@ -51,7 +51,7 @@ export const saveWorkflow = jsonGraph => {
       });
 
       // key in webservices list
-      const Key = webservices.find(algo => algo.name == type).id;
+      const Key = getWebserviceByName(type).id;
       const Service = { Key };
 
       const step = { Id: boxId, No, Name, Service, Inputs };

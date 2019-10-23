@@ -6,13 +6,12 @@
  */
 import * as joint from "jointjs";
 import { app } from "../app";
-import { webservices } from "../constants/globals";
+import { getWebserviceByName } from "../constants/globals";
 import {
   THEME,
   BOX_TITLE_HTML_TAG,
   ICON_COL,
   TITLE_COL,
-  BOX_MARGIN,
   Inputs,
   CATEGORY_SERVICE
 } from "../constants/constants";
@@ -24,7 +23,8 @@ import {
   computeTitleLength,
   generateUniqueId,
   getElementByBoxId,
-  shortenString
+  shortenString,
+  findEmptyPosition
 } from "../layout/utils";
 import { setParametersInForeignObject } from "../layout/inputs";
 import { createPort } from "../layout/utils";
@@ -198,7 +198,7 @@ const createPortsFromInputOutput = (inputs, outputs) => {
 
 export const buildElementFromName = name => {
   // find webservice given name
-  const webservice = webservices.find(service => service.name == name);
+  const webservice = getWebserviceByName(name);
   const { outputs = [], inputs = [] } = webservice;
 
   const el = transformWebserviceForGraph(webservice);
@@ -210,8 +210,7 @@ export const buildElementFromName = name => {
   const boxId = generateUniqueId();
   const { defaultParams } = el;
 
-  const showParameter =
-    layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
+  const showParameter = layoutSettingsApp.isShowParametersChecked();
   const size = {
     width: computeBoxWidth(el, showParameter),
     height: computeBoxHeight(el, showParameter)
@@ -228,43 +227,6 @@ export const buildElementFromName = name => {
     type: name,
     ports
   };
-};
-
-// helper function to find an empty position to add
-// an element without overlapping other ones
-// it tries to fill the canvas view first horizontally
-// then vertically
-export const findEmptyPosition = (size, startingPoint) => {
-  const { paper, graph } = app;
-  const { left, top, width, height } = paper.svg.getBoundingClientRect();
-  const canvasDimensions = paper.clientToLocalRect({
-    x: left,
-    y: top,
-    width,
-    height
-  });
-
-  const { x: canvasX, y: canvasY, width: canvasW } = canvasDimensions;
-  const position = startingPoint
-    ? startingPoint
-    : { x: canvasX + BOX_MARGIN, y: canvasY + BOX_MARGIN };
-  const { width: sizeWidth, height: sizeHeight } = size;
-
-  while (
-    graph.findModelsInArea({
-      ...position,
-      width: sizeWidth + BOX_MARGIN,
-      height: sizeHeight + BOX_MARGIN
-    }).length
-  ) {
-    position.x += sizeWidth + BOX_MARGIN;
-    if (canvasX + canvasW < position.x + sizeWidth) {
-      position.x = canvasX + BOX_MARGIN;
-      position.y += sizeHeight + BOX_MARGIN;
-    }
-  }
-
-  return position;
 };
 
 /**
@@ -292,7 +254,7 @@ export const addElementToGraphFromServiceDescription = (
 // info from the services xml descriptions
 // returns boxId and position for undo-redo purpose
 export const addElementByName = (name, defaultParams = {}) => {
-  const algo = webservices.find(service => service.name == name);
+  const algo = getWebserviceByName(name);
   if (algo) {
     addElementToGraphFromServiceDescription(algo, defaultParams);
   } else {

@@ -5,7 +5,7 @@
 import xml2js from "xml2js";
 import path from "path";
 import { HOST } from "../../config";
-import { webservices } from "../constants/globals";
+import { getWebserviceById } from "../constants/globals";
 import { buildElementFromName } from "../elements/addElement";
 import { Inputs } from "../constants/constants";
 import { app } from "../app";
@@ -26,9 +26,7 @@ export const readWorkflow = async () => {
         Service: [service]
       } = step;
 
-      const webserviceObj = webservices.find(
-        webservice => webservice.id == service.Key[0]
-      );
+      const webserviceObj = getWebserviceById(service.Key[0]);
       if (webserviceObj.length) {
         alert("step ", name, " not found");
       }

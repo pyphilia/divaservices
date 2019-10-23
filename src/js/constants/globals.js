@@ -41,3 +41,27 @@ export const initWebservices = async () => {
   await _initWebservices();
   await _initDataInputs();
 };
+
+export const getWebserviceByName = name => {
+  const webservice = webservices.find(service => service.name == name);
+  if (!webservice) {
+    throw "Cannot find webservice with name " + name;
+  }
+  return webservice;
+};
+
+export const getWebserviceById = id => {
+  const webservice = webservices.find(webservice => webservice.id == id);
+  if (!webservice) {
+    throw "Cannot find webservice with id " + id;
+  }
+  return webservice;
+};
+
+export const getDataInputByName = name => {
+  const dataInput = dataInputs.find(inp => inp.name == name);
+  if (!dataInput) {
+    throw "Cannot find dataInput with name " + name;
+  }
+  return dataInputs;
+};

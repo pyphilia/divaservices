@@ -6,11 +6,3 @@ export const {
   WEBSERVICES_XML_FILEPATH = "api/services.xml",
   INPUTS_DATA_XML_FILEPATH = "api/inputData.xml"
 } = process.env;
-
-// layout options
-export const DEFAULT_OPTIONS = {
-  showParameters: true,
-  showPortDetails: true,
-  showPorts: true,
-  showTooltips: true
-};

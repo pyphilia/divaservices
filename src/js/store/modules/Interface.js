@@ -1,10 +1,11 @@
 import Vue from "vue";
 import { cloneDeep } from "lodash";
+import { buildElementFromName } from "../../elements/addElement";
 import {
-  buildElementFromName,
+  generateUniqueId,
+  getElementByBoxId,
   findEmptyPosition
-} from "../../elements/addElement";
-import { generateUniqueId, getElementByBoxId } from "../../layout/utils";
+} from "../../layout/utils";
 import { Inputs } from "../../constants/constants";
 import {
   addElementToElements,

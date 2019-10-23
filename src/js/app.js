@@ -1,11 +1,8 @@
 import Vue from "vue";
 import * as joint from "jointjs";
 import { mapActions, mapState } from "vuex";
-import Toolsbar from "./layout/components/Toolsbar";
-import FileMenu from "./layout/components/FileMenu";
-import LeftSidebar from "./layout/components/LeftSidebar";
-import ContextMenus from "./layout/components/ContextMenu";
-import Minimap from "./layout/components/Minimap";
+import plugins from "./plugins";
+import components from "./layout/components";
 import store from "./store/store";
 import { initWebservices } from "./constants/globals";
 import { initPaperEvents } from "./events/paperEvents";
@@ -19,13 +16,18 @@ import {
 import { addElementByName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
 import { resizeElements } from "./elements/resizeElement";
-import { initKeyboardEvents } from "./events/keyboardEvents";
-import { initTour } from "./utils/walkthrough";
 import {
   setInputValueInElement,
   setSelectValueInElement
 } from "./layout/inputs";
-import { equalObjects } from "./utils/utils";
+import {
+  equalObjects,
+  findDifferenceBy,
+  getNewElements,
+  getDeletedElements,
+  getNewLinks,
+  getElementsInGraph
+} from "./utils/utils";
 import {
   selectedElements,
   copiedElements,
@@ -34,20 +36,19 @@ import {
   currentDataElements
 } from "./store/modules/utils";
 import { moveElements } from "./elements/moveElement";
-import ZoomPlugin from "./plugins/ZoomPlugin";
-import AreaSelectionPlugin from "./plugins/AreaSelectionPlugin";
-import ResizePlugin from "./plugins/ResizePlugin";
 import { addDataBox } from "./elements/addDataElement";
 import { initPaper } from "./layout/initPaper";
 import { initSplit } from "./layout/split";
+import { initKeyboardEvents } from "./events/keyboardEvents";
+import { initTour } from "./utils/walkthrough";
 
 export let app;
 
 (async () => {
   await initWebservices();
-  Vue.use(ZoomPlugin);
-  Vue.use(ResizePlugin);
-  Vue.use(AreaSelectionPlugin);
+
+  plugins.forEach(x => Vue.use(x));
+
   app = new Vue({
     el: "#app",
     store,
@@ -56,13 +57,7 @@ export let app;
       paper: null,
       translation: { tx: 0, ty: 0 }
     },
-    components: {
-      LeftSidebar,
-      Minimap,
-      Toolsbar,
-      FileMenu,
-      ContextMenus
-    },
+    components,
     computed: {
       // this computed method is necessary since we shouldn't
       // listen to the store directly
@@ -161,9 +156,7 @@ export let app;
       currentElements: {
         handler(newValue, oldValue) {
           // if boxId element does not exist in the graph, we add it
-          for (const el of newValue.filter(
-            ({ boxId }) => !getElementByBoxId(boxId)
-          )) {
+          for (const el of getNewElements(newValue)) {
             const { type, category } = el;
             switch (category) {
               case CATEGORY_SERVICE:
@@ -179,59 +172,43 @@ export let app;
 
           // remove element removed from arr
           // cannot use arr.includes because states are deep cloned
-          for (const el of oldValue.filter(
-            el => !newValue.find(v => v.boxId == el.boxId)
-          )) {
+          for (const el of getDeletedElements(oldValue, newValue)) {
             deleteElementByBoxId(el.boxId);
           }
         }
       },
+
       defaultParamsElements: {
         deep: true,
         handler(newValue, oldValue) {
-          const difference = newValue.filter(el => {
-            const v = oldValue.find(e => e.boxId == el.boxId);
-            return v && !equalObjects(v.defaultParams, el.defaultParams);
-          });
-          for (const param of difference) {
-            setSelectValueInElement(
-              param.boxId,
-              param.defaultParams[Inputs.SELECT.type]
-            );
-            setInputValueInElement(
-              param.boxId,
-              param.defaultParams[Inputs.NUMBER.type]
-            );
+          const difference = findDifferenceBy(
+            newValue,
+            oldValue,
+            "defaultParams"
+          );
+          for (const { boxId, defaultParams } of difference) {
+            setSelectValueInElement(boxId, defaultParams[Inputs.SELECT.type]);
+            setInputValueInElement(boxId, defaultParams[Inputs.NUMBER.type]);
           }
         }
       },
       movedElements: {
         deep: true,
         handler(newValue, oldValue) {
-          const difference = newValue.filter(el => {
-            const v = oldValue.find(e => e.boxId == el.boxId);
-            return v && !equalObjects(v.position, el.position);
-          });
+          const difference = findDifferenceBy(newValue, oldValue, "position");
           moveElements(difference);
         }
       },
       resizedElements: {
         deep: true,
         handler(newValue, oldValue) {
-          const difference = newValue.filter(el => {
-            const v = oldValue.find(e => e.boxId == el.boxId);
-            return v && !equalObjects(v.size, el.size);
-          });
-          resizeElements(difference, this.paper);
+          const difference = findDifferenceBy(newValue, oldValue, "size");
+          resizeElements(difference);
         }
       },
       links(newValue, oldValue) {
-        for (const l of newValue) {
-          const { source, target } = l;
-          const link = getLinkBySourceTarget(source, target);
-          if (!link) {
-            addLinkFromLink(l);
-          }
+        for (const l of getNewLinks(newValue)) {
+          addLinkFromLink(l);
         }
 
         // remove links removed from arr
@@ -245,9 +222,7 @@ export let app;
       },
       deletedElements(newValue) {
         // if element is not in elements but exist in graph, delete it
-        for (const element of newValue.filter(el =>
-          getElementByBoxId(el.boxId)
-        )) {
+        for (const element of getElementsInGraph(newValue)) {
           deleteElementByBoxId(element.boxId);
         }
       },

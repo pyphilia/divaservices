@@ -323,9 +323,6 @@ export const checkInputValue = input => {
 export const setParametersInForeignObject = (element, defaultParams = {}) => {
   const { description, type: label, originalParams } = element.attributes;
 
-  const showParameters =
-    layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
-
   const selectsArr = [];
   const inputsArr = [];
 
@@ -407,6 +404,7 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
   }
 
   // hide parameters depending on theme options
+  const showParameters = layoutSettingsApp.isShowParametersChecked();
   if (!showParameters) {
     selects.hide();
     inputs.hide();
@@ -432,10 +430,11 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
   // remove resizer if exists
   app.$removeResizer();
 
-  // When the user clicks on a select and moves the bloc
-  // the select dropdown is still displayed
-  // this event closes it
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
-    $(tooltip).tooltip(TOOLTIP_OPTIONS);
+    const t = $(tooltip);
+    t.tooltip(TOOLTIP_OPTIONS);
+    if (!layoutSettingsApp.isShowTooltipsChecked()) {
+      t.hide();
+    }
   }
 };

@@ -1,15 +1,20 @@
 import * as joint from "jointjs";
 import { app } from "../app";
-import { dataInputs } from "../constants/globals";
+import { getDataInputByName } from "../constants/globals";
 import { THEME, CATEGORY_DATATEST, MimeTypes } from "../constants/constants";
-import { generateUniqueId, buildPortAttrs } from "../layout/utils";
+import {
+  generateUniqueId,
+  buildPortAttrs,
+  findEmptyPosition
+} from "../layout/utils";
 import {
   PORT_SELECTOR,
   OUT_PORT_CLASS,
   DATA_BOX_FOREIGNOBJECT_CLASS,
-  INTERFACE_ROOT
+  INTERFACE_ROOT,
+  DATA_INPUT_CONTENT_CLASS
 } from "../constants/selectors";
-import { findEmptyPosition } from "./addElement";
+import { layoutSettingsApp } from "../layoutSettings";
 
 const buildDataMarkup = ({ boxId, size }) => {
   const markup = `<g class="scalable"><rect></rect></g>
@@ -101,8 +106,17 @@ const createImgPreview = input => {
   return preview;
 };
 
+const createContentBox = () => {
+  const content = document.createElement("div");
+  content.classList.add(DATA_INPUT_CONTENT_CLASS);
+  content.style.display = layoutSettingsApp.isShowParametersChecked()
+    ? "display"
+    : "none";
+  return content;
+};
+
 const addContent = ({ mimeType, outputType, boxId }) => {
-  let content = document.createElement("div");
+  let content = createContentBox();
   switch (outputType) {
     case MimeTypes.number.type: {
       const input = createNumberInput(content);
@@ -143,9 +157,7 @@ export const addDataBox = data => {
 };
 
 export const buildDataElement = elName => {
-  const { name, mimeType, outputType } = dataInputs.find(
-    inp => inp.name == elName
-  );
+  const { name, mimeType, outputType } = getDataInputByName(elName);
 
   const size = {
     width: 300,
