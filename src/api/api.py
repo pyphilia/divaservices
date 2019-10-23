@@ -43,6 +43,56 @@ def createAlgoServiceFile():
   services.write(text)
   services.close()
 
+def create_data_inputs(): 
+    response = requests.get(api_url_base)
+    root = ET.Element("DataTests")
+    inputs = set()
+    if response.status_code == 200:
+        res = json.loads(response.content.decode('utf-8'))
+
+        for i in range(len(res)):
+          url = res[i]['url']
+          algo = requests.get(url)
+
+          if algo.status_code == 200:
+            algoJson = json.loads(algo.content.decode('utf-8'))
+
+            for inp in algoJson['input']:
+              # print(inp)
+              if 'file' in inp:
+                for mimetypes in inp['file']['options']['mimeTypes']['allowed']:
+                  # print(mimetypes)
+                  inputs.add(mimetypes)
+                  # el = ET.SubElement(data, 'Data')
+                  # ET.SubElement(el, 'Name').text = inp['file']['name']
+                  # output = ET.SubElement(el, 'Output')
+                  # ET.SubElement(output, 'Type').text = inp['file']['name']
+
+                  # fileEl = ET.SubElement(output, 'File')
+                  # mime = ET.SubElement(fileEl, 'MimeTypes')
+                
+
+              if 'folder' in inp:
+                  inputs.add('folder')
+              #   el = ET.SubElement(data, 'Data')
+              #   ET.SubElement(el, 'Name').text = inp['folder']['name']
+              #   dataType = ET.SubElement(el, 'Type')
+              #   fileEl = ET.SubElement(dataType, 'Folder')
+    for inp in inputs: 
+      data = ET.SubElement(root, "Data")
+      ET.SubElement(data, 'Name').text = inp
+      output = ET.SubElement(data, 'Output')
+
+      typeFormat = inp.split('/')
+      ET.SubElement(output, 'Type').text = typeFormat[0]
+      ET.SubElement(output, 'MimeType').text = inp
+
+    # print(ET.tostring(root))
+    tree = ET.ElementTree(root)
+    tree.write("inputData.xml")
+    # print(ET.tostring(root))
+
+
 
 def create_services_xml():
 
@@ -173,4 +223,5 @@ def create_services_xml():
     else:
         return None
 
-create_services_xml()
+
+create_data_inputs()

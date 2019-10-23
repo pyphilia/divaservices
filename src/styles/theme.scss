@@ -73,6 +73,11 @@ $category-properties: (
     color: #e0e47c,
     type: "icon",
     icon: $fa-var-cut
+  ),
+  "data": (
+    color: #000000,
+    type: "icon",
+    icon: $fa-var-cut
   )
 );
 // @each $category, $color in $category-colors {

@@ -13,7 +13,8 @@ import {
   ICON_COL,
   TITLE_COL,
   BOX_MARGIN,
-  Inputs
+  Inputs,
+  CATEGORY_SERVICE
 } from "../constants/constants";
 import {
   isParamInput,
@@ -22,9 +23,11 @@ import {
   computeBoxHeight,
   computeTitleLength,
   generateUniqueId,
-  getElementByBoxId
+  getElementByBoxId,
+  shortenString
 } from "../layout/utils";
-import { setParametersInForeignObject, createPort } from "../layout/inputs";
+import { setParametersInForeignObject } from "../layout/inputs";
+import { createPort } from "../layout/utils";
 import {
   PORT_SELECTOR,
   TITLE_ROW_CLASS,
@@ -47,15 +50,19 @@ const createBox = (
     size = { width: 100, height: 100 };
   }
 
+  // y="-${titleHeight}"
+  // remove style="height:${titleHeight}px" to contain the whole title
   const template = `<g class="scalable"><rect></rect></g>
-  <foreignObject class="${FOREIGN_CLASS}" x="0" boxId="${boxId}"
-  y="-${titleHeight}" width="${size.width}" height="${size.height +
-    titleHeight}" style="">
+    <foreignObject class="${FOREIGN_CLASS}" x="0" y="-7" boxId="${boxId}" 
+    width="${size.width}" height="${size.height}" style="">
     <body xmlns="http://www.w3.org/1999/xhtml">
     <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
-    <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start" style="height:${titleHeight}px">
+    <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start"> 
     <div class="${ICON_COL} icon"></div>
-    <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${label}</${BOX_TITLE_HTML_TAG}>
+    <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle" title="${label}">${shortenString(
+    label,
+    25
+  )}</${BOX_TITLE_HTML_TAG}>
     </div>
     </div>
     </body>
@@ -71,6 +78,7 @@ const createBox = (
       rect: { ...THEME.rect, ...size }
     },
     boxId,
+    category: CATEGORY_SERVICE,
     position,
     size,
     titleHeight,
@@ -211,7 +219,15 @@ export const buildElementFromName = name => {
 
   const position = position ? position : findEmptyPosition(size);
 
-  return { boxId, defaultParams, size, position, type: name, ports };
+  return {
+    category: CATEGORY_SERVICE,
+    boxId,
+    defaultParams,
+    size,
+    position,
+    type: name,
+    ports
+  };
 };
 
 // helper function to find an empty position to add

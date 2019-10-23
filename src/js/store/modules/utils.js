@@ -1,3 +1,5 @@
+import { CATEGORY_DATATEST } from "../../constants/constants";
+
 export const buildLinkForStore = (graph, link) => {
   const source = link.source;
   const target = link.target;
@@ -54,6 +56,10 @@ export const selectElement = element => {
 
 export const currentElements = elements => {
   return elements.filter(el => !el.deleted);
+};
+
+export const currentDataElements = elements => {
+  return elements.filter(el => el.category == CATEGORY_DATATEST && !el.deleted);
 };
 
 export const copiedElements = elements => {

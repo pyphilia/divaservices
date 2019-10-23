@@ -1,18 +1,5 @@
 import { PORT_SELECTOR } from "./selectors";
 
-export const categoryName = {
-  binarization: "binarization",
-  kws: "kws",
-  imageprocessing: "image processing",
-  evaluation: "evaluation",
-  segmentation: "segmentation",
-  enhancement: "enhancement",
-  graph: "graph",
-  ocr: "ocr",
-  objectdetection: "object detection",
-  activelearning: "active learning"
-};
-
 export const Inputs = {
   SELECT: { tag: "select", type: "select" },
   NUMBER: { tag: "input", type: "number" },
@@ -32,6 +19,25 @@ export const BOX_HIGHLIGHTERS = [
   }
 ];
 
+export const CATEGORY_SERVICE = "CATEGORY_SERVICE";
+export const CATEGORY_DATATEST = "CATEGORY_DATATEST";
+export const DATATEST_TYPE = "data";
+
+export const categoryName = {
+  binarization: "binarization",
+  kws: "kws",
+  imageprocessing: "image processing",
+  evaluation: "evaluation",
+  segmentation: "segmentation",
+  enhancement: "enhancement",
+  graph: "graph",
+  ocr: "ocr",
+  objectdetection: "object detection",
+  activelearning: "active learning",
+  [DATATEST_TYPE]: "data test"
+};
+Object.freeze(categoryName);
+
 export const ZOOM_STEP = 75;
 
 export const BOX_MARGIN = 100;
@@ -50,7 +56,7 @@ export const BOX_TITLE_HTML_TAG = "h3";
 
 export const TOOLTIP_COL = "col-1";
 export const NAME_COL = "col-5";
-export const PARAM_COL = "col-4 p-0";
+export const PARAM_COL = "col-3 p-0";
 export const RESET_COL = "col-2";
 
 export const ICON_COL = "col-1";
@@ -76,6 +82,10 @@ export const MimeTypes = {
   text: {
     type: "text",
     color: "blue"
+  },
+  number: {
+    type: "number",
+    color: "red"
   }
 };
 Object.freeze(MimeTypes);
@@ -101,7 +111,7 @@ export const THEME = {
   },
   groups: {
     in: {
-      position: { name: "left" },
+      position: { name: "left", args: { dy: 25 } },
       attrs: {
         [PORT_SELECTOR]: {
           magnet: "passive",
@@ -119,7 +129,7 @@ export const THEME = {
       }
     },
     out: {
-      position: { name: "right" },
+      position: { name: "right", args: { dy: 25 } },
       attrs: {
         [PORT_SELECTOR]: {
           magnet: "active",

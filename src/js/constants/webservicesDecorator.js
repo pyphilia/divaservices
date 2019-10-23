@@ -45,7 +45,7 @@ const getTypeName = type => {
 
 const webservicesDecorator = xml => {
   const json = [];
-  // const data = await xml.json();
+
   for (const algoData of xml.Services.Service) {
     const {
       Id: [id],

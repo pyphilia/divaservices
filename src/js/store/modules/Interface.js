@@ -29,10 +29,12 @@ import {
   MOVE_ELEMENTS,
   CLEAR_ELEMENTS,
   RESIZE_ELEMENT,
-  OPEN_WORKFLOW
+  OPEN_WORKFLOW,
+  UPDATE_DATA_IN_DATA_ELEMENT
 } from "../mutationsTypes";
 import { fireAlert } from "../../utils/alerts";
 import { MESSAGE_PASTE_SUCCESS } from "../../constants/messages";
+import { buildDataElement } from "../../elements/addDataElement";
 
 const Interface = {
   namespaced: true,
@@ -107,6 +109,10 @@ const Interface = {
       for (const link of links) {
         state.links.push(link);
       }
+    },
+    [UPDATE_DATA_IN_DATA_ELEMENT](state, { boxId, data }) {
+      const el = state.elements.find(el => el.boxId == boxId);
+      el.data = data;
     }
   },
   actions: {
@@ -114,6 +120,10 @@ const Interface = {
       // buils necessary data to build an element afterwards
       const elementPayload = buildElementFromName(name);
       commit(ADD_ELEMENT, elementPayload);
+    },
+    addDataElement({ commit }, name) {
+      const el = buildDataElement(name);
+      commit(ADD_ELEMENT, el);
     },
     clearElements({ commit }) {
       commit(CLEAR_ELEMENTS);
@@ -172,6 +182,9 @@ const Interface = {
     },
     openWorkflow({ commit }, payload) {
       commit(OPEN_WORKFLOW, payload);
+    },
+    updateDataInDataElement({ commit }, payload) {
+      commit(UPDATE_DATA_IN_DATA_ELEMENT, payload);
     }
   }
 };

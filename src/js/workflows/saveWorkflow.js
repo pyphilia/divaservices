@@ -5,6 +5,7 @@
 import xml2js from "xml2js";
 import { webservices } from "../constants/globals";
 import { app } from "../app";
+import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "../constants/constants";
 
 // we use the actual graph nodes to get the workflow
 // because it contains vital ids (especially ports)
@@ -16,7 +17,9 @@ export const saveWorkflow = jsonGraph => {
   const Steps = { Step: [] };
   // NODE
   jsonGraph.cells
-    .filter(cell => cell.type != "standard.Link")
+    .filter(
+      cell => cell.type != "standard.Link" && cell.category == CATEGORY_SERVICE
+    )
     .forEach((box, i) => {
       const { type, ports, boxId } = box;
       const Name = type.replace(/\s/g, "");
@@ -55,31 +58,64 @@ export const saveWorkflow = jsonGraph => {
       Steps.Step.push(step);
     });
 
+  // save data elements
+  const dataPorts = {};
+  const dataElements = jsonGraph.cells.filter(
+    cell => cell.type != "standard.Link" && cell.category == CATEGORY_DATATEST
+  );
+  for (const el of dataElements) {
+    for (const port of el.ports.items) {
+      dataPorts[port.id] = el.boxId;
+    }
+  }
+
+  const data = [];
+  const allFiles = [];
   // LINK
   jsonGraph.cells
     .filter(cell => cell.type == "standard.Link")
     .forEach(link => {
       const {
-        source: { port: sourcePort },
-        target: { port: targetPort }
+        source: { port: sourcePortId },
+        target: { port: targetPortId }
       } = link;
-      const targetBox = allPorts[targetPort];
+      const targetPort = allPorts[targetPortId];
       const targetWebservice = Steps.Step.find(
-        step => step.Id == targetBox.boxId
+        step => step.Id == targetPort.boxId
       );
 
-      const { boxId: Ref, name: ServiceOutputName } = allPorts[sourcePort];
-      const p = {
-        Name: targetBox.name,
-        Value: {
-          WorkflowStep: {
-            Ref,
-            ServiceOutputName
+      if (allPorts[sourcePortId]) {
+        const { boxId: Ref, name: ServiceOutputName } = allPorts[sourcePortId];
+        const p = {
+          Name: targetPort.name,
+          Value: {
+            WorkflowStep: {
+              Ref,
+              ServiceOutputName
+            }
           }
+        };
+        targetWebservice.Inputs.Data.push(p);
+      } else if (dataPorts[sourcePortId]) {
+        const sourceDataBox = app.currentDataElements.find(
+          el => el.boxId == dataPorts[sourcePortId]
+        );
+
+        // @TODO get folder when folder type
+        let i = 0;
+        for (const file of sourceDataBox.data) {
+          allFiles.push(file);
+          const fileData = {
+            [targetWebservice.Name + "_" + targetPort.name + "_" + i++]:
+              "SOMENAME/" + file.name
+          };
+          data.push(fileData);
         }
-      };
-      targetWebservice.Inputs.Data.push(p);
+      }
     });
+
+  console.log(allFiles); //@TODO send to server to upload as zip
+  console.log(JSON.stringify(data));
 
   const Id = 1; // workflow id
   const Information = "";

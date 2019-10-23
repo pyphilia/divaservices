@@ -60,6 +60,31 @@ const plugin = {
       });
       Vue.prototype.$zoom.scale = paper.scale().sx;
     };
+
+    Vue.prototype.$changePaperScale = (paper, nextScale, currentScale) => {
+      if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
+        const zoom = Vue.prototype.$zoom;
+
+        const beta = currentScale / nextScale;
+
+        const ax = zoom.x - zoom.x * beta;
+        const ay = zoom.y - zoom.y * beta;
+
+        const translate = paper.translate();
+
+        const nextTx = translate.tx - ax * nextScale;
+        const nextTy = translate.ty - ay * nextScale;
+
+        paper.translate(nextTx, nextTy);
+
+        const ctm = paper.matrix();
+
+        ctm.a = nextScale;
+        ctm.d = nextScale;
+
+        paper.matrix(ctm);
+      }
+    };
   }
 };
 export default plugin;

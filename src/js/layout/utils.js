@@ -1,14 +1,28 @@
 import "select2js";
-import { TOOLTIP_BREAK_LINE, Inputs } from "../constants/constants";
-import { IN_PORT_CLASS, OUT_PORT_CLASS } from "../constants/selectors";
+import { TOOLTIP_BREAK_LINE, Inputs, MimeTypes } from "../constants/constants";
+import {
+  IN_PORT_CLASS,
+  OUT_PORT_CLASS,
+  PORT_SELECTOR
+} from "../constants/selectors";
 import { app } from "./../app";
+import { layoutSettingsApp } from "../layoutSettings";
 
-const maxWidth = 650;
+const maxWidth = 400;
 const titleFontSize = 18;
-const paramHeight = 55;
-const defaultHeight = 40;
+const paramHeight = 43;
+const defaultHeight = 100;
 const titleHeightOneLine = 60;
 const titleHeightTwoLine = 80;
+const titleHeightThreeLine = 110;
+
+export const shortenString = (string, maxLength = 15) => {
+  if (string.length > maxLength) {
+    const short = string.substr(0, maxLength);
+    return short + "...";
+  }
+  return string;
+};
 
 export const getElementByBoxId = id => {
   return app.graph.getElements().find(el => el.attributes.boxId == id);
@@ -91,13 +105,20 @@ export const computeTitleLength = (el, fromSVG = false) => {
   } else {
     titleLength = el.label.length;
   }
-  const value = Math.min(titleLength * titleFontSize, maxWidth);
+  const titleWidth = maxWidth - 100; // 80 is the icon's + tooltip's width
+  const titleWidth2 = titleWidth * 1.5;
+  let titleHeight = titleHeightOneLine;
+  let value = titleLength * titleFontSize;
+  if (value > titleWidth && value < titleWidth2) {
+    value = titleWidth;
+    titleHeight = titleHeightTwoLine;
+  } else if (value > titleWidth && value > titleWidth2) {
+    value = titleWidth2;
+    titleHeight = titleHeightThreeLine;
+  }
   return {
     value,
-    titleHeight:
-      titleLength * titleFontSize > maxWidth
-        ? titleHeightTwoLine
-        : titleHeightOneLine
+    titleHeight
   };
 };
 
@@ -117,11 +138,11 @@ export const computeBoxWidth = (el, showParameters, fromSVG = false) => {
   }
   const paramNameLength = showParameters ? getNameLengths : [0];
 
-  const inputDefaultWidth = Math.max(...paramNameLength) * 25;
+  const inputDefaultWidth = Math.max(...paramNameLength) * 20;
 
   const nameLength = computeTitleLength(el, fromSVG).value;
 
-  return Math.min(Math.max(nameLength, inputDefaultWidth) + 200, maxWidth); // 200 = button and stuff width
+  return Math.min(Math.max(nameLength, inputDefaultWidth) + 100, maxWidth); // 200 = button and stuff width
 };
 
 export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
@@ -149,5 +170,62 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
 
   const maxPortEntry = Math.max(inPorts.length, outPorts.length);
   // @TODO count input + output port
-  return Math.max(defaultHeight, maxPortEntry * 50, inputsHeight);
+  return Math.max(
+    defaultHeight,
+    maxPortEntry * 60,
+    inputsHeight + computeTitleLength(el, fromSVG).titleHeight
+  );
+};
+
+export const buildPortAttrs = (name, type, typeAllowed) => {
+  const showPortDetails =
+    layoutSettingsApp.checkedOptions.indexOf("showPortDetails") != -1;
+  const showPorts = layoutSettingsApp.checkedOptions.indexOf("showPorts") != -1;
+  return {
+    [PORT_SELECTOR]: {
+      fill: MimeTypes[type].color,
+      type,
+      typeAllowed
+    },
+    circle: {
+      display: showPorts ? "block" : "none"
+    },
+    text: {
+      text: `${name}\n${typeAllowed}`,
+      display: showPortDetails ? "block" : "none"
+    }
+  };
+};
+
+export const createPort = (param, group) => {
+  let port = {};
+  const { name, mimeTypes } = param;
+  if (group) {
+    //group == OUT_PORT_CLASS || userdefined) {
+    // always create out port, check userdefined for inputs
+
+    let typeAllowed;
+    let type;
+
+    // folder case
+    if (param.type == Inputs.FOLDER.type) {
+      typeAllowed = [Inputs.FOLDER.type]; // use options allowed types, otherwise it is a folder
+      type = Inputs.FOLDER.type;
+    } else {
+      // @TODO display !userdefined ports ?
+      typeAllowed = mimeTypes.allowed;
+      type = typeAllowed[0].substr(
+        //@TODO diff types ?
+        0,
+        typeAllowed[0].indexOf("/")
+      );
+    }
+
+    port = {
+      group,
+      name,
+      attrs: buildPortAttrs(name, type, typeAllowed)
+    };
+  }
+  return port;
 };

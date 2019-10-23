@@ -1,5 +1,4 @@
 import Vue from "vue";
-import Split from "split.js";
 import * as joint from "jointjs";
 import { mapActions, mapState } from "vuex";
 import Toolsbar from "./layout/components/Toolsbar";
@@ -12,36 +11,37 @@ import { initWebservices } from "./constants/globals";
 import { initPaperEvents } from "./events/paperEvents";
 import { getElementByBoxId, getLinkBySourceTarget } from "./layout/utils";
 import { highlightSelection, unHighlight } from "./store/modules/highlight";
-import { MAX_SCALE, MIN_SCALE, Inputs, THEME } from "./constants/constants";
+import {
+  Inputs,
+  CATEGORY_SERVICE,
+  CATEGORY_DATATEST
+} from "./constants/constants";
 import { addElementByName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
 import { resizeElements } from "./elements/resizeElement";
 import { initKeyboardEvents } from "./events/keyboardEvents";
 import { initTour } from "./utils/walkthrough";
 import {
-  INTERFACE_ROOT,
-  LEFT_SIDEBAR,
-  MAIN_INTERFACE
-} from "./constants/selectors";
-import {
   setInputValueInElement,
   setSelectValueInElement
 } from "./layout/inputs";
 import { equalObjects } from "./utils/utils";
-import { validateConnection } from "./layout/components/utils";
 import {
   selectedElements,
   copiedElements,
   deletedElements,
-  currentElements
+  currentElements,
+  currentDataElements
 } from "./store/modules/utils";
 import { moveElements } from "./elements/moveElement";
 import ZoomPlugin from "./plugins/ZoomPlugin";
 import AreaSelectionPlugin from "./plugins/AreaSelectionPlugin";
 import ResizePlugin from "./plugins/ResizePlugin";
+import { addDataBox } from "./elements/addDataElement";
+import { initPaper } from "./layout/initPaper";
+import { initSplit } from "./layout/split";
 
 export let app;
-export let split;
 
 (async () => {
   await initWebservices();
@@ -67,17 +67,23 @@ export let split;
       // this computed method is necessary since we shouldn't
       // listen to the store directly
       // we should use getters but for some reason (namespace?) it is not working
+      elementsData() {
+        return this.elements;
+      },
+      currentDataElements() {
+        return currentDataElements(this.elementsData);
+      },
       currentElements() {
-        return currentElements(this.elements);
+        return currentElements(this.elementsData);
       },
       selectedElements() {
-        return selectedElements(this.elements);
+        return selectedElements(this.elementsData);
       },
       copiedElements() {
-        return copiedElements(this.elements);
+        return copiedElements(this.elementsData);
       },
       deletedElements() {
-        return deletedElements(this.elements);
+        return deletedElements(this.elementsData);
       },
       defaultParamsElements() {
         return this.elements.map(({ boxId, defaultParams }) => {
@@ -96,6 +102,9 @@ export let split;
       },
       scale() {
         return this.$zoom.scale;
+      },
+      dataElements() {
+        return this.dataTest;
       },
       ...mapState("Interface", ["elements", "links"]),
       ...mapState("Keyboard", ["ctrl", "space"])
@@ -144,7 +153,8 @@ export let split;
         "deleteLink",
         "moveSelectedElements",
         "resizeElement",
-        "openWorkflow"
+        "openWorkflow",
+        "updateDataInDataElement"
       ])
     },
     watch: {
@@ -154,8 +164,17 @@ export let split;
           for (const el of newValue.filter(
             ({ boxId }) => !getElementByBoxId(boxId)
           )) {
-            const { type } = el;
-            addElementByName(type, el);
+            const { type, category } = el;
+            switch (category) {
+              case CATEGORY_SERVICE:
+                addElementByName(type, el);
+                break;
+              case CATEGORY_DATATEST:
+                addDataBox(el);
+                break;
+              default:
+                console.log("ERROR ADDING EL");
+            }
           }
 
           // remove element removed from arr
@@ -250,64 +269,20 @@ export let split;
         }
       },
       scale(nextScale, currentScale) {
-        if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
-          const beta = currentScale / nextScale;
-
-          const ax = this.$zoom.x - this.$zoom.x * beta;
-          const ay = this.$zoom.y - this.$zoom.y * beta;
-
-          const translate = this.paper.translate();
-
-          const nextTx = translate.tx - ax * nextScale;
-          const nextTy = translate.ty - ay * nextScale;
-
-          this.paper.translate(nextTx, nextTy);
-
-          const ctm = this.paper.matrix();
-
-          ctm.a = nextScale;
-          ctm.d = nextScale;
-
-          this.paper.matrix(ctm);
-        }
+        this.$changePaperScale(this.paper, nextScale, currentScale);
       }
     },
     mounted() {
-      this.paper = new joint.dia.Paper({
-        el: document.querySelector(INTERFACE_ROOT),
-        model: this.graph,
-        width: "100%",
-        height: 800,
-        gridSize: 15,
-        drawGrid: {
-          name: "dot"
-        },
-        linkPinning: false,
-        snapLinks: true,
-        defaultLink: new joint.shapes.standard.Link({ z: 20 }),
-        defaultConnector: { name: "smooth" },
-        defaultConnectionPoint: { name: "boundary" },
-        markAvailable: true,
-        validateConnection
-      });
-
-      this.paper.options.highlighting.magnetAvailability =
-        THEME.magnetAvailabilityHighlighter;
+      this.paper = initPaper(this.graph);
 
       this.$nextTick(() => {
         initPaperEvents();
         initKeyboardEvents();
       });
 
-      split = Split([`#${LEFT_SIDEBAR}`, MAIN_INTERFACE], {
-        elementStyle: function(dimension, size, gutterSize) {
-          return { "flex-basis": "calc(" + size + "% - " + gutterSize + "px)" };
-        },
-        minSize: [10, 500],
-        sizes: [25, 75],
-        gutterSize: 6
-      });
+      initSplit();
 
+      console.log(this.paper.svg);
       initTour();
     }
   });

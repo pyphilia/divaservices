@@ -7,6 +7,8 @@ export const ALGO_ITEM_CLASS = "algo-item";
 export const ALGO_SEARCH_CONTAINER = "algo-search";
 export const FILE_MENU = "#navbar-menu";
 
+export const DATA_BOX_FOREIGNOBJECT_CLASS = "data-foreignobj";
+
 export const PARAMETER_INPUTS = "inputs";
 export const PARAMETER_SELECTS = "selects";
 

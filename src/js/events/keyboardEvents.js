@@ -1,7 +1,6 @@
 import { copy } from "./controls";
 import { app } from "../app";
 import UndoRedoHistory from "../store/plugins/UndoRedoHistory";
-import { getElementByBoxId } from "../layout/utils";
 
 export let ctrlDown;
 export let spaceDown;
@@ -42,34 +41,36 @@ export const initKeyboardEvents = () => {
         }
       } else {
         switch (keyName) {
-          case "ArrowDown": {
-            for (const { boxId } of app.selectedElements) {
-              getElementByBoxId(boxId).translate(0, 50);
-              app.moveSelectedElements();
-            }
-            break;
-          }
-          case "ArrowUp": {
-            for (const { boxId } of app.selectedElements) {
-              getElementByBoxId(boxId).translate(0, -50);
-              app.moveSelectedElements();
-            }
-            break;
-          }
-          case "ArrowRight": {
-            for (const { boxId } of app.selectedElements) {
-              getElementByBoxId(boxId).translate(50, 0);
-              app.moveSelectedElements();
-            }
-            break;
-          }
-          case "ArrowLeft": {
-            for (const { boxId } of app.selectedElements) {
-              getElementByBoxId(boxId).translate(-50, 0);
-              app.moveSelectedElements();
-            }
-            break;
-          }
+          // arrow manipulation is not that useful, and should be
+          // activated only if we are not focusing an input
+          // case "ArrowDown": {
+          //   for (const { boxId } of app.selectedElements) {
+          //     getElementByBoxId(boxId).translate(0, 50);
+          //     app.moveSelectedElements();
+          //   }
+          //   break;
+          // }
+          // case "ArrowUp": {
+          //   for (const { boxId } of app.selectedElements) {
+          //     getElementByBoxId(boxId).translate(0, -50);
+          //     app.moveSelectedElements();
+          //   }
+          //   break;
+          // }
+          // case "ArrowRight": {
+          //   for (const { boxId } of app.selectedElements) {
+          //     getElementByBoxId(boxId).translate(50, 0);
+          //     app.moveSelectedElements();
+          //   }
+          //   break;
+          // }
+          // case "ArrowLeft": {
+          //   for (const { boxId } of app.selectedElements) {
+          //     getElementByBoxId(boxId).translate(-50, 0);
+          //     app.moveSelectedElements();
+          //   }
+          //   break;
+          // }
           case "Delete": {
             // do not delete element if an input is focused
             const focusedInput = document.querySelector("input:focus");

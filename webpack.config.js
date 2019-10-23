@@ -20,7 +20,7 @@ module.exports = {
    resolve: {
       extensions: ['.js'],
       alias: {
-         'vue$': 'vue/dist/vue.min.js',
+         'vue$': 'vue/dist/vue.esm.js',
          'jquery': 'jquery/dist/jquery.min.js',
          'bootstrapjs': 'bootstrap/dist/js/bootstrap.min.js',
          'select2js': 'select2/dist/js/select2.min.js',

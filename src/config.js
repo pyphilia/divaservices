@@ -3,7 +3,8 @@
 export const {
   HOST = "/",
   API = "http://divaservices.unifr.ch/api/v2/",
-  WEBSERVICES_XML_FILEPATH = "api/services.xml"
+  WEBSERVICES_XML_FILEPATH = "api/services.xml",
+  INPUTS_DATA_XML_FILEPATH = "api/inputData.xml"
 } = process.env;
 
 // layout options

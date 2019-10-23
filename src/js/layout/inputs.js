@@ -11,12 +11,10 @@ import {
   NAME_COL,
   TOOLTIP_HTML,
   RESET_COL,
-  MimeTypes,
   TOOLTIP_OPTIONS
 } from "../constants/constants";
 import {
   PARAM_NAME_CLASS,
-  PORT_SELECTOR,
   INFO_TOOLTIP_CLASS,
   TITLE_ROW_CLASS,
   BOX_CONTAINER_CLASS,
@@ -27,7 +25,7 @@ import {
   PARAMETER_INPUTS,
   INTERFACE_ROOT
 } from "../constants/selectors";
-import { objectToString } from "./utils";
+import { objectToString, shortenString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
 import { elementOnChangePosition } from "../events/paperEvents";
@@ -123,7 +121,8 @@ export const createSelect = (
   // param name
   const nameEl = $("<span/>", {
     class: `${PARAM_NAME_CLASS} ${NAME_COL}`,
-    text: name
+    text: shortenString(name),
+    title: name
   });
 
   // param options, select the default value or the read value of the workflow
@@ -208,7 +207,8 @@ export const createInput = (
   // param name
   const nameEl = $("<span/>", {
     class: `${PARAM_NAME_CLASS} ${NAME_COL}`,
-    text: name
+    text: shortenString(name),
+    title: name
   });
 
   // param input
@@ -438,54 +438,4 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
     $(tooltip).tooltip(TOOLTIP_OPTIONS);
   }
-};
-
-export const createPort = (param, group) => {
-  const showPortDetails =
-    layoutSettingsApp.checkedOptions.indexOf("showPortDetails") != -1;
-  const showPorts = layoutSettingsApp.checkedOptions.indexOf("showPorts") != -1;
-
-  let port = {};
-  const { name, mimeTypes } = param;
-  if (group) {
-    //group == OUT_PORT_CLASS || userdefined) {
-    // always create out port, check userdefined for inputs
-
-    let typeAllowed;
-    let type;
-
-    // folder case
-    if (param.type == Inputs.FOLDER.type) {
-      typeAllowed = [Inputs.FOLDER.type]; // use options allowed types, otherwise it is a folder
-      type = Inputs.FOLDER.type;
-    } else {
-      // @TODO display !userdefined ports ?
-      typeAllowed = mimeTypes.allowed;
-      type = typeAllowed[0].substr(
-        //@TODO diff types ?
-        0,
-        typeAllowed[0].indexOf("/")
-      );
-    }
-
-    port = {
-      group,
-      name,
-      attrs: {
-        [PORT_SELECTOR]: {
-          fill: MimeTypes[type].color,
-          type,
-          typeAllowed
-        },
-        circle: {
-          display: showPorts ? "block" : "none"
-        },
-        text: {
-          text: `${name}\n${typeAllowed}`,
-          display: showPortDetails ? "block" : "none"
-        }
-      }
-    };
-  }
-  return port;
 };
