@@ -97,11 +97,7 @@ Object.freeze(MimeTypes);
 export const THEMES = {};
 
 export const PORT_MARKUP = [{ tagName: "circle", selector: PORT_SELECTOR }];
-export const PORT_LABEL_MARKUP = [
-  { tagName: "text", selector: "mainText" },
-  { tagName: "rect", selector: "hover-background" },
-  { tagName: "text", selector: "type-hover" }
-];
+export const PORT_LABEL_MARKUP = [{ tagName: "text", selector: "mainText" }];
 
 export const PORT_ATTRS = position => {
   let refX, magnet;
