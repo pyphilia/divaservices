@@ -31,11 +31,11 @@ input[type="file"]:hover {
 // foreignObject
 .algo-box {
   body {
-    background: none;
+    background: $box-background;
   }
 
   .row {
-    margin: 7px 0;
+    margin-bottom: 7px;
     align-items: center;
     justify-content: center;
   }
@@ -46,6 +46,8 @@ input[type="file"]:hover {
 
   .title-box {
     font-size: 2em;
+    margin-left: 0;
+    margin-right: 0;
     align-items: center;
     justify-content: center;
 
@@ -200,9 +202,10 @@ input[type="file"]:hover {
 /*HIGHLIGHTER*/
 
 .highlighted {
-  fill: lightgreen;
-  stroke-width: 3px;
-  stroke: green !important;
+  rect {
+    stroke-width: 5px;
+    stroke: red !important;
+  }
 }
 
 // .joint-highlight-stroke {

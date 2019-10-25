@@ -63,5 +63,5 @@ export const getDataInputByName = name => {
   if (!dataInput) {
     throw "Cannot find dataInput with name " + name;
   }
-  return dataInputs;
+  return dataInput;
 };

@@ -7,7 +7,6 @@ let startingResizerPos = {};
 let startingElementPos;
 let currentElement;
 let currentState;
-let titleHeight;
 let currentForeignObjs;
 let boxId = null;
 let resizer = null;
@@ -47,7 +46,6 @@ const plugin = {
       currentForeignObjs = document.querySelectorAll(
         `foreignObject[boxId='${boxId}']`
       );
-      titleHeight = currentElement.attributes.titleHeight;
 
       resizer = new joint.shapes.standard.Rectangle();
       resizer.attributes.class = "resizer";
@@ -79,12 +77,7 @@ const plugin = {
         MIN_ELEMENT_WIDTH
       );
 
-      resizeElementBox(
-        currentElement,
-        currentForeignObjs,
-        { height, width },
-        titleHeight
-      );
+      resizeElementBox(currentElement, currentForeignObjs, { height, width });
     };
   }
 };

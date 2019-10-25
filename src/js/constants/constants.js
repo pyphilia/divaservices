@@ -11,9 +11,9 @@ Object.freeze(Inputs);
 export const BOX_HIGHLIGHTERS = [
   {
     highlighter: {
-      name: "stroke",
+      name: "addClass",
       options: {
-        width: 3
+        className: "highlighted"
       }
     }
   }

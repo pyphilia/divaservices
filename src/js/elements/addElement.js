@@ -20,7 +20,6 @@ import {
   isPortUserdefined,
   computeBoxWidth,
   computeBoxHeight,
-  computeTitleLength,
   generateUniqueId,
   getElementByBoxId,
   shortenString,
@@ -44,16 +43,15 @@ const createBox = (
 ) => {
   const { graph } = app;
   const { category, label, description, params = {} } = e;
-  const { titleHeight } = computeTitleLength(e);
 
   if (!size) {
     size = { width: 100, height: 100 };
   }
 
-  // y="-${titleHeight}"
-  // remove style="height:${titleHeight}px" to contain the whole title
+  // we do not add inputs and select in the markup because of the
+  // missing input declaration '/' (valid for HTML but not XML/SVG)
   const template = `<g class="scalable"><rect></rect></g>
-    <foreignObject class="${FOREIGN_CLASS}" x="0" y="-7" boxId="${boxId}" 
+    <foreignObject class="${FOREIGN_CLASS}" x="0" y="0" boxId="${boxId}" 
     width="${size.width}" height="${size.height}" style="">
     <body xmlns="http://www.w3.org/1999/xhtml">
     <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
@@ -81,7 +79,6 @@ const createBox = (
     category: CATEGORY_SERVICE,
     position,
     size,
-    titleHeight,
     ports: {
       groups: THEME.groups,
       items

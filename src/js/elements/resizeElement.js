@@ -1,15 +1,10 @@
 import { getElementByBoxId } from "../layout/utils";
 import { FOREIGN_CLASS } from "../constants/selectors";
 
-export const resizeElementBox = (
-  model,
-  foreignObjs,
-  { width, height },
-  titleHeight = 0
-) => {
+export const resizeElementBox = (model, foreignObjs, { width, height }) => {
   model.resize(width, height);
   for (const foreignObj of foreignObjs) {
-    foreignObj.setAttribute("height", height + titleHeight);
+    foreignObj.setAttribute("height", height);
     foreignObj.setAttribute("width", width);
   }
 };
@@ -22,8 +17,6 @@ export const resizeElements = elements => {
       `foreignObject.${FOREIGN_CLASS}[boxId='${boxId}']`
     );
 
-    const titleHeight = model.attributes.titleHeight;
-
-    resizeElementBox(model, foreignObjs, size, titleHeight);
+    resizeElementBox(model, foreignObjs, size);
   }
 };
