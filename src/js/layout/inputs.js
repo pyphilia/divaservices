@@ -98,7 +98,7 @@ export const createSelect = (
   });
 
   // select
-  const wrapperSelect = $("<div/>", { class: PARAM_COL });
+  const wrapperSelect = $("<div/>", { class: `${PARAM_COL} p-0` });
   const dataDefault = values[defaultOption]
     ? values[defaultOption].toString()
     : "";

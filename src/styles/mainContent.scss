@@ -32,6 +32,23 @@ input[type="file"]:hover {
 .algo-box {
   body {
     background: $box-background;
+
+    @each $category, $properties in $category-properties {
+      &.#{$category} {
+        border-width: 0 0 5px 0;
+        border-bottom: map-get($properties, "color");
+        border-style: solid;
+
+        .param-name {
+          // display:inline-block;
+          // min-width:
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          color: map-get($properties, "color");
+        }
+      }
+    }
   }
 
   .row {
@@ -81,16 +98,9 @@ input[type="file"]:hover {
     }
   }
 
-  .param-name {
-    // display:inline-block;
-    // min-width:
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   .reset-button {
-    background: lightgrey;
+    background: darkgrey;
+    color: white;
   }
 
   .tooltip-info-button {

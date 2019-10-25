@@ -53,7 +53,7 @@ const createBox = (
   const template = `<g class="scalable"><rect></rect></g>
     <foreignObject class="${FOREIGN_CLASS}" x="0" y="0" boxId="${boxId}" 
     width="${size.width}" height="${size.height}" style="">
-    <body xmlns="http://www.w3.org/1999/xhtml">
+    <body xmlns="http://www.w3.org/1999/xhtml" class="${category}">
     <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
     <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start"> 
     <div class="${ICON_COL} icon"></div>
