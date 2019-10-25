@@ -104,16 +104,18 @@ export const PORT_LABEL_MARKUP = [
 ];
 
 export const PORT_ATTRS = position => {
-  let refX;
+  let refX, magnet;
   if (position == IN_PORT_CLASS) {
+    magnet = "passive";
     refX = 0;
   } else if (position == OUT_PORT_CLASS) {
+    magnet = "active";
     refX = -20;
   }
 
   return {
     [PORT_SELECTOR]: {
-      magnet: "passive",
+      magnet,
       r: 12,
       fill: "darkblue",
       stroke: "white",
