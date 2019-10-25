@@ -59,6 +59,9 @@ input[type="file"]:hover {
 
     h3 {
       margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .tooltip-box {
@@ -81,6 +84,9 @@ input[type="file"]:hover {
   .param-name {
     // display:inline-block;
     // min-width:
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .reset-button {
@@ -111,9 +117,52 @@ input[type="file"]:hover {
 // }
 
 .joint-port-label {
-  tspan:first-of-type {
+  fill: black;
+  text[joint-selector="mainText"] tspan:first-of-type {
     font-weight: bold;
   }
+
+  rect[joint-selector="hover-background"] {
+    fill: black;
+  }
+  text[joint-selector="type-hover"] {
+    fill: white;
+  }
+
+  // next elements form the tooltip
+  text[joint-selector="type-hover"],
+  rect[joint-selector="hover-background"] {
+    display: block;
+    opacity: 0;
+    -webkit-transition: all 1ms;
+    transition: all 1ms;
+    -webkit-transition-delay: 0s;
+    transition-delay: 0s;
+  }
+
+  &:hover {
+    text[joint-selector="type-hover"],
+    rect[joint-selector="hover-background"] {
+      display: block;
+      opacity: 1;
+      -webkit-transition-delay: 1s;
+      transition-delay: 1s;
+    }
+  }
+}
+
+// text[joint-selector=hover] {
+//   display: none;
+// }
+
+.type-hover {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 30;
+  padding: 2px;
+  background: black;
+  color: white;
 }
 
 #minimap-container {
@@ -202,7 +251,7 @@ input[type="file"]:hover {
 /*HIGHLIGHTER*/
 
 .highlighted {
-  rect {
+  & > g > rect {
     stroke-width: 5px;
     stroke: red !important;
   }

@@ -1,4 +1,4 @@
-import { PORT_SELECTOR } from "./selectors";
+import { PORT_SELECTOR, OUT_PORT_CLASS, IN_PORT_CLASS } from "./selectors";
 
 export const Inputs = {
   SELECT: { tag: "select", type: "select" },
@@ -34,7 +34,11 @@ export const categoryName = {
   ocr: "ocr",
   objectdetection: "object detection",
   activelearning: "active learning",
-  [DATATEST_TYPE]: "data test"
+  [DATATEST_TYPE]: "data test",
+  wordextraction: "word extraction",
+  htk: "htk",
+  filepicker: "filepicker",
+  other: "other"
 };
 Object.freeze(categoryName);
 
@@ -77,7 +81,7 @@ export const MimeTypes = {
   },
   application: {
     type: "application",
-    color: "yellow"
+    color: "green"
   },
   text: {
     type: "text",
@@ -91,6 +95,38 @@ export const MimeTypes = {
 Object.freeze(MimeTypes);
 
 export const THEMES = {};
+
+export const PORT_MARKUP = [{ tagName: "circle", selector: PORT_SELECTOR }];
+export const PORT_LABEL_MARKUP = [
+  { tagName: "text", selector: "mainText" },
+  { tagName: "rect", selector: "hover-background" },
+  { tagName: "text", selector: "type-hover" }
+];
+
+export const PORT_ATTRS = position => {
+  let refX;
+  if (position == IN_PORT_CLASS) {
+    refX = 0;
+  } else if (position == OUT_PORT_CLASS) {
+    refX = -20;
+  }
+
+  return {
+    [PORT_SELECTOR]: {
+      magnet: "passive",
+      r: 12,
+      fill: "darkblue",
+      stroke: "white",
+      "stroke-width": "3px"
+    },
+    "hover-background": {
+      ref: "type-hover",
+      refWidth: "125%",
+      refHeight: "100%",
+      refX
+    }
+  };
+};
 
 export const THEME = {
   magnetAvailabilityHighlighter: {
@@ -110,17 +146,9 @@ export const THEME = {
     fill: "#eeeeee"
   },
   groups: {
-    in: {
+    [IN_PORT_CLASS]: {
       position: { name: "left", args: { dy: 25 } },
-      attrs: {
-        [PORT_SELECTOR]: {
-          magnet: "passive",
-          r: 12,
-          fill: "darkblue",
-          stroke: "black"
-        },
-        text: {}
-      },
+      attrs: PORT_ATTRS(IN_PORT_CLASS),
       z: 5,
       label: {
         position: {
@@ -128,16 +156,9 @@ export const THEME = {
         }
       }
     },
-    out: {
+    [OUT_PORT_CLASS]: {
       position: { name: "right", args: { dy: 25 } },
-      attrs: {
-        [PORT_SELECTOR]: {
-          magnet: "active",
-          r: 12,
-          fill: "lightblue",
-          stroke: "black"
-        }
-      },
+      attrs: PORT_ATTRS(OUT_PORT_CLASS),
       z: 5,
       label: {
         position: {

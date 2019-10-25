@@ -19,6 +19,8 @@ export const TRASH_SELECTOR = "#trash";
 export const PORT_SELECTOR = "portBody";
 export const PORT_LABEL_CLASS = "joint-port-label";
 
+export const TYPE_HOVER_CLASS = "type-hover";
+
 export const INFO_TOOLTIP_CLASS = "tooltip-info-button";
 export const TOOLTIP_CLASS = "tooltip-class";
 

@@ -54,30 +54,34 @@
   min-width: 90px;
 }
 
-#algo-categories a.category-tab {
+#algo-categories .category-tab {
   font-size: 0.6em;
   text-transform: uppercase;
   width: 100%;
   text-align: center;
   // background: lightgrey;
-  margin: 1px 0;
   border-radius: 0;
-  padding: 1rem 0.3rem;
   color: white;
+  padding: 1px 0;
 
   &:hover {
     background: black !important;
     cursor: pointer;
   }
 
-  @each $category, $properties in $category-properties {
-    &.#{$category} {
-      background-color: map-get($properties, "color");
+  span {
+    padding: 0.8rem 0.3rem;
+    display: block;
 
-      .icon {
-        @include add-icon($properties, 25px);
-        display: block;
-        font-size: 2em;
+    @each $category, $properties in $category-properties {
+      &.#{$category} {
+        background-color: map-get($properties, "color");
+
+        .icon {
+          @include add-icon($properties, 25px);
+          display: block;
+          font-size: 2em;
+        }
       }
     }
   }

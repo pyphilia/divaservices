@@ -13,7 +13,9 @@ import {
   ICON_COL,
   TITLE_COL,
   Inputs,
-  CATEGORY_SERVICE
+  CATEGORY_SERVICE,
+  PORT_MARKUP,
+  PORT_LABEL_MARKUP
 } from "../constants/constants";
 import {
   isParamInput,
@@ -22,13 +24,11 @@ import {
   computeBoxHeight,
   generateUniqueId,
   getElementByBoxId,
-  shortenString,
   findEmptyPosition
 } from "../layout/utils";
 import { setParametersInForeignObject } from "../layout/inputs";
 import { createPort } from "../layout/utils";
 import {
-  PORT_SELECTOR,
   TITLE_ROW_CLASS,
   BOX_CONTAINER_CLASS,
   FOREIGN_CLASS,
@@ -57,10 +57,7 @@ const createBox = (
     <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
     <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start"> 
     <div class="${ICON_COL} icon"></div>
-    <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle" title="${label}">${shortenString(
-    label,
-    25
-  )}</${BOX_TITLE_HTML_TAG}>
+    <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle" title="${label}">${label}</${BOX_TITLE_HTML_TAG}>
     </div>
     </div>
     </body>
@@ -86,7 +83,8 @@ const createBox = (
     description,
     originalParams: params,
     defaultParams,
-    portMarkup: [{ tagName: "circle", selector: PORT_SELECTOR }],
+    portMarkup: PORT_MARKUP,
+    portLabelMarkup: PORT_LABEL_MARKUP,
 
     getGroupPorts: function(model, group) {
       return model.getPorts().filter(port => {

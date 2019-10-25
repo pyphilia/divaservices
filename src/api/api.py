@@ -2,7 +2,8 @@ import json
 import requests
 import xml.etree.cElementTree as ET
 
-api_url_base = 'http://divaservices.unifr.ch/api/v2/'
+# api_url_base = 'http://divaservices.unifr.ch/api/v2/'
+api_url_base = 'http://134.21.72.190:8080/'
 filepath = "api.json"
 
 def get_account_info():
@@ -127,6 +128,8 @@ def create_services_xml():
               ET.SubElement(information, 'DOI').text = str(general['DOI'])
             if('license' in general):
               ET.SubElement(information, 'License').text = general['license']
+            if('type' not in general):
+              general['type'] = 'other'
             ET.SubElement(information, 'Type').text = general['type']
             if 'ownsCopyright' in general:
               ET.SubElement(information, 'OwnsCopyright').text = general['ownsCopyright']
@@ -224,4 +227,4 @@ def create_services_xml():
         return None
 
 
-create_data_inputs()
+create_services_xml()

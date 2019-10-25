@@ -25,7 +25,7 @@ import {
   PARAMETER_INPUTS,
   INTERFACE_ROOT
 } from "../constants/selectors";
-import { objectToString, shortenString } from "./utils";
+import { objectToString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
 import { elementOnChangePosition } from "../events/paperEvents";
@@ -121,7 +121,7 @@ export const createSelect = (
   // param name
   const nameEl = $("<span/>", {
     class: `${PARAM_NAME_CLASS} ${NAME_COL}`,
-    text: shortenString(name),
+    text: name,
     title: name
   });
 
@@ -207,7 +207,7 @@ export const createInput = (
   // param name
   const nameEl = $("<span/>", {
     class: `${PARAM_NAME_CLASS} ${NAME_COL}`,
-    text: shortenString(name),
+    text: name,
     title: name
   });
 

@@ -13,7 +13,7 @@ import {
 import { app } from "./../app";
 import { layoutSettingsApp } from "../layoutSettings";
 
-const maxWidth = 400;
+const minWidth = 350;
 const titleFontSize = 18;
 const paramHeight = 43;
 const defaultHeight = 100;
@@ -110,7 +110,7 @@ export const computeTitleLength = (el, fromSVG = false) => {
   } else {
     titleLength = el.label.length;
   }
-  const titleWidth = maxWidth - 100; // 80 is the icon's + tooltip's width
+  const titleWidth = minWidth - 100; // 80 is the icon's + tooltip's width
   const titleWidth2 = titleWidth * 1.5;
   let titleHeight = titleHeightOneLine;
   let value = titleLength * titleFontSize;
@@ -147,7 +147,7 @@ export const computeBoxWidth = (el, showParameters, fromSVG = false) => {
 
   const nameLength = computeTitleLength(el, fromSVG).value;
 
-  return Math.min(Math.max(nameLength, inputDefaultWidth) + 100, maxWidth); // 200 = button and stuff width
+  return Math.max(Math.max(nameLength, inputDefaultWidth) + 100, minWidth); // 200 = button and stuff width
 };
 
 export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
@@ -182,9 +182,29 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
   );
 };
 
+/* break line every 3 times
+let i= 0 
+let found = 0;
+originalStr = 'wefw,ergerg,ergeth,'
+str= originalStr
+while(found != -1) {
+found = str.search(/,/)
+str = str.substr(found+1, str.length)
+console.log(found)
+if(i==3) {
+  originalStr.replace(str, )
+}
+i++;
+  if(i==8) {
+    break;
+  }
+}
+*/
+
 export const buildPortAttrs = (name, type, typeAllowed) => {
   const showPortDetails = layoutSettingsApp.isShowPortsDetailsChecked();
   const showPorts = layoutSettingsApp.isShowPortsChecked();
+  const typeAllowedShort = shortenString(typeAllowed.join(", "), 25);
   return {
     [PORT_SELECTOR]: {
       fill: MimeTypes[type].color,
@@ -194,9 +214,12 @@ export const buildPortAttrs = (name, type, typeAllowed) => {
     circle: {
       display: showPorts ? "block" : "none"
     },
-    text: {
-      text: `${name}\n${typeAllowed}`,
+    mainText: {
+      text: `${name}\n${typeAllowedShort}`,
       display: showPortDetails ? "block" : "none"
+    },
+    "type-hover": {
+      text: `${typeAllowed.join("\n")}`
     }
   };
 };

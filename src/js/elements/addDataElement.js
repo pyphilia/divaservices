@@ -1,14 +1,18 @@
 import * as joint from "jointjs";
 import { app } from "../app";
 import { getDataInputByName } from "../constants/globals";
-import { THEME, CATEGORY_DATATEST, MimeTypes } from "../constants/constants";
+import {
+  THEME,
+  CATEGORY_DATATEST,
+  MimeTypes,
+  PORT_MARKUP
+} from "../constants/constants";
 import {
   generateUniqueId,
   buildPortAttrs,
   findEmptyPosition
 } from "../layout/utils";
 import {
-  PORT_SELECTOR,
   OUT_PORT_CLASS,
   DATA_BOX_FOREIGNOBJECT_CLASS,
   INTERFACE_ROOT,
@@ -49,7 +53,7 @@ const buildBasicDataRect = ({
       rect: { ...THEME.rect, ...size }
     },
     ports,
-    portMarkup: [{ tagName: "circle", selector: PORT_SELECTOR }]
+    portMarkup: PORT_MARKUP
   });
   return new rect();
 };
