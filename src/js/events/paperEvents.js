@@ -185,9 +185,8 @@ export const elementOnChangePosition = (
   { multitranslate }
 ) => {
   changePosition = true;
-  $(`.select ${Inputs.SELECT.tag}`)
-    .select2("close")
-    .blur();
+  const allSelect = $(`${INTERFACE_ROOT} .select ${Inputs.SELECT.tag}`);
+  allSelect.select2("close");
   app.$removeResizer();
 
   const { selectedElements } = app;

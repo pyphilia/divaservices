@@ -1,9 +1,12 @@
 import { copy } from "./controls";
 import { app } from "../app";
 import UndoRedoHistory from "../store/plugins/UndoRedoHistory";
+import { readWorkflow } from "../workflows/readWorkflow";
+import { saveWorkflow } from "../workflows/saveWorkflow";
 
 export let ctrlDown;
 export let spaceDown;
+export let shiftDown;
 
 /**
  * Initialize keyboard events
@@ -16,6 +19,7 @@ export const initKeyboardEvents = () => {
       const evt = event || window.event; // IE support
       const keyName = evt.key;
       ctrlDown = evt.ctrlKey || evt.metaKey; // Mac support
+      shiftDown = event.shiftKey;
 
       if (ctrlDown) {
         switch (keyName) {
@@ -35,6 +39,16 @@ export const initKeyboardEvents = () => {
           }
           case "y": {
             UndoRedoHistory.redo();
+            break;
+          }
+          case "o": {
+            readWorkflow();
+            event.preventDefault();
+            break;
+          }
+          case "s": {
+            saveWorkflow(app.graph.toJSON());
+            event.preventDefault();
             break;
           }
           default:

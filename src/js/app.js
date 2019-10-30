@@ -139,6 +139,7 @@ export let app;
         "clearElements",
         "selectAllElements",
         "addElementToSelection",
+        "addUniqueElementToSelection",
         "copySelectedElements",
         "duplicateElements",
         "deleteElements",

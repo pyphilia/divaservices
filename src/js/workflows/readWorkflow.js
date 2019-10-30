@@ -6,12 +6,15 @@ import xml2js from "xml2js";
 import path from "path";
 import { HOST } from "../../config";
 import { getWebserviceById } from "../constants/globals";
-import { buildElementFromName } from "../elements/addElement";
-import { Inputs } from "../constants/constants";
+import {
+  buildElementFromName,
+  buildDefaultParameters
+} from "../elements/addElement";
 import { app } from "../app";
+import { isParamInput } from "../layout/utils";
 
 export const readWorkflow = async () => {
-  const filepath = path.join(HOST, "files/tmp.xml");
+  const filepath = path.join(HOST, "files/example.xml");
 
   let xml = await fetch(filepath).then(response => response.text());
   const elements = [];
@@ -30,13 +33,11 @@ export const readWorkflow = async () => {
       if (webserviceObj.length) {
         alert("step ", name, " not found");
       }
-
       //@TODO check defaultParams match with definition
       const { Parameter, Data } = inputs;
-      const defaultParams = {
-        [Inputs.SELECT.type]: {},
-        [Inputs.NUMBER.type]: {}
-      };
+      const defaultParams = buildDefaultParameters(
+        webserviceObj.inputs.filter(inp => isParamInput(inp))
+      );
 
       if (Parameter) {
         for (const param of Parameter) {
@@ -48,7 +49,7 @@ export const readWorkflow = async () => {
           const type = webserviceObj.inputs.find(input => input.name == name)
             .type;
 
-          defaultParams[type][name] = value;
+          defaultParams[type][name].value = value;
         }
       }
 

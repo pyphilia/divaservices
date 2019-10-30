@@ -111,14 +111,14 @@ const createBox = (
   return element;
 };
 
-const buildDefaultParameters = params => {
+export const buildDefaultParameters = params => {
   const defaultParams = { select: {}, number: {} };
   for (const p of params) {
     let { type, name, defaultValue, values } = p;
     if (type == Inputs.SELECT.type) {
       defaultValue = values[defaultValue];
     }
-    defaultParams[type][name] = { value: defaultValue, defaultValue };
+    defaultParams[type][name] = { value: defaultValue, defaultValue, values };
   }
   return defaultParams;
 };

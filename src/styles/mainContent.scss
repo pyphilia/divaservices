@@ -1,3 +1,5 @@
+$bootstrap-input-height: calc(1.5em + 0.75rem + 2px);
+
 #content-wrapper.row > div {
   border: 1px solid black;
 }
@@ -57,8 +59,17 @@ input[type="file"]:hover {
     justify-content: center;
   }
 
-  select {
-    height: 100%;
+  .selection .select2-selection {
+    height: $bootstrap-input-height;
+
+    //.select2-container--default .select2-selection--single .select2-selection__rendered
+    .select2-selection__rendered {
+      line-height: $bootstrap-input-height;
+    }
+
+    .select2-selection__arrow {
+      height: $bootstrap-input-height;
+    }
   }
 
   .title-box {
@@ -128,7 +139,7 @@ input[type="file"]:hover {
 
 .joint-port-label {
   fill: black;
-  text[joint-selector="mainText"] tspan:first-of-type {
+  tspan:first-of-type {
     font-weight: bold;
   }
 }
@@ -243,4 +254,29 @@ input[type="file"]:hover {
   height: 20px;
   width: 20px;
   background: red;
+}
+
+#log {
+  position: absolute;
+  top: 120px;
+  right: 0;
+  z-index: 30;
+  background: rgb(48, 48, 48);
+  color: red;
+  font-size: 0.9em;
+  max-width: 300px;
+
+  div {
+    border-bottom: 1px solid grey;
+    margin: 5px 10px;
+
+    span {
+      cursor: pointer;
+      text-decoration: underline;
+
+      &:hover {
+        color: white;
+      }
+    }
+  }
 }

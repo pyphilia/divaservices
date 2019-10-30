@@ -13,7 +13,7 @@ import {
 import { app } from "./../app";
 import { layoutSettingsApp } from "../layoutSettings";
 
-const minWidth = 350;
+const minWidth = 400;
 const titleFontSize = 18;
 const paramHeight = 43;
 const defaultHeight = 100;
@@ -128,26 +128,9 @@ export const computeTitleLength = (el, fromSVG = false) => {
 };
 
 export const computeBoxWidth = (el, showParameters, fromSVG = false) => {
-  const { attributes, params } = el;
-  let getNameLengths;
-  if (fromSVG) {
-    getNameLengths = Object.keys(attributes.originalParams).map(
-      name => name.length
-    );
-  } else {
-    getNameLengths = params
-      ? params
-          .filter(x => isParamInput(x))
-          .map(param => (param.name ? param.name.length : 0))
-      : [0];
-  }
-  const paramNameLength = showParameters ? getNameLengths : [0];
-
-  const inputDefaultWidth = Math.max(...paramNameLength) * 20;
-
   const nameLength = computeTitleLength(el, fromSVG).value;
 
-  return Math.max(Math.max(nameLength, inputDefaultWidth) + 100, minWidth); // 200 = button and stuff width
+  return Math.max(Math.max(nameLength) + 100, minWidth); // 200 = button and stuff width
 };
 
 export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
@@ -217,9 +200,6 @@ export const buildPortAttrs = (name, type, typeAllowed) => {
     mainText: {
       text: `${name}\n${typeAllowedShort}`,
       display: showPortDetails ? "block" : "none"
-    },
-    "type-hover": {
-      text: `${typeAllowed.join("\n")}`
     }
   };
 };
@@ -292,4 +272,25 @@ export const findEmptyPosition = (size, startingPoint) => {
   }
 
   return position;
+};
+
+export const centerBoxInPaperByBoxId = boxId => {
+  const { paper } = app;
+
+  const el = getElementByBoxId(boxId);
+  const bbox = el.getBBox();
+  const { left, top, width, height } = paper.svg.getBoundingClientRect();
+  const canvasDimensions = paper.clientToLocalRect({
+    x: left,
+    y: top,
+    width,
+    height
+  });
+  app.translate(
+    -bbox.x + canvasDimensions.width / 2 - bbox.width / 2,
+    -bbox.y + canvasDimensions.height / 2 - bbox.height / 2
+  );
+
+  // highlight element
+  app.addUniqueElementToSelection(el.findView(paper));
 };

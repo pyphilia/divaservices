@@ -29,6 +29,7 @@ import { objectToString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
 import { elementOnChangePosition } from "../events/paperEvents";
+import { checkValue } from "../utils/utils";
 
 export const setSelectValueInElement = (boxId, parameters) => {
   for (const [key, { value }] of Object.entries(parameters)) {
@@ -98,7 +99,7 @@ export const createSelect = (
   });
 
   // select
-  const wrapperSelect = $("<div/>", { class: `${PARAM_COL} p-0` });
+  const wrapperSelect = $("<div/>", { class: `${PARAM_COL} p-0 mr-1` });
   const dataDefault = values[defaultOption]
     ? values[defaultOption].toString()
     : "";
@@ -227,7 +228,7 @@ export const createInput = (
     ? max
     : 0;
   const inputEl = $(`<${Inputs.NUMBER.tag} />`, {
-    class: `${PARAM_COL} form-control`,
+    class: `${PARAM_COL} form-control mr-1`,
     prop: { disabled: false, required }, // userdefined?
     attr: {
       type: "text",
@@ -280,40 +281,15 @@ export const createInput = (
   return newInput;
 };
 
-const checkStep = (step, currentVal) => {
-  let checkStep = true;
-  if (step) {
-    const valueFloat = parseFloat(currentVal / step);
-
-    // case step = 1
-    if (step == 1) {
-      return valueFloat == parseInt(currentVal);
-    }
-
-    const stepNumber = step.toString().split(".");
-    let precision = 0;
-    if (stepNumber.length == 1) {
-      precision = 0;
-    } else {
-      precision = stepNumber[1].length + 1;
-    }
-    checkStep = Number.isInteger(+valueFloat.toFixed(precision));
-  }
-  return checkStep;
-};
-
 export const checkInputValue = input => {
   const currentVal = input.val();
   const { min, max, step } = input.data();
 
-  const minCondition = min ? currentVal >= min : true;
-  const maxCondition = max ? currentVal <= max : true;
-
-  // because of js inconsistency with float computations
-  // we transform it to a string, round it to the the least precision
-  // and check if it is a integer, so whether it matches the step
-  const stepCondition = checkStep(step, currentVal);
-  const isValid = minCondition && maxCondition && stepCondition;
+  const isValid = checkValue(currentVal, Inputs.NUMBER.type, {
+    min,
+    max,
+    step
+  });
 
   input.toggleClass("is-invalid", !isValid);
 };

@@ -12,7 +12,8 @@ const savedOperations = [
   "Interface/ADD_LINK",
   "Interface/DELETE_LINK",
   "Interface/RESIZE_ELEMENT",
-  "Interface/MOVE_ELEMENTS"
+  "Interface/MOVE_ELEMENTS",
+  "Interface/OPEN_WORKFLOW"
 ];
 
 const undoRedoPlugin = store => {

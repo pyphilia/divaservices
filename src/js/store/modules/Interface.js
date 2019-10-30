@@ -31,7 +31,8 @@ import {
   CLEAR_ELEMENTS,
   RESIZE_ELEMENT,
   OPEN_WORKFLOW,
-  UPDATE_DATA_IN_DATA_ELEMENT
+  UPDATE_DATA_IN_DATA_ELEMENT,
+  ADD_UNIQUE_ELEMENT_TO_SELECTION
 } from "../mutationsTypes";
 import { fireAlert } from "../../utils/alerts";
 import { MESSAGE_PASTE_SUCCESS } from "../../constants/messages";
@@ -61,6 +62,11 @@ const Interface = {
       }
     },
     [ADD_ELEMENT_TO_SELECTION](state, { model }) {
+      const { boxId } = model.attributes;
+      selectElementByBoxId(state.elements, boxId);
+    },
+    [ADD_UNIQUE_ELEMENT_TO_SELECTION](state, { model }) {
+      state.elements.map(el => (el.selected = false));
       const { boxId } = model.attributes;
       selectElementByBoxId(state.elements, boxId);
     },
@@ -104,6 +110,7 @@ const Interface = {
       element.size = size;
     },
     [OPEN_WORKFLOW](state, { elements, links }) {
+      console.log("TCL: elements", elements);
       for (const el of elements) {
         addElementToElements(state.elements, el);
       }
@@ -153,6 +160,9 @@ const Interface = {
     },
     addElementToSelection({ commit }, payload) {
       commit(ADD_ELEMENT_TO_SELECTION, payload);
+    },
+    addUniqueElementToSelection({ commit }, payload) {
+      commit(ADD_UNIQUE_ELEMENT_TO_SELECTION, payload);
     },
     unSelectAllElements({ commit }) {
       commit(UNSELECT_ALL_ELEMENTS);

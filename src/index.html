@@ -8,7 +8,6 @@
 </head>
 <body>
     
-    
     <!-- area selection highlight element  -->
     <div id="areaSelectionHighlight"></div>
     
@@ -20,6 +19,8 @@
     
     
     <div id="app" class="container-fluid no-gutters h-100">
+        
+        <log ref="log"></log>
         
         <div id="header" class="row">
             <h1 class="col-3">Name</h1> 
@@ -33,7 +34,7 @@
                 :selected-elements="selectedElements"
                 >
             </file-menu>
-
+            
         </div>
         
         <img class="col-2" id="logo" src="http://wuersch.pillo-srv.ch/images/logo.png" alt="divaspotlight logo">
@@ -41,32 +42,33 @@
     <div id="content-wrapper" class="row">
         <left-sidebar ref="leftsidebar"></left-sidebar>
         <div id="main" class="col p-0 h-100">
-
-                <context-menus
-                ref="contextmenu"
-                :paper="paper"
-                :current-elements="currentElements"
-                :copied-elements="copiedElements"
-                :selected-elements="selectedElements"></context-menus>
+            
+            <context-menus
+            ref="contextmenu"
+            :paper="paper"
+            :current-elements="currentElements"
+            :copied-elements="copiedElements"
+            :selected-elements="selectedElements">
+            </context-menus>
         
-                
-            
-            <!-- minimap -->
-            <minimap :scale="scale" :moved-elements="movedElements" :translation="translation" :paper="paper" :graph="graph"></minimap>
-            
-            <!-- trash    -->
-            <!-- <div id="trash"><i class="fas fa-trash"></i></div> -->
-            
-            <!-- content -->
-            <div id="paper-html-elements" class="h-100"></div>
-            
-            <div id="message"></div>
-            
-            <toolsbar :scale="scale"  :paper="paper" :selected-elements="selectedElements"></toolsbar>
-            
-            
-        </div>
+        
+        
+        <!-- minimap -->
+        <minimap :scale="scale" :moved-elements="movedElements" :translation="translation" :paper="paper" :graph="graph"></minimap>
+        
+        <!-- trash    -->
+        <!-- <div id="trash"><i class="fas fa-trash"></i></div> -->
+        
+        <!-- content -->
+        <div id="paper-html-elements" class="h-100"></div>
+        
+        <div id="message"></div>
+        
+        <toolsbar :scale="scale"  :paper="paper" :selected-elements="selectedElements"></toolsbar>
+        
+        
     </div>
+</div>
 </div>
 <script src="main.js"></script>
 <script src="css.js"></script>
