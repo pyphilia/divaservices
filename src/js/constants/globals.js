@@ -1,8 +1,6 @@
 import xml2js from "xml2js";
-import {
-  WEBSERVICES_XML_FILEPATH,
-  INPUTS_DATA_XML_FILEPATH
-} from "../../config";
+import fetch from "node-fetch";
+import { INPUTS_DATA_XML_FILEPATH } from "../../config";
 import webservicesDecorator from "./webservicesDecorator";
 import { dataTestDecorator } from "./dataTestDecorator";
 
@@ -22,9 +20,14 @@ const createXml2jsPromise = xml => {
 };
 
 const _initWebservices = async () => {
-  const filepath = WEBSERVICES_XML_FILEPATH;
-  const xml = (await import(`!!raw-loader!../../${filepath}`)).default;
-  const data = await createXml2jsPromise(xml);
+  // const filepath = WEBSERVICES_XML_FILEPATH;
+  // const xml = (await import(`!!raw-loader!../../${filepath}`)).default;
+  const xml = await fetch(
+    "http://diufvm17.unifr.ch:8080/exist/projects/diae/services/services.xml"
+  );
+  const xmlString = await xml.text();
+
+  const data = await createXml2jsPromise(xmlString);
   webservices = webservicesDecorator(data);
 };
 

@@ -8,6 +8,20 @@ import { app } from "../app";
 import { CATEGORY_DATATEST } from "../constants/constants";
 import { checkValue } from "../utils/utils";
 
+const saveWorkflowInDB = xml => {
+  const xhr = new XMLHttpRequest();
+  xhr.open(
+    "POST",
+    "http://diufvm17.unifr.ch:8080/exist/projects/diae/services/save",
+    true
+  );
+  xhr.setRequestHeader("Content-Type", "text/xml");
+  xhr.setRequestHeader("username", "admin");
+  xhr.setRequestHeader("password", "12diae34serv");
+  xhr.setRequestHeader("filename", "65432.xml");
+  xhr.send(xml);
+};
+
 // we use the actual graph nodes to get the workflow
 // because it contains vital ids (especially ports)
 // we make a connection with our store elements
@@ -129,5 +143,5 @@ export const saveWorkflow = jsonGraph => {
   // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
   // saveAs(blob, "../../tmp/hello.xml");
 
-  console.log(xml);
+  saveWorkflowInDB(xml);
 };
