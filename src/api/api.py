@@ -220,6 +220,12 @@ def create_services_xml():
                 mimetypes = ET.SubElement(fileEl, 'MimeTypes')
                 for types in out['file']['options']['mimeTypes']['allowed']:
                   ET.SubElement(mimetypes, 'Allowed').text = types
+              if 'folder' in out:
+                output = ET.SubElement(outputs, 'Output')
+                ET.SubElement(output, 'Name').text = out['folder']['name']
+                typeEl = ET.SubElement(output, 'Type')
+                fileEl = ET.SubElement(typeEl, 'Folder')
+
 
         tree = ET.ElementTree(root)
         tree.write("services.xml")
