@@ -71,7 +71,7 @@ export function resetValue(event) {
     case Inputs.NUMBER.tag:
       $(el.parentNode.querySelector(Inputs.NUMBER.tag))
         .val(defaultValue)
-        .trigger("input");
+        .trigger("blur");
       break;
     default:
       alert("error");

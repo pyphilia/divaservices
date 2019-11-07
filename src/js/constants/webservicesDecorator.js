@@ -45,7 +45,6 @@ const getTypeName = type => {
 
 const webservicesDecorator = xml => {
   const json = [];
-
   for (const algoData of xml.Services.Service) {
     const {
       Id: [id],
@@ -105,10 +104,16 @@ const webservicesDecorator = xml => {
     if (outputsData) {
       for (const output of outputsData.Output) {
         const {
-          Description: [description],
+          Description,
           Name: [name],
           Type: [typeData]
         } = output;
+
+        let description;
+        if (Description) {
+          description = Description[0];
+        }
+
         const { type, allowed } = getTypeName(typeData);
         const out = {
           description,
