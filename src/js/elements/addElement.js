@@ -267,7 +267,6 @@ export const addLinkFromJSON = link => {
 
 export const addLinkFromLink = link => {
   const { source, target, id } = link;
-  console.log("TCL: source", source);
 
   const s = getElementByBoxId(source.boxId);
   const t = getElementByBoxId(target.boxId);

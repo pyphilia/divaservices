@@ -13,7 +13,8 @@ import {
   selectElementByBoxId,
   selectedElements,
   selectElement,
-  addLinktoLinks
+  addLinktoLinks,
+  removeLinksWithDeletedElements
 } from "./utils";
 import {
   ADD_ELEMENT,
@@ -60,6 +61,8 @@ const Interface = {
       for (const el of elements) {
         deleteElement(el);
       }
+
+      state.links = removeLinksWithDeletedElements(state.elements, state.links);
     },
     [ADD_ELEMENT_TO_SELECTION](state, { model }) {
       const { boxId } = model.attributes;

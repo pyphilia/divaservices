@@ -36,6 +36,10 @@ export const deleteElement = element => {
   element.deleted = true;
 };
 
+export const deleteLink = (links, link) => {
+  links = links.filter(thisL => thisL.id != link.id);
+};
+
 export const addLinktoLinks = (links, link, graph) => {
   const l = buildLinkForStore(graph, link);
   links.push(l);
@@ -48,6 +52,14 @@ export const selectElementByBoxId = (elements, boxId) => {
   } else {
     console.log("ERROR");
   }
+};
+
+export const removeLinksWithDeletedElements = (elements, links) => {
+  return links.filter(
+    link =>
+      !elements.find(el => el.boxId == link.source.boxId).deleted &&
+      !elements.find(el => el.boxId == link.target.boxId).deleted
+  );
 };
 
 export const selectElement = element => {
