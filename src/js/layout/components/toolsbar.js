@@ -9,6 +9,7 @@ import { app } from "../../app";
 import { TOOLSBAR } from "../../constants/selectors";
 import { shortcutToString } from "../../utils/utils";
 import { getElementByBoxId } from "../utils";
+import { saveWorkflow } from "../../workflows/saveWorkflow";
 
 const Toolsbar = Vue.component("Toolsbar", {
   props: ["selectedElements", "paper", "scale"],
@@ -115,6 +116,15 @@ const Toolsbar = Vue.component("Toolsbar", {
             },
             icon: "fas fa-expand",
             enabledCondition: this.selectedElements.length == 1
+          }
+        },
+        {
+          save: {
+            action: () => {
+              saveWorkflow(app.graph.toJSON());
+            },
+            icon: "fas fa-save",
+            enabledCondition: true
           }
         }
       ];

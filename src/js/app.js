@@ -41,6 +41,7 @@ import { initPaper } from "./layout/initPaper";
 import { initSplit } from "./layout/split";
 import { initKeyboardEvents } from "./events/keyboardEvents";
 import { initTour } from "./utils/walkthrough";
+import { readWorkflow } from "./workflows/readWorkflow";
 
 export let app;
 
@@ -55,7 +56,8 @@ export let app;
     data: {
       graph: new joint.dia.Graph(),
       paper: null,
-      translation: { tx: 0, ty: 0 }
+      translation: { tx: 0, ty: 0 },
+      workflowId: 0
     },
     components,
     computed: {
@@ -254,6 +256,21 @@ export let app;
       this.$nextTick(() => {
         initPaperEvents();
         initKeyboardEvents();
+
+        if (process.env.NODE_ENV === "production") {
+          // check id, if there is no id, go back to workflows
+          const url_string = window.location.href.split("id=")[1];
+          const id = parseInt(url_string);
+          if (!isNaN(id)) {
+            this.workflowId = id;
+            readWorkflow(id);
+          } else {
+            alert("error with id " + id);
+          }
+        } else {
+          this.workflowId = 32;
+          readWorkflow();
+        }
       });
 
       initSplit();

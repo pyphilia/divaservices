@@ -3,25 +3,29 @@
  * in the main interface area
  */
 import xml2js from "xml2js";
-import path from "path";
-import { HOST } from "../../config";
 import { getWebserviceById } from "../constants/globals";
 import {
   buildElementFromName,
   buildDefaultParameters
 } from "../elements/addElement";
 import { app } from "../app";
-import { isParamInput } from "../layout/utils";
+import { isParamInput, generateUniqueId } from "../layout/utils";
+import { openWorkflowFromId } from "../api/requests";
 
-export const readWorkflow = async () => {
-  const filepath = path.join(HOST, "files/example.xml");
+export const readWorkflow = async id => {
+  const xml = await openWorkflowFromId(id);
 
-  let xml = await fetch(filepath).then(response => response.text());
   const elements = [];
   const links = [];
 
   xml2js.parseString(xml, async (err, json) => {
-    for (const step of json.WorkflowDefinition.Steps[0].Step) {
+    if (!json.WorkflowDefinition.Steps) {
+      return;
+    }
+
+    const { Step = [] } = json.WorkflowDefinition.Steps[0];
+
+    for (const step of Step) {
       const {
         Id: [id], // from saveWorkflow, id  is defined with the boxId
         Inputs: [inputs],
@@ -71,6 +75,7 @@ export const readWorkflow = async () => {
           };
           const target = { boxId: id, portName };
           links.push({
+            id: generateUniqueId(),
             source,
             target
           });

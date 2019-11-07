@@ -110,11 +110,11 @@ const Interface = {
       element.size = size;
     },
     [OPEN_WORKFLOW](state, { elements, links }) {
-      console.log("TCL: elements", elements);
       for (const el of elements) {
         addElementToElements(state.elements, el);
       }
       for (const link of links) {
+        link.id = generateUniqueId();
         state.links.push(link);
       }
     },
