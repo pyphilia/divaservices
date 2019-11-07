@@ -258,19 +258,26 @@ input[type="file"]:hover {
 
 #log {
   position: absolute;
-  top: 120px;
-  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 30;
   background: rgb(48, 48, 48);
   color: red;
   font-size: 0.9em;
-  max-width: 300px;
+  max-width: 75%;
+  max-height: 200px;
+  overflow: auto;
 
   div {
     border-bottom: 1px solid grey;
     margin: 5px 10px;
 
-    span {
+    span.name,
+    span.value {
+      color: white;
+    }
+
+    span.boxName {
       cursor: pointer;
       text-decoration: underline;
 

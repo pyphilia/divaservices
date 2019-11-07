@@ -22,7 +22,7 @@ const Log = Vue.component("Log", {
   },
   template: `
   <div id="log">
-    <div v-for="{value, paramName, paramType, name, boxId} in logMessages">Invalid value {{value}} in {{paramName}} of <span @click="goToBox(boxId)">{{name}}</span></div>
+    <div v-for="{value, paramName, paramType, name, boxId} in logMessages">Invalid value <span class="value">{{value}}</span> in <span class="name">{{paramName}}</span> of <span class="boxName" @click="goToBox(boxId)">{{name}}</span></div>
   </div>
   `
 });
