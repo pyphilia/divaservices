@@ -7,5 +7,6 @@ export const {
   INPUTS_DATA_XML_FILEPATH = "api/inputData.xml",
   USERNAME = "",
   PASSWORD = "",
-  SERVICES_API = ""
+  SERVICES_API = "",
+  BASE_URL = "http://diufvm17.unifr.ch:8080/exist/projects/diae/"
 } = process.env;

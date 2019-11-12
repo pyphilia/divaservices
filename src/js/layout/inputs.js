@@ -4,6 +4,7 @@ const $ = jQuery;
 global.$ = global.jQuery = $;
 
 import "select2js";
+import { BASE_URL } from "../../config";
 import {
   TOOLTIP_BREAK_LINE,
   Inputs,
@@ -45,14 +46,16 @@ export const setSelectValueInElement = (boxId, parameters) => {
   }
 };
 
-export const setInputValueInElement = (boxId, parameters) => {
+export const setInputValueInElement = (box, parameters) => {
+  console.log("TCL: setInputValueInElement -> box", box);
+  const { boxId, type: boxName } = box;
   for (const [key, { value }] of Object.entries(parameters)) {
     // we need to precise paper root because of the minimap duplicate elements
     const el = $(
       `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Inputs.NUMBER.tag}[name="${key}"]`
     );
     el.val(value);
-    checkInputValue(el);
+    checkInputValue(el, { boxId, boxName });
   }
 };
 
@@ -241,6 +244,9 @@ export const createInput = (
     }
   });
 
+  const { boxId, type: boxName } = element.attributes;
+  const boxParams = { boxId, boxName };
+
   // update param
   inputEl.on({
     blur: function() {
@@ -248,7 +254,7 @@ export const createInput = (
       const value = input.val();
       const attr = input.attr("name");
       app.setInputValueInElement({ element, attr, value });
-      checkInputValue(input);
+      checkInputValue(input, boxParams);
     },
     click: function() {
       $(this).select();
@@ -259,7 +265,7 @@ export const createInput = (
   });
 
   // evaluate default parameters
-  checkInputValue(inputEl);
+  checkInputValue(inputEl, boxParams);
 
   // reset
   const resetButtonNumber = resetButton.clone(true).attr({
@@ -281,7 +287,7 @@ export const createInput = (
   return newInput;
 };
 
-export const checkInputValue = input => {
+export const checkInputValue = (input, { boxName, boxId }) => {
   const currentVal = input.val();
   const { min, max, step } = input.data();
 
@@ -291,13 +297,34 @@ export const checkInputValue = input => {
     step
   });
 
+  if (!isValid) {
+    app.$refs.log.addMessage({
+      value: currentVal,
+      paramName: input.attr("name"),
+      paramType: Inputs.NUMBER.type,
+      name: boxName,
+      boxId
+    });
+  } else {
+    app.$refs.log.removeMessage({
+      paramName: input.attr("name"),
+      name: boxName,
+      boxId
+    });
+  }
+
   input.toggleClass("is-invalid", !isValid);
 };
 
 // cannot merge defaultParams in element, because element needs to be "pure"
 // in order to modify it with jointjs functions
 export const setParametersInForeignObject = (element, defaultParams = {}) => {
-  const { description, type: label, originalParams } = element.attributes;
+  const {
+    description,
+    type: label,
+    originalParams,
+    serviceId
+  } = element.attributes;
 
   const selectsArr = [];
   const inputsArr = [];
@@ -395,6 +422,13 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
         "data-title": description,
         "data-toggle": "tooltip",
         "data-placement": "right"
+      })
+      .on("click", function() {
+        const win = window.open(
+          `${BASE_URL}services/service?id=${serviceId}`,
+          "_blank"
+        );
+        win.focus();
       })
       .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`));
   }

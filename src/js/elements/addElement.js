@@ -39,7 +39,7 @@ import { layoutSettingsApp } from "../layoutSettings";
 
 const createBox = (
   e,
-  { position, size, boxId, defaultParams = {}, ports: { items } }
+  { position, size, boxId, defaultParams = {}, ports: { items }, serviceId }
 ) => {
   const { graph } = app;
   const { category, label, description, params = {} } = e;
@@ -73,6 +73,7 @@ const createBox = (
       rect: { ...THEME.rect, ...size }
     },
     boxId,
+    serviceId,
     category: CATEGORY_SERVICE,
     position,
     size,
@@ -194,7 +195,7 @@ const createPortsFromInputOutput = (inputs, outputs) => {
 export const buildElementFromName = name => {
   // find webservice given name
   const webservice = getWebserviceByName(name);
-  const { outputs = [], inputs = [] } = webservice;
+  const { outputs = [], inputs = [], id } = webservice;
 
   const el = transformWebserviceForGraph(webservice);
 
@@ -214,6 +215,7 @@ export const buildElementFromName = name => {
   const position = position ? position : findEmptyPosition(size);
 
   return {
+    serviceId: id,
     category: CATEGORY_SERVICE,
     boxId,
     defaultParams,
