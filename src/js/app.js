@@ -152,7 +152,8 @@ export let app;
         "moveSelectedElements",
         "resizeElement",
         "openWorkflow",
-        "updateDataInDataElement"
+        "updateDataInDataElement",
+        "selectElements"
       ])
     },
     watch: {

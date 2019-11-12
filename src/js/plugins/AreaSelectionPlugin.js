@@ -14,11 +14,21 @@ const reCalc = (x1, x2, y1, y2) => {
   div.style.height = y4 - y3 + "px";
 };
 
+const findViewsInAreaCustom = ({ x, y, width, height }) => {
+  return app.elements.filter(el => {
+    return !(
+      x > el.position.x + el.size.width ||
+      x + width < el.position.x ||
+      y > el.position.y + el.size.height ||
+      y + height < el.position.y
+    );
+  });
+};
+
 const plugin = {
   install(Vue) {
     Vue.prototype.$areaSelection = Vue.observable({
-      active: false,
-      selectedElements: []
+      active: false
     });
     let x1 = 0;
     let y1 = 0;
@@ -46,15 +56,15 @@ const plugin = {
       const pointX = (x - paperOffsetX - paperTranslateX) / currentScale;
       const pointY = (y - paperOffsetY - paperTranslateY) / currentScale;
 
-      Vue.prototype.$areaSelection.selectedElements = paper.findViewsInArea({
+      const selectedElements = findViewsInAreaCustom({
         x: pointX,
         y: pointY,
         width: width / currentScale,
         height: height / currentScale
       });
 
-      for (const views of Vue.prototype.$areaSelection.selectedElements) {
-        app.addElementToSelection(views);
+      if (selectedElements) {
+        app.selectElements({ elements: selectedElements });
       }
 
       div.hidden = 1;

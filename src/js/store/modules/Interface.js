@@ -170,6 +170,9 @@ const Interface = {
     unSelectAllElements({ commit }) {
       commit(UNSELECT_ALL_ELEMENTS);
     },
+    selectElements({ commit }, payload) {
+      commit(ADD_ELEMENTS_TO_SELECTION, payload);
+    },
     selectAllElements({ commit, state }) {
       commit(ADD_ELEMENTS_TO_SELECTION, { elements: state.elements });
     },
