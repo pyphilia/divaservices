@@ -1,7 +1,8 @@
 import "select2js";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 import {
   TOOLTIP_BREAK_LINE,
-  Inputs,
   MimeTypes,
   BOX_MARGIN
 } from "../constants/constants";
@@ -70,28 +71,28 @@ export const generateUniqueId = () => {
 
 export const isParamInput = input => {
   if (input.type) {
-    return input.type == Inputs.SELECT.type || input.type == Inputs.NUMBER.type;
+    return input.type == Types.SELECT.type || input.type == Types.NUMBER.type;
   }
 
-  return input[Inputs.SELECT.type] || input[Inputs.NUMBER.type];
+  return input[Types.SELECT.type] || input[Types.NUMBER.type];
 };
 
 export const isPort = el => {
   if (el.type) {
-    return el.type == Inputs.FILE.type || el.type == Inputs.FOLDER.type;
+    return el.type == Types.FILE.type || el.type == Types.FOLDER.type;
   }
-  return el[Inputs.FILE.type] || el[Inputs.FOLDER.type];
+  return el[Types.FILE.type] || el[Types.FOLDER.type];
 };
 
 export const isPortUserdefined = el => {
   if (el.type) {
     return (
-      el.type == Inputs.FILE.type || el.type == Inputs.FOLDER.type
+      el.type == Types.FILE.type || el.type == Types.FOLDER.type
       // && el.userdefined
     );
   }
   return (
-    el[Inputs.FILE.type] || el[Inputs.FOLDER.type] //&& el[Object.keys(el)[0]].userdefined
+    el[Types.FILE.type] || el[Types.FOLDER.type] //&& el[Object.keys(el)[0]].userdefined
   );
 };
 
@@ -140,8 +141,8 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
   let portsItems;
   if (fromSVG) {
     nbParam =
-      Object.keys(attributes.defaultParams[Inputs.SELECT.type]).length +
-      Object.keys(attributes.defaultParams[Inputs.NUMBER.type]).length;
+      Object.keys(attributes.defaultParams[Types.SELECT.type]).length +
+      Object.keys(attributes.defaultParams[Types.NUMBER.type]).length;
     portsItems = attributes.ports.items;
   } else {
     nbParam = params.filter(x => isParamInput(x)).length;
@@ -215,9 +216,9 @@ export const createPort = (param, group) => {
     let type;
 
     // folder case
-    if (param.type == Inputs.FOLDER.type) {
-      typeAllowed = [Inputs.FOLDER.type]; // use options allowed types, otherwise it is a folder
-      type = Inputs.FOLDER.type;
+    if (param.type == Types.FOLDER.type) {
+      typeAllowed = [Types.FOLDER.type]; // use options allowed types, otherwise it is a folder
+      type = Types.FOLDER.type;
     } else {
       // @TODO display !userdefined ports ?
       typeAllowed = mimeTypes.allowed;

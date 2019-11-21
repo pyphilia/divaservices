@@ -6,7 +6,7 @@ import xml2js from "xml2js";
 import { getWebserviceByName } from "../constants/globals";
 import { app } from "../app";
 import { CATEGORY_DATATEST } from "../constants/constants";
-import { checkValue } from "../utils/utils";
+import { Validation } from "divaservices-utils";
 import { sendWorkflowSteps } from "../api/requests";
 
 // we use the actual graph nodes to get the workflow
@@ -36,7 +36,7 @@ export const saveWorkflow = jsonGraph => {
             Value
           });
         }
-        const validity = checkValue(Value, paramType, values);
+        const validity = Validation.checkValue(Value, paramType, values);
         if (!validity) {
           log.push({ value: Value, paramName, paramType, name: type, boxId });
         }

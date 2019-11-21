@@ -5,7 +5,8 @@ const $ = jQuery;
 global.$ = global.jQuery = $;
 */
 import { addElementFromTransformedJSON } from "../src/js/elements/addElement";
-import { Inputs } from "../src/js/constants/constants";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 
 import { correctAlgorithms, ocropusBinarization } from "./algorithms";
 
@@ -65,12 +66,11 @@ describe.each(correctAlgorithms)("test real algorithms layout", e => {
     e.label +
       " - element contains correct number of parameters (input, select)",
     () => {
-      const nbInput = e.params.filter(param => param.type == Inputs.NUMBER.type)
+      const nbInput = e.params.filter(param => param.type == Types.NUMBER.type)
         .length;
 
-      const nbSelect = e.params.filter(
-        param => param.type == Inputs.SELECT.type
-      ).length;
+      const nbSelect = e.params.filter(param => param.type == Types.SELECT.type)
+        .length;
 
       const el = addElementFromTransformedJSON(e);
 

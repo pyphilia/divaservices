@@ -1,6 +1,6 @@
 import xml2js from "xml2js";
 import { INPUTS_DATA_XML_FILEPATH } from "../../config";
-import webservicesDecorator from "./webservicesDecorator";
+import { Decorators } from "divaservices-utils";
 import { dataTestDecorator } from "./dataTestDecorator";
 import { getServicesAPI } from "../api/requests";
 
@@ -22,7 +22,7 @@ const createXml2jsPromise = xml => {
 const _initWebservices = async () => {
   const xml = await getServicesAPI();
   const data = await createXml2jsPromise(xml);
-  webservices = webservicesDecorator(data);
+  webservices = Decorators.webservicesDecorator(data);
 };
 
 const _initDataInputs = async () => {

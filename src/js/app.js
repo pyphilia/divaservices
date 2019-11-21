@@ -4,15 +4,13 @@ import { mapActions, mapState } from "vuex";
 import plugins from "./plugins";
 import components from "./layout/components";
 import store from "./store/store";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 import { initWebservices } from "./constants/globals";
 import { initPaperEvents } from "./events/paperEvents";
 import { getElementByBoxId, getLinkBySourceTarget } from "./layout/utils";
 import { highlightSelection, unHighlight } from "./store/modules/highlight";
-import {
-  Inputs,
-  CATEGORY_SERVICE,
-  CATEGORY_DATATEST
-} from "./constants/constants";
+import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "./constants/constants";
 import { addElementByName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
 import { resizeElements } from "./elements/resizeElement";
@@ -191,8 +189,8 @@ export let app;
             "defaultParams"
           );
           for (const { boxId, defaultParams } of difference) {
-            setSelectValueInElement(boxId, defaultParams[Inputs.SELECT.type]);
-            setInputValueInElement(boxId, defaultParams[Inputs.NUMBER.type]);
+            setSelectValueInElement(boxId, defaultParams[Types.SELECT.type]);
+            setInputValueInElement(boxId, defaultParams[Types.NUMBER.type]);
           }
         }
       },

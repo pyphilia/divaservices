@@ -7,7 +7,7 @@ import { mapState, mapActions } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { app } from "../../app";
 import { TOOLSBAR } from "../../constants/selectors";
-import { shortcutToString } from "../../utils/utils";
+import { shortcutToString, buildSearchRegex } from "../../utils/utils";
 import { getElementByBoxId } from "../utils";
 import { saveWorkflow } from "../../workflows/saveWorkflow";
 
@@ -28,6 +28,15 @@ const Toolsbar = Vue.component("Toolsbar", {
     },
     toggleLeftSidebar() {
       this.$root.$refs.leftsidebar.toggle();
+    },
+    searchForElements() {
+      const searchStr = document.getElementById("search-elements").value;
+      // @TODO: check on searchStr
+      const regex = buildSearchRegex(searchStr);
+      const candidates = app.elements.filter(({ type }) =>
+        type.toLowerCase().search(regex)
+      );
+      console.log("TCL: searchForElements -> candidates", candidates);
     },
     ...mapActions("Interface", ["duplicateElements", "deleteElements"])
   },
@@ -126,6 +135,16 @@ const Toolsbar = Vue.component("Toolsbar", {
             icon: "fas fa-save",
             enabledCondition: true
           }
+        },
+        {
+          search: {
+            action: () => {
+              console.log(app.$refs);
+              app.$refs.searchElements.openSearch();
+            },
+            icon: "fas fa-search",
+            enabledCondition: true
+          }
         }
       ];
     },
@@ -133,6 +152,7 @@ const Toolsbar = Vue.component("Toolsbar", {
       return Math.ceil(this.scale * 100);
     }
   },
+  // @TODO search done twice because of a
   template: `
   <div id="${TOOLSBAR}">
     <div v-for="group in toolsbarIcons" class="group">
@@ -157,7 +177,6 @@ const Toolsbar = Vue.component("Toolsbar", {
           
         <i v-if="icon" :class="icon"></i>
           
-        <div v-if="element" v-html="element"></div>
       </a>
     </div>
   </div>`

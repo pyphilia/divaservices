@@ -7,12 +7,13 @@
 import * as joint from "jointjs";
 import { app } from "../app";
 import { getWebserviceByName } from "../constants/globals";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 import {
   THEME,
   BOX_TITLE_HTML_TAG,
   ICON_COL,
   TITLE_COL,
-  Inputs,
   CATEGORY_SERVICE,
   PORT_MARKUP,
   PORT_LABEL_MARKUP
@@ -116,7 +117,7 @@ export const buildDefaultParameters = params => {
   const defaultParams = { select: {}, number: {} };
   for (const p of params) {
     let { type, name, defaultValue, values } = p;
-    if (type == Inputs.SELECT.type) {
+    if (type == Types.SELECT.type) {
       defaultValue = values[defaultValue];
     }
     defaultParams[type][name] = { value: defaultValue, defaultValue, values };

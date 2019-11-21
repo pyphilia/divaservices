@@ -6,7 +6,8 @@ import {
   getElementByBoxId,
   findEmptyPosition
 } from "../../layout/utils";
-import { Inputs } from "../../constants/constants";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 import {
   addElementToElements,
   deleteElement,
@@ -88,13 +89,13 @@ const Interface = {
       const el = state.elements.find(
         el => el.boxId == element.attributes.boxId
       );
-      Vue.set(el.defaultParams[Inputs.SELECT.type][attr], "value", value);
+      Vue.set(el.defaultParams[Types.SELECT.type][attr], "value", value);
     },
     [SET_INPUT_VALUE](state, { element, value, attr }) {
       const el = state.elements.find(
         el => el.boxId == element.attributes.boxId
       );
-      Vue.set(el.defaultParams[Inputs.NUMBER.type][attr], "value", value);
+      Vue.set(el.defaultParams[Types.NUMBER.type][attr], "value", value);
     },
     [ADD_LINK](state, { link, graph }) {
       addLinktoLinks(state.links, link, graph);

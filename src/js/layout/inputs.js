@@ -7,7 +7,6 @@ import "select2js";
 import { BASE_URL } from "../../config";
 import {
   TOOLTIP_BREAK_LINE,
-  Inputs,
   PARAM_COL,
   NAME_COL,
   TOOLTIP_HTML,
@@ -30,13 +29,14 @@ import { objectToString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
 import { elementOnChangePosition } from "../events/paperEvents";
-import { checkValue } from "../utils/utils";
+import { Validation, Constants } from "divaservices-utils";
+const { Types } = Constants;
 
 export const setSelectValueInElement = (boxId, parameters) => {
   for (const [key, { value }] of Object.entries(parameters)) {
     // we need to precise paper root because of the minimap duplicate elements
     const el = $(
-      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] .select[name="${key}"] ${Inputs.SELECT.tag}`
+      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] .select[name="${key}"] ${Types.SELECT.tag}`
     );
     if (el.find(":selected").val() != value) {
       $(el)
@@ -52,7 +52,7 @@ export const setInputValueInElement = (box, parameters) => {
   for (const [key, { value }] of Object.entries(parameters)) {
     // we need to precise paper root because of the minimap duplicate elements
     const el = $(
-      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Inputs.NUMBER.tag}[name="${key}"]`
+      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Types.NUMBER.tag}[name="${key}"]`
     );
     el.val(value);
     checkInputValue(el, { boxId, boxName });
@@ -63,16 +63,16 @@ export function resetValue(event) {
   const el = event.target;
   const defaultValue = el.dataset.value;
   switch (el.dataset.parent) {
-    case Inputs.SELECT.tag: {
-      const select = el.parentNode.querySelector(Inputs.SELECT.tag);
+    case Types.SELECT.tag: {
+      const select = el.parentNode.querySelector(Types.SELECT.tag);
       // use jquery because of select2
       $(select)
         .val(defaultValue)
         .trigger("change");
       break;
     }
-    case Inputs.NUMBER.tag:
-      $(el.parentNode.querySelector(Inputs.NUMBER.tag))
+    case Types.NUMBER.tag:
+      $(el.parentNode.querySelector(Types.NUMBER.tag))
         .val(defaultValue)
         .trigger("blur");
       break;
@@ -106,7 +106,7 @@ export const createSelect = (
   const dataDefault = values[defaultOption]
     ? values[defaultOption].toString()
     : "";
-  const selectEl = $(`<${Inputs.SELECT.tag}/>`, {
+  const selectEl = $(`<${Types.SELECT.tag}/>`, {
     style: "width:100%;margin:0",
     attr: {
       "data-default": dataDefault
@@ -230,7 +230,7 @@ export const createInput = (
     : max
     ? max
     : 0;
-  const inputEl = $(`<${Inputs.NUMBER.tag} />`, {
+  const inputEl = $(`<${Types.NUMBER.tag} />`, {
     class: `${PARAM_COL} form-control mr-1`,
     prop: { disabled: false, required }, // userdefined?
     attr: {
@@ -291,7 +291,7 @@ export const checkInputValue = (input, { boxName, boxId }) => {
   const currentVal = input.val();
   const { min, max, step } = input.data();
 
-  const isValid = checkValue(currentVal, Inputs.NUMBER.type, {
+  const isValid = Validation.checkValue(currentVal, Types.NUMBER.type, {
     min,
     max,
     step
@@ -301,7 +301,7 @@ export const checkInputValue = (input, { boxName, boxId }) => {
     app.$refs.log.addMessage({
       value: currentVal,
       paramName: input.attr("name"),
-      paramType: Inputs.NUMBER.type,
+      paramType: Types.NUMBER.type,
       name: boxName,
       boxId
     });
@@ -355,7 +355,7 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
     //   : null;
 
     switch (type) {
-      case Inputs.SELECT.type: {
+      case Types.SELECT.type: {
         const newSelect = createSelect(
           element,
           param,
@@ -366,7 +366,7 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
         selectsArr.push(newSelect);
         break;
       }
-      case Inputs.NUMBER.type: {
+      case Types.NUMBER.type: {
         const newInput = createInput(
           element,
           param,

@@ -1,7 +1,9 @@
 import * as $ from "jquery";
 import * as joint from "jointjs";
 import Vue from "vue";
-import { THEME, Inputs } from "../constants/constants";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
+import { THEME } from "../constants/constants";
 import {
   INTERFACE_ROOT,
   PORT_SELECTOR,
@@ -185,7 +187,7 @@ export const elementOnChangePosition = (
   { multitranslate }
 ) => {
   changePosition = true;
-  const allSelect = $(`${INTERFACE_ROOT} .select ${Inputs.SELECT.tag}`);
+  const allSelect = $(`${INTERFACE_ROOT} .select ${Types.SELECT.tag}`);
   allSelect.select2("close");
   app.$removeResizer();
 

@@ -14,6 +14,7 @@ import {
 } from "../../constants/selectors";
 import { mapActions } from "vuex";
 import { toggleSplit } from "../split";
+import { buildSearchRegex } from "../../utils/utils";
 
 const alphabeticalOrder = (a, b) => {
   const x = a.name.toLowerCase();
@@ -59,24 +60,18 @@ const LeftSidebar = Vue.component("LeftSidebar", {
 
         const searchQuery = this.search.toLowerCase();
 
-        // build regex to take into account capital letters
-        let regex = "";
-        for (const letter of searchQuery) {
-          regex += `[${letter}${letter.toUpperCase()}]`;
-        }
-        const re = new RegExp(regex);
+        let regex = buildSearchRegex(searchQuery);
 
         // apply search regex
-        const searchResult = [];
-        for (const item of this.services) {
-          const value = item.name.toLowerCase().search(re);
-          searchResult.push({ value, ...item });
-        }
-
-        // filter out non matching items, and sort results
-        return searchResult
-          .filter(({ value }) => value != -1)
-          .sort((a, b) => a.value - b.value);
+        return (
+          this.services
+            .map(s => {
+              return { value: s.name.toLowerCase().search(regex), ...s };
+            })
+            // filter out non matching items, and sort results
+            .filter(({ value }) => value != -1)
+            .sort((a, b) => a.value - b.value)
+        );
       } else {
         return this.services;
       }

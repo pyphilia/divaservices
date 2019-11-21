@@ -3,24 +3,25 @@ import {
   isPort,
   isPortUserdefined
 } from "../src/js/layout/utils";
-import { Inputs } from "../src/js/constants/constants";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 
-const fileUserdefinedTrue = { type: Inputs.FILE.type, userdefined: true };
+const fileUserdefinedTrue = { type: Types.FILE.type, userdefined: true };
 const webserviceFileUserdefinedTrue = { file: { userdefined: true } };
-const folderUserdefinedTrue = { type: Inputs.FOLDER.type, userdefined: true };
+const folderUserdefinedTrue = { type: Types.FOLDER.type, userdefined: true };
 const webserviceFolderUserdefinedTrue = { folder: { userdefined: true } };
-const selectUserdefinedTrue = { type: Inputs.SELECT.type, userdefined: true };
+const selectUserdefinedTrue = { type: Types.SELECT.type, userdefined: true };
 const webserviceSelectUserdefinedTrue = { select: { userdefined: true } };
-const numberUserdefinedTrue = { type: Inputs.NUMBER.type, userdefined: true };
+const numberUserdefinedTrue = { type: Types.NUMBER.type, userdefined: true };
 const webserviceNumberUserdefinedTrue = { number: { userdefined: true } };
 
-const fileUserdefinedFalse = { type: Inputs.FILE.type, userdefined: false };
+const fileUserdefinedFalse = { type: Types.FILE.type, userdefined: false };
 const webserviceFileUserdefinedFalse = { file: { userdefined: false } };
-const folderUserdefinedFalse = { type: Inputs.FOLDER.type, userdefined: false };
+const folderUserdefinedFalse = { type: Types.FOLDER.type, userdefined: false };
 const webserviceFolderUserdefinedFalse = { folder: { userdefined: false } };
-const selectUserdefinedFalse = { type: Inputs.SELECT.type, userdefined: false };
+const selectUserdefinedFalse = { type: Types.SELECT.type, userdefined: false };
 const webserviceSelectUserdefinedFalse = { select: { userdefined: false } };
-const numberUserdefinedFalse = { type: Inputs.NUMBER.type, userdefined: false };
+const numberUserdefinedFalse = { type: Types.NUMBER.type, userdefined: false };
 const webserviceNumberUserdefinedFalse = { number: { userdefined: false } };
 
 describe("isParamInput", () => {

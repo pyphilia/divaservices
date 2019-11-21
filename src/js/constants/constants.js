@@ -1,13 +1,5 @@
 import { PORT_SELECTOR, OUT_PORT_CLASS, IN_PORT_CLASS } from "./selectors";
 
-export const Inputs = {
-  SELECT: { tag: "select", type: "select" },
-  NUMBER: { tag: "input", type: "number" },
-  FILE: { type: "file" },
-  FOLDER: { type: "folder" }
-};
-Object.freeze(Inputs);
-
 export const BOX_HIGHLIGHTERS = [
   {
     highlighter: {

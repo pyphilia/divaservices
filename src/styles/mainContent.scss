@@ -288,3 +288,12 @@ input[type="file"]:hover {
     }
   }
 }
+#search-component {
+  background: white;
+  padding: 3px;
+  border: 1px solid grey;
+  position: absolute;
+  right: 10px;
+  top: 40px;
+  z-index: 30;
+}
