@@ -1,42 +1,26 @@
-import xml2js from "xml2js";
-import { INPUTS_DATA_XML_FILEPATH } from "../../config";
 import { Decorators } from "divaservices-utils";
-import { dataTestDecorator } from "./dataTestDecorator";
 import { getServicesAPI } from "../api/requests";
 
 export let webservices;
 export let dataInputs;
 
-const createXml2jsPromise = xml => {
-  return new Promise((resolve, reject) => {
-    xml2js.parseString(xml, async (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-};
-
 const _initWebservices = async () => {
   const xml = await getServicesAPI();
-  const data = await createXml2jsPromise(xml);
-  webservices = Decorators.webservicesDecorator(data);
+  webservices = await Decorators.webservicesDecorator(xml);
 };
 
-const _initDataInputs = async () => {
-  const inputDataFilePath = INPUTS_DATA_XML_FILEPATH;
-  const inputDataXml = (await import(`!!raw-loader!../../${inputDataFilePath}`))
-    .default;
-  const dataTest = await createXml2jsPromise(inputDataXml);
-  dataInputs = dataTestDecorator(dataTest);
-};
+// const _initDataInputs = async () => {
+//   const inputDataFilePath = INPUTS_DATA_XML_FILEPATH;
+//   const inputDataXml = (await import(`!!raw-loader!../../${inputDataFilePath}`))
+//     .default;
+//   const dataTest = await createXml2jsPromise(inputDataXml);
+//   dataInputs = dataTestDecorator(dataTest);
+// };
 
 // init webservices from xml file
 export const initWebservices = async () => {
   await _initWebservices();
-  await _initDataInputs();
+  // await _initDataInputs();
 };
 
 export const getWebserviceByName = name => {
