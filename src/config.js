@@ -8,5 +8,6 @@ export const {
   USERNAME = "",
   PASSWORD = "",
   SERVICES_API = "",
+  COLLECTIONS_API = "http://134.21.72.190:8080/collections",
   BASE_URL = "http://diufvm17.unifr.ch:8080/exist/projects/diae/"
 } = process.env;

@@ -82,6 +82,10 @@ export const MimeTypes = {
   number: {
     type: "number",
     color: "red"
+  },
+  data: {
+    type: "data",
+    color: "grey"
   }
 };
 Object.freeze(MimeTypes);

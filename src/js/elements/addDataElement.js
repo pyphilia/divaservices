@@ -5,7 +5,8 @@ import {
   THEME,
   CATEGORY_DATATEST,
   MimeTypes,
-  PORT_MARKUP
+  PORT_MARKUP,
+  PORT_LABEL_MARKUP
 } from "../constants/constants";
 import {
   generateUniqueId,
@@ -53,7 +54,8 @@ const buildBasicDataRect = ({
       rect: { ...THEME.rect, ...size }
     },
     ports,
-    portMarkup: PORT_MARKUP
+    portMarkup: PORT_MARKUP,
+    portLabelMarkup: PORT_LABEL_MARKUP
   });
   return new rect();
 };
@@ -83,11 +85,11 @@ const createFolderInput = boxId => {
   return input;
 };
 
-const createFileInput = ({ mimeType, boxId }) => {
+const createFileInput = ({ boxId }) => {
   const input = document.createElement("input");
   input.setAttribute("type", "file");
   input.classList.add("btn");
-  input.setAttribute("accept", mimeType);
+  // input.setAttribute("accept", mimeType);
   input.addEventListener("change", function() {
     const data = [...this.files];
     app.updateDataInDataElement({ boxId, data });
@@ -95,19 +97,30 @@ const createFileInput = ({ mimeType, boxId }) => {
   return input;
 };
 
-const createImgPreview = input => {
+const createFileInputNew = ({ boxId }) => {
+  const btn = document.createElement("button");
+  btn.innerText = "Choose a file";
+  btn.addEventListener("click", function() {
+    app.$refs.collections.openCollectionModel(boxId);
+  });
+  btn.classList.add("btn");
+  btn.classList.add("btn-primary");
+  return btn;
+};
+
+const createImgPreview = () => {
   const preview = document.createElement("div");
   preview.classList.add("preview");
 
-  input.addEventListener("change", function() {
-    var reader = new FileReader();
-    const data = this.files[0]; // suppose only one file
-    reader.onload = function(e) {
-      preview.innerHTML = `<img src="${e.target.result}"/> <span>${data.name}</span>`;
-    };
-    reader.readAsDataURL(data);
-  });
   return preview;
+};
+
+export const updateImgPreview = (boxId, data) => {
+  const { url, identifier } = data[0]; // suppose one file
+  const preview = document.querySelector(
+    `${INTERFACE_ROOT} foreignObject[boxId='${boxId}'] .preview`
+  );
+  preview.innerHTML = `<img src="${url}"/> <span>${identifier}</span>`;
 };
 
 const createContentBox = () => {
@@ -118,6 +131,16 @@ const createContentBox = () => {
     : "none";
   return content;
 };
+
+// const oldImageContent = () => {
+//   const input = createFileInput({ mimeType, boxId });
+//   content.appendChild(input);
+
+//   // @TODO only if size okay
+//   // image preview
+//   const preview = createImgPreview(input, boxId);
+//   content.appendChild(preview);
+// };
 
 const addContent = ({ mimeType, outputType, boxId }) => {
   let content = createContentBox();
@@ -133,13 +156,16 @@ const addContent = ({ mimeType, outputType, boxId }) => {
       break;
     }
     case MimeTypes.image.type: {
-      const input = createFileInput({ mimeType, boxId });
+      // oldImageContent()
+
+      const input = createFileInputNew({ mimeType, boxId });
       content.appendChild(input);
 
       // @TODO only if size okay
       // image preview
       const preview = createImgPreview(input, boxId);
       content.appendChild(preview);
+
       break;
     }
     default: {
@@ -162,6 +188,19 @@ export const addDataBox = data => {
 
 export const buildDataElement = elName => {
   const { name, mimeType, outputType } = getDataInputByName(elName);
+  // let name = elName;
+  // let mimeType = [];
+  // let outputType;
+  // switch(elName) {
+  //   case 'file': {
+  //     outputType = MimeTypes.image.type;
+  //     break;
+  //   }
+  //   case 'number':
+  //       {outputType = MimeTypes.number.type;
+  //       break;}
+  //   default:
+  // }
 
   const size = {
     width: 300,
@@ -175,7 +214,7 @@ export const buildDataElement = elName => {
       {
         group: OUT_PORT_CLASS,
         name,
-        attrs: buildPortAttrs(name, outputType, mimeType)
+        attrs: buildPortAttrs(name, outputType, [mimeType])
       }
     ]
   };

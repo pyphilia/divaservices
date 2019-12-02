@@ -1,5 +1,7 @@
 import { Decorators } from "divaservices-utils";
 import { getServicesAPI } from "../api/requests";
+import { INPUTS_DATA_XML_FILEPATH } from "../../config";
+import { dataTestDecorator } from "./dataTestDecorator";
 
 export let webservices;
 export let dataInputs;
@@ -9,18 +11,17 @@ const _initWebservices = async () => {
   webservices = await Decorators.webservicesDecorator(xml);
 };
 
-// const _initDataInputs = async () => {
-//   const inputDataFilePath = INPUTS_DATA_XML_FILEPATH;
-//   const inputDataXml = (await import(`!!raw-loader!../../${inputDataFilePath}`))
-//     .default;
-//   const dataTest = await createXml2jsPromise(inputDataXml);
-//   dataInputs = dataTestDecorator(dataTest);
-// };
+const _initDataInputs = async () => {
+  const inputDataFilePath = INPUTS_DATA_XML_FILEPATH;
+  const inputDataXml = (await import(`!!raw-loader!../../${inputDataFilePath}`))
+    .default;
+  dataInputs = await dataTestDecorator(inputDataXml);
+};
 
 // init webservices from xml file
 export const initWebservices = async () => {
   await _initWebservices();
-  // await _initDataInputs();
+  await _initDataInputs();
 };
 
 export const getWebserviceByName = name => {

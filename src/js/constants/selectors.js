@@ -60,3 +60,6 @@ export const MINIMAP_NAVIGATOR_SELECTOR = "minimap-navigator";
 export const MINIMAP_PAPER_ID = "minimap-paper";
 
 export const TOOLSBAR = "toolsbar";
+
+export const IS_VALID = "is-valid";
+export const IS_INVALID = "is-invalid";

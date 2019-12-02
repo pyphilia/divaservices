@@ -1,10 +1,12 @@
 import fetch from "node-fetch";
 import { app } from "../app";
+import { Decorators } from "divaservices-utils";
 import {
   USERNAME,
   PASSWORD,
   SERVICES_API,
-  WEBSERVICES_XML_FILEPATH
+  WEBSERVICES_XML_FILEPATH,
+  COLLECTIONS_API
 } from "../../config";
 
 export const getServicesAPI = async () => {
@@ -64,4 +66,360 @@ export const openWorkflowFromId = async id => {
     xml = (await import(`!!raw-loader!../../${filepath}`)).default;
   }
   return xml;
+};
+
+export const getCollectionsAPI = async () => {
+  let xml;
+  if (process.env.NODE_ENV === "production") {
+    const xmlApi = await fetch(COLLECTIONS_API);
+    xml = await xmlApi.text();
+  } else {
+    // const filepath = "collections.xml";
+    // xml = (await import(`raw-loader!./${filepath}`)).default;
+    xml = `<Collections>
+    <Collection>
+    <Id>134</Id>
+    <Url>http://134.21.72.190:8080/collections/qwertz</Url>
+    <Author/>
+    <Name>qwertz</Name>
+    <Files>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299913_0.jpg</Url>
+            <Identifier>qwertz/2299913_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299918_0.jpg</Url>
+            <Identifier>qwertz/2299918_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299907_0.jpg</Url>
+            <Identifier>qwertz/2299907_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2986434_0.jpg</Url>
+            <Identifier>qwertz/2986434_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    </Files>
+</Collection>
+<Collection>
+    <Id>134</Id>
+    <Url>http://134.21.72.190:8080/collections/qwertz</Url>
+    <Author/>
+    <Name>qwertz</Name>
+    <Files>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299913_0.jpg</Url>
+            <Identifier>qwertz/2299913_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299918_0.jpg</Url>
+            <Identifier>qwertz/2299918_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299907_0.jpg</Url>
+            <Identifier>qwertz/2299907_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2986434_0.jpg</Url>
+            <Identifier>qwertz/2986434_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    </Files>
+</Collection>
+<Collection>
+    <Id>134</Id>
+    <Url>http://134.21.72.190:8080/collections/qwertz</Url>
+    <Author/>
+    <Name>qwertz</Name>
+    <Files>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299913_0.jpg</Url>
+            <Identifier>qwertz/2299913_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299918_0.jpg</Url>
+            <Identifier>qwertz/2299918_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299907_0.jpg</Url>
+            <Identifier>qwertz/2299907_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2986434_0.jpg</Url>
+            <Identifier>qwertz/2986434_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    </Files>
+</Collection>
+<Collection>
+    <Id>134</Id>
+    <Url>http://134.21.72.190:8080/collections/qwertz</Url>
+    <Author/>
+    <Name>qwertz</Name>
+    <Files>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299913_0.jpg</Url>
+            <Identifier>qwertz/2299913_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299918_0.jpg</Url>
+            <Identifier>qwertz/2299918_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299907_0.jpg</Url>
+            <Identifier>qwertz/2299907_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2986434_0.jpg</Url>
+            <Identifier>qwertz/2986434_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    </Files>
+</Collection>
+<Collection>
+    <Id>134</Id>
+    <Url>http://134.21.72.190:8080/collections/qwertz</Url>
+    <Author/>
+    <Name>qwertz</Name>
+    <Files>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299913_0.jpg</Url>
+            <Identifier>qwertz/2299913_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299918_0.jpg</Url>
+            <Identifier>qwertz/2299918_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299907_0.jpg</Url>
+            <Identifier>qwertz/2299907_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2986434_0.jpg</Url>
+            <Identifier>qwertz/2986434_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    </Files>
+</Collection>
+<Collection>
+    <Id>134</Id>
+    <Url>http://134.21.72.190:8080/collections/qwertz</Url>
+    <Author/>
+    <Name>qwertz</Name>
+    <Files>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299942_0.jpg</Url>
+            <Identifier>qwertz/2299942_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299913_0.jpg</Url>
+            <Identifier>qwertz/2299913_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299918_0.jpg</Url>
+            <Identifier>qwertz/2299918_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+        <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2299907_0.jpg</Url>
+            <Identifier>qwertz/2299907_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    <File>
+            <Url>http://134.21.72.190:8080/files/qwertz/original/2986434_0.jpg</Url>
+            <Identifier>qwertz/2986434_0.jpg</Identifier>
+            <Options>
+            <Mime-type>image/jpeg</Mime-type>
+            </Options>
+        </File>
+    </Files>
+</Collection></Collections>`;
+  }
+
+  return await Decorators.collectionsDecorator(xml);
 };

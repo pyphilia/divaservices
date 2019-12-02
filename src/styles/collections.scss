@@ -1,0 +1,14 @@
+#collections-wrapper {
+  max-height: 500px;
+  overflow: auto;
+}
+
+.input-files {
+  height: 100px;
+  width: 100%;
+  border: dashed 1px black;
+
+  .file img {
+    max-width: 100px;
+  }
+}

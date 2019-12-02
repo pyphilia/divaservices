@@ -2,6 +2,7 @@
  * Initialize toolsbar
  */
 import Vue from "vue";
+import * as $ from "jquery";
 import { MAX_SCALE, MIN_SCALE, Shortcuts } from "../../constants/constants";
 import { mapState, mapActions } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
@@ -10,6 +11,8 @@ import { TOOLSBAR } from "../../constants/selectors";
 import { shortcutToString, buildSearchRegex } from "../../utils/utils";
 import { getElementByBoxId } from "../utils";
 import { saveWorkflow } from "../../workflows/saveWorkflow";
+import { fireAlert } from "../../utils/alerts";
+import { MESSAGE_SAVE_SUCCESS } from "../../constants/messages";
 
 const Toolsbar = Vue.component("Toolsbar", {
   props: ["selectedElements", "paper", "scale"],
@@ -130,9 +133,20 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           save: {
             action: () => {
+              // @TODO receive response and fire correct alert
               saveWorkflow(app.graph.toJSON());
+              fireAlert("success", MESSAGE_SAVE_SUCCESS);
             },
             icon: "fas fa-save",
+            enabledCondition: true
+          }
+        },
+        {
+          settings: {
+            action: () => {
+              $("#exampleModal").modal("show");
+            },
+            icon: "fas fa-cog",
             enabledCondition: true
           }
         },
@@ -143,6 +157,15 @@ const Toolsbar = Vue.component("Toolsbar", {
               app.$refs.searchElements.openSearch();
             },
             icon: "fas fa-search",
+            enabledCondition: true
+          }
+        },
+        {
+          collections: {
+            action: () => {
+              $("#collections").modal("show");
+            },
+            icon: "fas fa-cog",
             enabledCondition: true
           }
         }

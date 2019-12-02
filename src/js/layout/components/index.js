@@ -5,6 +5,8 @@ import ContextMenus from "./ContextMenu";
 import Minimap from "./Minimap";
 import Log from "./Log";
 import Search from "./Search";
+import Collections from "./Collections";
+import FilesCollection from "./FilesCollection";
 
 const components = {
   LeftSidebar,
@@ -13,7 +15,9 @@ const components = {
   FileMenu,
   ContextMenus,
   Log,
-  Search
+  Search,
+  Collections,
+  FilesCollection
 };
 
 export default components;

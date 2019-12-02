@@ -4,7 +4,7 @@
 import Vue from "vue";
 import { groupBy } from "lodash"; // we use lodash since it is a dependency of jointjs
 import { categoryName, DATATEST_TYPE } from "../../constants/constants";
-import { webservices } from "../../constants/globals";
+import { webservices, dataInputs } from "../../constants/globals";
 import {
   ALGO_ITEM_CLASS,
   ALGO_ITEM_WRAPPER,
@@ -28,10 +28,12 @@ const LeftSidebar = Vue.component("LeftSidebar", {
       open: true,
       search: null,
       services: (() => {
-        const mapped = webservices.map(service => {
-          const { type, name } = service;
-          return { type, name };
-        });
+        const mapped = webservices
+          .map(service => {
+            const { type, name } = service;
+            return { type, name };
+          })
+          .concat(dataInputs);
 
         const servicesPerCategory = groupBy(mapped, "type");
         const sorted = [];
@@ -47,6 +49,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
           .map(algo => algo.type)
           .filter((v, i, a) => a.indexOf(v) === i) // get unique value
           .sort();
+        categories.push(DATATEST_TYPE);
 
         return categories;
       })()

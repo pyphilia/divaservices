@@ -17,48 +17,50 @@ export const saveWorkflow = jsonGraph => {
   const log = [];
   const Steps = { Step: [] };
   // NODE
-  app.currentElements.forEach((box, i) => {
-    const { type, boxId } = box;
-    const Name = type.replace(/\s/g, "");
-    const No = i;
-    const Inputs = { Parameter: [], Data: [] };
+  app.currentElements
+    .filter(({ category }) => category != CATEGORY_DATATEST)
+    .forEach((box, i) => {
+      const { type, boxId } = box;
+      const Name = type.replace(/\s/g, "");
+      const No = i;
+      const Inputs = { Parameter: [], Data: [] };
 
-    // get actual defaultParams in store
-    const defaultParams = app.elements.find(el => el.boxId == boxId)
-      .defaultParams;
+      // get actual defaultParams in store
+      const defaultParams = app.elements.find(el => el.boxId == boxId)
+        .defaultParams;
 
-    for (const [paramType, values] of Object.entries(defaultParams)) {
-      for (const [paramName, options] of Object.entries(values)) {
-        const { value: Value, defaultValue, values } = options;
-        if (Value != defaultValue.toString()) {
-          Inputs.Parameter.push({
-            paramName,
-            Value
-          });
-        }
-        const validity = Validation.checkValue(Value, paramType, values);
-        if (!validity) {
-          log.push({ value: Value, paramName, paramType, name: type, boxId });
+      for (const [paramType, values] of Object.entries(defaultParams)) {
+        for (const [paramName, options] of Object.entries(values)) {
+          const { value: Value, defaultValue, values } = options;
+          if (Value != defaultValue.toString()) {
+            Inputs.Parameter.push({
+              paramName,
+              Value
+            });
+          }
+          const validity = Validation.checkValue(Value, paramType, values);
+          if (!validity) {
+            log.push({ value: Value, paramName, paramType, name: type, boxId });
+          }
         }
       }
-    }
 
-    // ports.items.forEach(port => {
-    //   console.log(port);
-    //   allPorts[port.id] = {
-    //     boxId,
-    //     boxNo: i,
-    //     name: port.name
-    //   };
-    // });
+      // ports.items.forEach(port => {
+      //   console.log(port);
+      //   allPorts[port.id] = {
+      //     boxId,
+      //     boxNo: i,
+      //     name: port.name
+      //   };
+      // });
 
-    // key in webservices list
-    const Key = getWebserviceByName(type).id;
-    const Service = { Key };
+      // key in webservices list
+      const Key = getWebserviceByName(type).id;
+      const Service = { Key };
 
-    const step = { Id: boxId, No, Name, Service, Inputs };
-    Steps.Step.push(step);
-  });
+      const step = { Id: boxId, No, Name, Service, Inputs };
+      Steps.Step.push(step);
+    });
 
   // save data elements
   const dataPorts = {};
@@ -71,50 +73,55 @@ export const saveWorkflow = jsonGraph => {
     }
   }
 
-  // const data = [];
-  // const allFiles = [];
+  const data = [];
+  const allFiles = [];
   app.links.forEach(link => {
     const {
-      source: { boxId: sourcePortId },
-      target: { boxId: targetPortId }
+      source: { boxId: sourceId },
+      target: { boxId: targetId }
     } = link;
 
     // search in steps step because it contains the inputs.data array
-    const targetWebservice = Steps.Step.find(el => el.Id == targetPortId);
-    const sourceWebservice = Steps.Step.find(el => el.Id == sourcePortId);
+    const targetWebservice = Steps.Step.find(el => el.Id == targetId);
+    const sourceWebservice = Steps.Step.find(el => el.Id == sourceId);
 
-    // if (allPorts[sourcePortId]) {
-    const { Id: Ref } = sourceWebservice;
-    const p = {
-      Name: link.target.portName,
-      Value: {
-        WorkflowStep: {
-          Ref,
-          ServiceOutputName: link.source.portName
+    if (sourceWebservice) {
+      const { Id: Ref } = sourceWebservice;
+      const p = {
+        Name: link.target.portName,
+        Value: {
+          WorkflowStep: {
+            Ref,
+            ServiceOutputName: link.source.portName
+          }
         }
-      }
-    };
-    targetWebservice.Inputs.Data.push(p);
-    // } else if (dataPorts[sourcePortId]) {
-    // const sourceDataBox = app.currentDataElements.find(
-    //   el => el.boxId == dataPorts[sourcePortId]
-    // );
+      };
+      targetWebservice.Inputs.Data.push(p);
+    } else {
+      const sourceDataBox = app.currentDataElements.find(
+        el => el.boxId == sourceId
+      );
 
-    // // @TODO get folder when folder type
-    // let i = 0;
-    // for (const file of sourceDataBox.data) {
-    //   allFiles.push(file);
-    //   const fileData = {
-    //     [targetWebservice.Name + "_" + targetPort.name + "_" + i++]:
-    //       "SOMENAME/" + file.name
-    //   };
-    //   data.push(fileData);
-    // }
-    // }
+      // @TODO get folder when folder type
+      let i = 0;
+      const file = sourceDataBox.data[0]; // suppose one file
+      allFiles.push(file);
+      const dataName =
+        targetWebservice.Name + "_" + link.target.portName + "_" + i++;
+      const fileData = {
+        [dataName]: file.identifier
+      };
+      data.push(fileData);
+
+      targetWebservice.Inputs.Data.push({
+        Name: dataName,
+        Path: file.identifier
+      });
+    }
   });
 
-  // console.log(allFiles); //@TODO send to server to upload as zip
-  // console.log(JSON.stringify(data));
+  console.log(allFiles); //@TODO send to server to upload as zip
+  console.log(JSON.stringify(data));
 
   const builder = new xml2js.Builder({ rootName: "Steps" });
   const xml = builder.buildObject(Steps);
