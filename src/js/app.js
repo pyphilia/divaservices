@@ -183,7 +183,8 @@ export let app;
       currentDataElements: {
         deep: true,
         handler(newValue, oldValue) {
-          // const difference = findDifferenceBy(newValue, oldValue, "boxId");
+          const difference = findDifferenceBy(newValue, oldValue, "boxId");
+          console.log("TCL: handler -> difference", difference);
           // for (const { boxId, defaultParams } of difference) {
           //   setSelectValueInElement(boxId, defaultParams[Types.SELECT.type]);
           //   setInputValueInElement(boxId, defaultParams[Types.NUMBER.type]);

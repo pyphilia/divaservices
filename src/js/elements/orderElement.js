@@ -38,3 +38,36 @@ export const orderGraph = graph => {
 
   app.$fitContent(app.paper);
 };
+
+export const getOrderedElements = () => {
+  const order = [];
+  const { graph } = app;
+  const sources = graph.getSources();
+
+  const addedBoxId = [];
+
+  for (const source of sources) {
+    order.push(source);
+    addedBoxId.push(source.attributes.boxId);
+
+    let children = graph.getNeighbors(source, { outbound: true });
+    do {
+      let allChildren = [];
+      const noDuplicates = children.filter(
+        ({ attributes: { boxId } }) => !addedBoxId.includes(boxId)
+      );
+      //.sort((a,b) => graph.getNeighbors(b).length - graph.getNeighbors(a).length)
+
+      for (const child of noDuplicates) {
+        order.push(child);
+        addedBoxId.push(child.attributes.boxId);
+        allChildren = allChildren.concat(
+          graph.getNeighbors(child, { outbound: true })
+        );
+      }
+
+      children = allChildren;
+    } while (children.length);
+  }
+  return order;
+};

@@ -5,68 +5,67 @@
 import xml2js from "xml2js";
 import { getWebserviceByName } from "../constants/globals";
 import { app } from "../app";
-import { CATEGORY_DATATEST } from "../constants/constants";
+import { CATEGORY_DATATEST, CATEGORY_SERVICE } from "../constants/constants";
 import { Validation } from "divaservices-utils";
 import { sendWorkflowSteps } from "../api/requests";
+import { getOrderedElements } from "../elements/orderElement";
 
 // we use the actual graph nodes to get the workflow
 // because it contains vital ids (especially ports)
 // we make a connection with our store elements
 // to retrieve the actual parameters
 export const saveWorkflow = jsonGraph => {
+  const orderedElements = getOrderedElements().filter(
+    ({ attributes: { category } }) => category == CATEGORY_SERVICE
+  );
+
   const log = [];
   const Steps = { Step: [] };
   // NODE
-  app.currentElements
-    .filter(({ category }) => category != CATEGORY_DATATEST)
-    .forEach((box, i) => {
-      const { type, boxId } = box;
-      const Name = type.replace(/\s/g, "");
-      const No = i;
-      const Inputs = { Parameter: [], Data: [] };
 
-      // get actual defaultParams in store
-      const defaultParams = app.elements.find(el => el.boxId == boxId)
-        .defaultParams;
+  for (const [i, { attributes: box }] of orderedElements.entries()) {
+    // app.currentElements
+    // .filter(({ category }) => category != CATEGORY_DATATEST)
+    // .forEach((box, i) => {
+    const { type, boxId } = box;
+    const Name = type.replace(/\s/g, "");
+    const No = i;
+    const Inputs = { Parameter: [], Data: [] };
 
-      for (const [paramType, values] of Object.entries(defaultParams)) {
-        for (const [paramName, options] of Object.entries(values)) {
-          const { value: Value, defaultValue, values } = options;
-          if (Value != defaultValue.toString()) {
-            Inputs.Parameter.push({
-              Name: paramName,
-              Value
-            });
-          }
-          const validity = Validation.checkValue(Value, paramType, values);
-          if (!validity) {
-            log.push({
-              value: Value,
-              Name: paramName,
-              paramType,
-              name: type,
-              boxId
-            });
-          }
+    // get actual defaultParams in store
+    const defaultParams = app.elements.find(el => el.boxId == boxId)
+      .defaultParams;
+
+    for (const [paramType, values] of Object.entries(defaultParams)) {
+      for (const [paramName, options] of Object.entries(values)) {
+        const { value: Value, defaultValue, values } = options;
+        if (Value != defaultValue.toString()) {
+          Inputs.Parameter.push({
+            Name: paramName,
+            Value
+          });
+        }
+        const validity = Validation.checkValue(Value, paramType, values);
+        if (!validity) {
+          log.push({
+            value: Value,
+            Name: paramName,
+            paramType,
+            name: type,
+            boxId
+          });
         }
       }
+    }
 
-      // ports.items.forEach(port => {
-      //   console.log(port);
-      //   allPorts[port.id] = {
-      //     boxId,
-      //     boxNo: i,
-      //     name: port.name
-      //   };
-      // });
+    // key in webservices list
+    const Key = getWebserviceByName(type).id;
+    const Service = { Key };
 
-      // key in webservices list
-      const Key = getWebserviceByName(type).id;
-      const Service = { Key };
-
-      const step = { Id: boxId, No, Name, Service, Inputs };
-      Steps.Step.push(step);
-    });
+    const step = { Id: boxId, No, Name, Service, Inputs };
+    Steps.Step.push(step);
+    // });
+  }
 
   // save data elements
   const dataPorts = {};
@@ -131,7 +130,6 @@ export const saveWorkflow = jsonGraph => {
 
   // remove Id to match relax validation schema
   for (const step of Steps.Step) {
-    console.log("TCL: step", step);
     delete step.Id;
   }
 
