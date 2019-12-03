@@ -34,13 +34,19 @@ export const saveWorkflow = jsonGraph => {
           const { value: Value, defaultValue, values } = options;
           if (Value != defaultValue.toString()) {
             Inputs.Parameter.push({
-              paramName,
+              Name: paramName,
               Value
             });
           }
           const validity = Validation.checkValue(Value, paramType, values);
           if (!validity) {
-            log.push({ value: Value, paramName, paramType, name: type, boxId });
+            log.push({
+              value: Value,
+              Name: paramName,
+              paramType,
+              name: type,
+              boxId
+            });
           }
         }
       }
@@ -86,7 +92,7 @@ export const saveWorkflow = jsonGraph => {
     const sourceWebservice = Steps.Step.find(el => el.Id == sourceId);
 
     if (sourceWebservice) {
-      const { Id: Ref } = sourceWebservice;
+      const { No: Ref } = sourceWebservice;
       const p = {
         Name: link.target.portName,
         Value: {
@@ -122,6 +128,12 @@ export const saveWorkflow = jsonGraph => {
 
   console.log(allFiles); //@TODO send to server to upload as zip
   console.log(JSON.stringify(data));
+
+  // remove Id to match relax validation schema
+  for (const step of Steps.Step) {
+    console.log("TCL: step", step);
+    delete step.Id;
+  }
 
   const builder = new xml2js.Builder({ rootName: "Steps" });
   const xml = builder.buildObject(Steps);

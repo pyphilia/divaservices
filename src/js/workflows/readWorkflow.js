@@ -17,6 +17,7 @@ export const readWorkflow = async id => {
 
   const elements = [];
   const links = [];
+  const linksTmp = [];
 
   xml2js.parseString(xml, async (err, json) => {
     if (!json.WorkflowDefinition.Steps) {
@@ -27,11 +28,14 @@ export const readWorkflow = async id => {
 
     for (const step of Step) {
       const {
-        Id: [id], // from saveWorkflow, id  is defined with the boxId
+        // Id: [id], // from saveWorkflow, id  is defined with the boxId
+        No: [no],
         Inputs: [inputs],
         Name: [name],
         Service: [service]
       } = step;
+
+      const boxId = generateUniqueId();
 
       const webserviceObj = getWebserviceById(service.Key[0]);
       if (webserviceObj.length) {
@@ -46,7 +50,7 @@ export const readWorkflow = async id => {
       if (Parameter) {
         for (const param of Parameter) {
           const {
-            paramName: [name],
+            Name: [name],
             Value: [value]
           } = param;
 
@@ -57,46 +61,56 @@ export const readWorkflow = async id => {
         }
       }
 
-      // store links
       if (Data) {
         for (const port of Data) {
           const {
             Value: [value],
             Name: [portName]
           } = port;
-          const {
-            Ref: [ref],
-            ServiceOutputName: [serviceName]
-          } = value.WorkflowStep[0];
-
-          const source = {
-            boxId: ref,
-            portName: serviceName
-          };
-          const target = { boxId: id, portName };
-          links.push({
-            id: generateUniqueId(),
-            source,
-            target
-          });
+          linksTmp.push({ targetBoxId: boxId, value, portName });
         }
       }
 
-      const information = { id };
+      const information = { boxId };
 
       // add element
       const param = buildElementFromName(webserviceObj.name);
 
       const element = {
+        no,
         ...param,
         information,
         defaultParams,
-        boxId: id
+        boxId
       };
 
       elements.push(element);
     }
   });
+
+  for (const link of linksTmp) {
+    const { targetBoxId, value, portName } = link;
+
+    // store links
+    const {
+      Ref: [ref],
+      ServiceOutputName: [serviceName]
+    } = value.WorkflowStep[0];
+
+    // find corresponding step with given ref
+    const sourceStep = elements.find(({ no }) => no == ref);
+    const sourceBoxId = sourceStep.boxId;
+    const source = {
+      boxId: sourceBoxId,
+      portName: serviceName
+    };
+    const target = { boxId: targetBoxId, portName };
+    links.push({
+      id: generateUniqueId(),
+      source,
+      target
+    });
+  }
 
   app.openWorkflow({ elements, links });
 };
