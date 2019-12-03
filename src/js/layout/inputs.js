@@ -425,7 +425,7 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
       })
       .on("click", function() {
         const win = window.open(
-          `${BASE_URL}services/service?id=${serviceId}`,
+          `${BASE_URL}services/${serviceId}/view`,
           "_blank"
         );
         win.focus();

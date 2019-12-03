@@ -85,17 +85,17 @@ const createFolderInput = boxId => {
   return input;
 };
 
-const createFileInput = ({ boxId }) => {
-  const input = document.createElement("input");
-  input.setAttribute("type", "file");
-  input.classList.add("btn");
-  // input.setAttribute("accept", mimeType);
-  input.addEventListener("change", function() {
-    const data = [...this.files];
-    app.updateDataInDataElement({ boxId, data });
-  });
-  return input;
-};
+// const createFileInput = ({ boxId }) => {
+//   const input = document.createElement("input");
+//   input.setAttribute("type", "file");
+//   input.classList.add("btn");
+//   // input.setAttribute("accept", mimeType);
+//   input.addEventListener("change", function() {
+//     const data = [...this.files];
+//     app.updateDataInDataElement({ boxId, data });
+//   });
+//   return input;
+// };
 
 const createFileInputNew = ({ boxId }) => {
   const btn = document.createElement("button");
@@ -170,7 +170,7 @@ const addContent = ({ mimeType, outputType, boxId }) => {
     }
     default: {
       console.log("default for type : " + outputType);
-      const input = createFileInput({ mimeType, boxId });
+      const input = createFileInputNew({ mimeType, boxId });
       content.appendChild(input);
     }
   }

@@ -21,7 +21,7 @@ export const dataTestDecorator = async xmlData => {
     Name: [name],
     Output: [output]
   } of xml.DataTests.Data) {
-    const data = { name, outputType: output.Type[0], type: DATATEST_TYPE };
+    const data = { name, outputType: output.Type[0], category: DATATEST_TYPE };
     const mimeType = output.MimeType;
     if (output.MimeType) {
       data.mimeType = mimeType[0];
