@@ -186,6 +186,7 @@ i++;
 */
 
 export const buildPortAttrs = (name, type, typeAllowed) => {
+  console.log("TCL: buildPortAttrs -> type", type);
   const showPortDetails = layoutSettingsApp.isShowPortsDetailsChecked();
   const showPorts = layoutSettingsApp.isShowPortsChecked();
   const typeAllowedShort = shortenString(typeAllowed.join(", "), 25);
@@ -223,10 +224,15 @@ export const createPort = (param, group) => {
     } else {
       // @TODO display !userdefined ports ?
       typeAllowed = mimeTypes.allowed;
+      const typeEnd =
+        typeAllowed[0].indexOf("/") < 0
+          ? typeAllowed[0].length
+          : typeAllowed[0].indexOf("/");
+      console.log("TCL: typeEnd", typeEnd);
       type = typeAllowed[0].substr(
         //@TODO diff types ?
         0,
-        typeAllowed[0].indexOf("/")
+        typeEnd
       );
     }
 

@@ -8,7 +8,9 @@ export let dataInputs;
 
 const _initWebservices = async () => {
   const xml = await getServicesAPI();
+  console.log("wefd");
   webservices = await Decorators.webservicesDecorator(xml);
+  console.log("wefd");
 };
 
 const _initDataInputs = async () => {

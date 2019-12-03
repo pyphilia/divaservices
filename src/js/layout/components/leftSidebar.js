@@ -30,12 +30,12 @@ const LeftSidebar = Vue.component("LeftSidebar", {
       services: (() => {
         const mapped = webservices
           .map(service => {
-            const { type, name } = service;
-            return { type, name };
+            const { category, name } = service;
+            return { category, name };
           })
           .concat(dataInputs);
 
-        const servicesPerCategory = groupBy(mapped, "type");
+        const servicesPerCategory = groupBy(mapped, "category");
         const sorted = [];
         for (let category of Object.keys(servicesPerCategory).sort()) {
           sorted.push(...servicesPerCategory[category].sort(alphabeticalOrder));
@@ -46,7 +46,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
 
       categories: (() => {
         const categories = webservices
-          .map(algo => algo.type)
+          .map(algo => algo.category)
           .filter((v, i, a) => a.indexOf(v) === i) // get unique value
           .sort();
         categories.push(DATATEST_TYPE);
@@ -142,7 +142,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
       </div>
       <div id="${ALGO_ITEM_WRAPPER}">
         <div id="${ALGO_ITEMS}">
-          <div v-for="{type, name} in results" :class="'${ALGO_ITEM_CLASS} ' + type" :name="name" @click="type == '${DATATEST_TYPE}' ? addData(name) : addElementByName(name)">
+          <div v-for="{category, name} in results" :class="'${ALGO_ITEM_CLASS} ' + category" :name="name" @click="category == '${DATATEST_TYPE}' ? addData(name) : addElementByName(name)">
             <span class="icon"></span><span class="name" v-html="boldRegInString(name)"></span>
           </div>
         </div>

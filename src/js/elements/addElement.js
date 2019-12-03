@@ -130,13 +130,7 @@ export const transformWebserviceForGraph = webservice => {
     alert("problem with ", webservice);
     return {};
   }
-  const {
-    name: label,
-    description,
-    inputs = [],
-    type: category,
-    ports
-  } = webservice;
+  const { name: label, description, inputs = [], category, ports } = webservice;
 
   // handle params
   const params = inputs.filter(inp => isParamInput(inp));
