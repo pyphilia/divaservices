@@ -21,6 +21,7 @@ export const saveWorkflow = jsonGraph => {
 
   const log = [];
   const Steps = { Step: [] };
+  const _steps = [];
   // NODE
 
   for (const [i, { attributes: box }] of orderedElements.entries()) {
@@ -31,6 +32,8 @@ export const saveWorkflow = jsonGraph => {
     const Name = type.replace(/\s/g, "");
     const No = i;
     const Inputs = { Parameter: [], Data: [] };
+
+    const _inputs = { parameters: {}, data: [] };
 
     // get actual defaultParams in store
     const defaultParams = app.elements.find(el => el.boxId == boxId)
@@ -44,6 +47,7 @@ export const saveWorkflow = jsonGraph => {
             Name: paramName,
             Value
           });
+          _inputs.parameters[paramName] = JSON.parse(Value);
         }
         const validity = Validation.checkValue(Value, paramType, values);
         if (!validity) {
@@ -59,8 +63,17 @@ export const saveWorkflow = jsonGraph => {
     }
 
     // key in webservices list
-    const Key = getWebserviceByName(type).id;
+    const currentService = getWebserviceByName(type);
+    const { id: Key, method } = currentService;
     const Service = { Key };
+
+    const _step = {
+      name: Name,
+      type: "regular",
+      method,
+      inputs: _inputs
+    };
+    _steps.push(_step);
 
     const step = { Id: boxId, No, Name, Service, Inputs };
     Steps.Step.push(step);
@@ -89,9 +102,12 @@ export const saveWorkflow = jsonGraph => {
     // search in steps step because it contains the inputs.data array
     const targetWebservice = Steps.Step.find(el => el.Id == targetId);
     const sourceWebservice = Steps.Step.find(el => el.Id == sourceId);
+    const _targetWebservice = _steps.find(
+      el => el.name == targetWebservice.Name
+    );
 
     if (sourceWebservice) {
-      const { No: Ref } = sourceWebservice;
+      const { No: Ref, Name: name } = sourceWebservice;
       const p = {
         Name: link.target.portName,
         Value: {
@@ -102,6 +118,10 @@ export const saveWorkflow = jsonGraph => {
         }
       };
       targetWebservice.Inputs.Data.push(p);
+
+      _targetWebservice.inputs.data.push({
+        [link.target.portName]: `$${name}/$${link.source.portName}`
+      });
     } else {
       const sourceDataBox = app.currentDataElements.find(
         el => el.boxId == sourceId
@@ -122,6 +142,9 @@ export const saveWorkflow = jsonGraph => {
         Name: dataName,
         Path: file.identifier
       });
+      _targetWebservice.inputs.data.push({
+        [link.target.portName]: file.identifier
+      });
     }
   });
 
@@ -133,9 +156,18 @@ export const saveWorkflow = jsonGraph => {
     delete step.Id;
   }
 
+  console.log(JSON.stringify(_steps));
+
   const builder = new xml2js.Builder({ rootName: "Steps" });
   const xml = builder.buildObject(Steps);
   console.log("TCL: xml", xml);
+
+  // add json request to xml
+  const finalXml = `<Request>
+    <JsonRequest>${JSON.stringify(_steps)}</JsonRequest>
+    ${xml}
+  </Request>`;
+  console.log(finalXml);
 
   app.$refs.log.setLogMessages(log);
 
