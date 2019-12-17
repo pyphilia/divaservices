@@ -184,3 +184,5 @@ export const Shortcuts = {
     key: "y"
   }
 };
+
+export const DRAGGABLE_GROUP_NAME = "files";

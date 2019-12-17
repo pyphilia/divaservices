@@ -7,8 +7,34 @@
   height: 100px;
   width: 100%;
   border: dashed 1px black;
+  display: flex;
+  flex-wrap: wrap;
 
-  .file img {
-    max-width: 100px;
+  .file {
+    position: relative;
+
+    img {
+      max-width: 100px;
+    }
+    .delete-button {
+      z-index: 5;
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: red;
+      border: lightgrey 2px solid;
+      box-shadow: 0 0 3px;
+      color: white;
+      padding: 10px;
+      text-transform: uppercase;
+      border-radius: 15px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      height: 20px;
+      width: 20px;
+    }
   }
 }

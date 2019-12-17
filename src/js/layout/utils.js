@@ -189,7 +189,7 @@ export const buildPortAttrs = (name, type, typeAllowed) => {
   const showPortDetails = layoutSettingsApp.isShowPortsDetailsChecked();
   const showPorts = layoutSettingsApp.isShowPortsChecked();
   const typeAllowedShort = shortenString(typeAllowed.join(", "), 25);
-  console.log(type);
+
   return {
     [PORT_SELECTOR]: {
       fill: MimeTypes[type].color,

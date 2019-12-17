@@ -3,6 +3,7 @@
  * in the main interface area
  */
 import xml2js from "xml2js";
+import mime from "mime-types";
 import { getWebserviceById } from "../constants/globals";
 import {
   buildElementFromName,
@@ -11,6 +12,7 @@ import {
 import { app } from "../app";
 import { isParamInput, generateUniqueId } from "../layout/utils";
 import { openWorkflowFromId } from "../api/requests";
+import { buildDataElement } from "../elements/addDataElement";
 
 export const readWorkflow = async id => {
   const xml = await openWorkflowFromId(id);
@@ -20,15 +22,14 @@ export const readWorkflow = async id => {
   const linksTmp = [];
 
   xml2js.parseString(xml, async (err, json) => {
-    if (!json.WorkflowDefinition.Steps) {
+    if (!json.Workflow.Steps) {
       return;
     }
 
-    const { Step = [] } = json.WorkflowDefinition.Steps[0];
+    const { Step = [] } = json.Workflow.Steps[0];
 
     for (const step of Step) {
       const {
-        // Id: [id], // from saveWorkflow, id  is defined with the boxId
         No: [no],
         Inputs: [inputs],
         Name: [name],
@@ -64,10 +65,37 @@ export const readWorkflow = async id => {
       if (Data) {
         for (const port of Data) {
           const {
-            Value: [value],
-            Name: [portName]
+            Value,
+            Name: [portName],
+            Path
           } = port;
-          linksTmp.push({ targetBoxId: boxId, value, portName });
+          if (Value) {
+            linksTmp.push({
+              targetBoxId: boxId,
+              source: Value[0].WorkflowStep[0],
+              portName
+            });
+          } else if (Path) {
+            // add input box
+            const ref = generateUniqueId();
+            const mimetype = mime.lookup(Path[0]);
+            const [collectionName, filename] = Path[0].split("/");
+            const dataEl = buildDataElement(mimetype, [
+              {
+                identifier: Path[0],
+                url: `http://134.21.72.190:8080/files/${collectionName}/original/${filename}`,
+                options: {
+                  "mime-type": mimetype
+                }
+              }
+            ]); // @TODO path is an array of files
+            elements.push({ ...dataEl, no: ref });
+            linksTmp.push({
+              targetBoxId: boxId,
+              source: { Ref: [ref], ServiceOutputName: [mimetype] },
+              portName
+            });
+          }
         }
       }
 
@@ -89,13 +117,15 @@ export const readWorkflow = async id => {
   });
 
   for (const link of linksTmp) {
-    const { targetBoxId, value, portName } = link;
-
-    // store links
     const {
-      Ref: [ref],
-      ServiceOutputName: [serviceName]
-    } = value.WorkflowStep[0];
+      targetBoxId,
+      source: {
+        Ref: [ref],
+        ServiceOutputName: [serviceName]
+      },
+      portName
+    } = link;
+    // store links
 
     // find corresponding step with given ref
     const sourceStep = elements.find(({ no }) => no == ref);

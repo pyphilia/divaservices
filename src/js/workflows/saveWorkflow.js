@@ -6,7 +6,7 @@ import xml2js from "xml2js";
 import { getWebserviceByName } from "../constants/globals";
 import { app } from "../app";
 import { CATEGORY_DATATEST, CATEGORY_SERVICE } from "../constants/constants";
-import { Validation } from "divaservices-utils";
+import { Validation, XMLBuilders } from "divaservices-utils";
 import { sendWorkflowSteps } from "../api/requests";
 import { getOrderedElements } from "../elements/orderElement";
 
@@ -14,7 +14,7 @@ import { getOrderedElements } from "../elements/orderElement";
 // because it contains vital ids (especially ports)
 // we make a connection with our store elements
 // to retrieve the actual parameters
-export const saveWorkflow = jsonGraph => {
+export const saveWorkflow = async (jsonGraph, installation = false) => {
   const orderedElements = getOrderedElements().filter(
     ({ attributes: { category } }) => category == CATEGORY_SERVICE
   );
@@ -139,7 +139,7 @@ export const saveWorkflow = jsonGraph => {
       data.push(fileData);
 
       targetWebservice.Inputs.Data.push({
-        Name: dataName,
+        Name: link.target.portName,
         Path: file.identifier
       });
       _targetWebservice.inputs.data.push({
@@ -156,17 +156,14 @@ export const saveWorkflow = jsonGraph => {
     delete step.Id;
   }
 
-  console.log(JSON.stringify(_steps));
-
   const builder = new xml2js.Builder({ rootName: "Steps" });
   const xml = builder.buildObject(Steps);
+  const request = JSON.stringify(_steps);
+  console.log("TCL: request", request);
   console.log("TCL: xml", xml);
 
   // add json request to xml
-  const finalXml = `<Request>
-    <JsonRequest>${JSON.stringify(_steps)}</JsonRequest>
-    ${xml}
-  </Request>`;
+  const finalXml = XMLBuilders.SaveRequest(xml, request);
   console.log(finalXml);
 
   app.$refs.log.setLogMessages(log);
@@ -175,5 +172,7 @@ export const saveWorkflow = jsonGraph => {
   // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
   // saveAs(blob, "../../tmp/hello.xml");
 
-  sendWorkflowSteps(xml);
+  await sendWorkflowSteps(xml, installation);
+
+  return request;
 };

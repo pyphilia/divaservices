@@ -265,7 +265,7 @@ export let app;
 
       this.$nextTick(() => {
         initPaperEvents();
-        initKeyboardEvents();
+        initKeyboardEvents(); // WARNiNG promise
 
         if (process.env.NODE_ENV === "production") {
           // check id, if there is no id, go back to workflows

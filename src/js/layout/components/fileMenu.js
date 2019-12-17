@@ -132,7 +132,7 @@ const FileMenu = Vue.component("FileMenu", {
           {
             name: "Save",
             action: () => {
-              saveWorkflow(this.graph.toJSON());
+              saveWorkflow(this.graph.toJSON()); // WARNING: promise
             }
           },
           {

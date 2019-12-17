@@ -12,7 +12,7 @@ export let shiftDown;
  * Initialize keyboard events
  * */
 
-export const initKeyboardEvents = () => {
+export const initKeyboardEvents = async () => {
   document.addEventListener(
     "keydown",
     event => {
@@ -47,8 +47,7 @@ export const initKeyboardEvents = () => {
             break;
           }
           case "s": {
-            saveWorkflow(app.graph.toJSON());
-            event.preventDefault();
+            saveWorkflow(app.graph.toJSON()); // WARNING: promise
             break;
           }
           default:

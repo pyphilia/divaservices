@@ -4,9 +4,7 @@ import draggable from "vuedraggable";
 import { getCollectionsAPI } from "../../api/requests";
 import { app } from "../../app";
 import { updateImgPreview } from "../../elements/addDataElement";
-// import { FilesExtensions } from "./constants";
-
-// const MAX_FILES_LOADED = 5;
+import { DRAGGABLE_GROUP_NAME } from "../../constants/constants";
 
 const Collections = Vue.component("Collections", {
   data() {
@@ -22,32 +20,47 @@ const Collections = Vue.component("Collections", {
   computed: {
     dragOptions() {
       return {
-        group: "files",
+        group: DRAGGABLE_GROUP_NAME,
         ghostClass: "ghost"
       };
     }
   },
   watch: {
-    id(newValue) {
-      // if doesnt exist in obj, add it
-      if (!(newValue in this.files)) {
-        this.$set(this.files, newValue, []);
-      }
-    }
+    // id(newValue) {
+    //   // if doesnt exist in obj, add it
+    //   if (!(newValue in this.files)) {
+    //     this.$set(this.files, newValue, []);
+    //   }
+    // }
   },
   methods: {
     openCollectionModel(boxId) {
       this.id = boxId;
+
+      // if doesnt exist in obj, add it
+      if (!(boxId in this.files)) {
+        const data = app.elementsData.find(
+          ({ boxId: thisBoxId }) => thisBoxId == boxId
+        ).data;
+        const definedData = data ? [data[0]] : [];
+        this.$set(this.files, boxId, definedData);
+      }
       $("#collections").modal("show");
     },
     updateDataFile() {
       console.log("update");
       const data = this.files[this.id];
       app.updateDataInDataElement({ boxId: this.id, data });
-      updateImgPreview(this.id, data);
+      // @TODO: suppose one image
+      if (data[0].options["mime-type"].includes("image")) {
+        updateImgPreview(this.id, data);
+      }
 
       // close modal
       $("#collections").modal("hide");
+    },
+    deleteFile(file) {
+      this.files[this.id].splice(file, 1);
     },
     // Vue draggable
     onMove(event) {
@@ -58,59 +71,9 @@ const Collections = Vue.component("Collections", {
         (!relatedElement || !relatedElement.fixed) && !draggedElement.fixed
       );
     }
-    // getFileFormat(url) {
-    //   const reg = new RegExp(
-    //     "^https?://(?:[a-z0-9-]+.)+[a-z]{2,6}(?:/[^/#?]+)+.(?:jpe?g|gif|png)$"
-    //   );
-    //   if (url.match(reg)) {
-    //     return FilesExtensions.IMAGE.type;
-    //   } else {
-    //     return "UNKNOWN FORMAT : " + url;
-    //   }
-    // },
-
-    // @FIX fired on open and on close
-    // loadCollection(idx) {
-    //   const { files, maxLoaded } = this.collections[idx];
-
-    //   if (maxLoaded < files.length) {
-    //     const container = document.querySelector("#collapse-" + idx);
-
-    //     // take portion of files
-    //     for (const file of files.slice(
-    //       maxLoaded,
-    //       maxLoaded + MAX_FILES_LOADED
-    //     )) {
-    //       const format = file.options ? file.options.type : "none";
-    //       switch (format) {
-    //         case FilesExtensions.IMAGE.type: {
-    //           const child = document.createElement("img");
-    //           child.src = file.url;
-    //           child.alt = file.identifier;
-    //           container.appendChild(child);
-    //           break;
-    //         }
-    //         default: {
-    //           const child = document.createElement("span");
-    //           child.innerText = file.identifier;
-    //           container.appendChild(child);
-    //         }
-    //       }
-    //     }
-    //     this.collections[idx].maxLoaded += MAX_FILES_LOADED;
-    //   }
-    // }
   },
   async mounted() {
-    const originalCollections = await getCollectionsAPI();
-    // add maxLoaded to manage huge collections
-    this.collections = originalCollections.map(c => ({ ...c, maxLoaded: 0 }));
-
-    // this.$nextTick(function () {
-    //   for(const collapsible of document.querySelectorAll('card-header')){
-
-    //   }
-    // })
+    this.collections = await getCollectionsAPI();
   },
   template: `
   <div id="collections"  class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -159,7 +122,7 @@ const Collections = Vue.component("Collections", {
         </a>
       </span>
       <div class="delete-button">
-        <span @click="deleteFile(service.name, name, file)" title="delete">x</span>
+        <span @click="deleteFile(name, file)" title="delete">x</span>
       </div>
     </div>
 

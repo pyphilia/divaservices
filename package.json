@@ -26,6 +26,7 @@
     "file-saver": "^2.0.2",
     "jointjs": "^3.0.4",
     "jquery": "^3.4.1",
+    "mime-types": "^2.1.25",
     "node-fetch": "^2.6.0",
     "path": "^0.12.7",
     "select2": "^4.0.9",

@@ -13,6 +13,7 @@ import { getElementByBoxId } from "../utils";
 import { saveWorkflow } from "../../workflows/saveWorkflow";
 import { fireAlert } from "../../utils/alerts";
 import { MESSAGE_SAVE_SUCCESS } from "../../constants/messages";
+import { WORKFLOWS_API, WORKFLOWS_EXECUTION_ENDPOINT } from "../../../config";
 
 const Toolsbar = Vue.component("Toolsbar", {
   props: ["selectedElements", "paper", "scale"],
@@ -131,17 +132,6 @@ const Toolsbar = Vue.component("Toolsbar", {
           }
         },
         {
-          save: {
-            action: () => {
-              // @TODO receive response and fire correct alert
-              saveWorkflow(app.graph.toJSON());
-              fireAlert("success", MESSAGE_SAVE_SUCCESS);
-            },
-            icon: "fas fa-save",
-            enabledCondition: true
-          }
-        },
-        {
           settings: {
             action: () => {
               $("#exampleModal").modal("show");
@@ -161,11 +151,21 @@ const Toolsbar = Vue.component("Toolsbar", {
           }
         },
         {
-          collections: {
-            action: () => {
-              $("#collections").modal("show");
+          save: {
+            action: async () => {
+              // @TODO receive response and fire correct alert
+              await saveWorkflow(app.graph.toJSON());
+              fireAlert("success", MESSAGE_SAVE_SUCCESS);
             },
-            icon: "fas fa-cog",
+            icon: "fas fa-save",
+            enabledCondition: true
+          },
+          "save and install": {
+            action: async () => {
+              await saveWorkflow(app.graph.toJSON(), true);
+              top.window.location.href = `${WORKFLOWS_API}/${app.workflowId}/${WORKFLOWS_EXECUTION_ENDPOINT}`;
+            },
+            icon: "fas fa-download",
             enabledCondition: true
           }
         }

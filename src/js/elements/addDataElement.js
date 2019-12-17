@@ -142,7 +142,8 @@ const createContentBox = () => {
 //   content.appendChild(preview);
 // };
 
-const addContent = ({ mimeType, outputType, boxId }) => {
+const addContent = dataEl => {
+  const { mimeType, outputType, boxId, data = [] } = dataEl;
   let content = createContentBox();
   switch (outputType) {
     case MimeTypes.number.type: {
@@ -156,14 +157,12 @@ const addContent = ({ mimeType, outputType, boxId }) => {
       break;
     }
     case MimeTypes.image.type: {
-      // oldImageContent()
-
       const input = createFileInputNew({ mimeType, boxId });
       content.appendChild(input);
 
       // @TODO only if size okay
       // image preview
-      const preview = createImgPreview(input, boxId);
+      const preview = createImgPreview(data);
       content.appendChild(preview);
 
       break;
@@ -178,6 +177,11 @@ const addContent = ({ mimeType, outputType, boxId }) => {
     `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] body`
   );
   foreignObj.appendChild(content);
+
+  // add preview if already exist
+  if (data.length && mimeType.includes("image")) {
+    updateImgPreview(boxId, data);
+  }
 };
 
 export const addDataBox = data => {
@@ -186,21 +190,8 @@ export const addDataBox = data => {
   addContent(data);
 };
 
-export const buildDataElement = elName => {
+export const buildDataElement = (elName, data = undefined) => {
   const { name, mimeType, outputType } = getDataInputByName(elName);
-  // let name = elName;
-  // let mimeType = [];
-  // let outputType;
-  // switch(elName) {
-  //   case 'file': {
-  //     outputType = MimeTypes.image.type;
-  //     break;
-  //   }
-  //   case 'number':
-  //       {outputType = MimeTypes.number.type;
-  //       break;}
-  //   default:
-  // }
 
   const size = {
     width: 300,
@@ -232,6 +223,6 @@ export const buildDataElement = elName => {
     ports,
     outputType,
     mimeType,
-    data: null
+    data
   };
 };

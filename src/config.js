@@ -2,12 +2,14 @@
 
 export const {
   HOST = "/",
-  API = "http://divaservices.unifr.ch/api/v2/",
   WEBSERVICES_XML_FILEPATH = "api/services.xml",
-  INPUTS_DATA_XML_FILEPATH = "api/inputData.xml",
-  USERNAME = "",
-  PASSWORD = "",
   SERVICES_API = "",
-  COLLECTIONS_API = "http://134.21.72.190:8080/collections",
-  BASE_URL = "http://diufvm17.unifr.ch:8080/exist/projects/diae/"
+  COLLECTIONS_API_ENDPOINT = "api/collections",
+  WORKFLOWS_API_ENDPOINT = "workflows",
+  WORKFLOWS_EXECUTION_ENDPOINT = "exec",
+  BASE_URL = "http://diufvm17.unifr.ch:8080/exist/projects/diae"
 } = process.env;
+
+export const WORKFLOWS_EXECUTION = `${BASE_URL}/${WORKFLOWS_EXECUTION_ENDPOINT}`;
+export const COLLECTIONS_API = `${BASE_URL}/${COLLECTIONS_API_ENDPOINT}`;
+export const WORKFLOWS_API = `${BASE_URL}/${WORKFLOWS_API_ENDPOINT}`;

@@ -1,10 +1,10 @@
-<WorkflowDefinition>
+<Workflow>
     <Id>20</Id>
     <Information>
         <Name>Workflow 1</Name>
         <Description>de</Description>
     </Information>
-    <Steps>
+    <!-- <Steps>
   <Step>
     <Id>8o04tkrnz</Id>
     <No>0</No>
@@ -47,5 +47,73 @@
       </Parameter>
     </Inputs>
   </Step>
+</Steps> -->
+<Steps>
+  <Step>
+    <No>0</No>
+    <Name>OtsuBinarizationFolder</Name>
+    <Service>
+      <Key>45</Key>
+    </Service>
+    <Inputs/>
+  </Step>
+  <Step>
+    <No>1</No>
+    <Name>OtsuBinarization</Name>
+    <Service>
+      <Key>0</Key>
+    </Service>
+    <Inputs>
+      <Data>
+        <Name>inputImage</Name>
+        <Value>
+          <WorkflowStep>
+            <Ref>2</Ref>
+            <ServiceOutputName>sauvolaBinaryImage</ServiceOutputName>
+          </WorkflowStep>
+        </Value>
+      </Data>
+      <Data>
+        <Name>inputImage</Name>
+        <Value>
+          <WorkflowStep>
+            <Ref>3</Ref>
+            <ServiceOutputName>grayImage</ServiceOutputName>
+          </WorkflowStep>
+        </Value>
+      </Data>
+    </Inputs>
+  </Step>
+  <Step>
+    <No>2</No>
+    <Name>SauvolaBinarization</Name>
+    <Service>
+      <Key>2</Key>
+    </Service>
+    <Inputs>
+      <Parameter>
+        <Name>radius</Name>
+        <Value>543</Value>
+      </Parameter>
+    </Inputs>
+  </Step>
+  <Step>
+    <No>3</No>
+    <Name>Grayification</Name>
+    <Service>
+      <Key>13</Key>
+    </Service>
+    <Inputs>
+      <Data>
+        <Name>inputImage</Name>
+        <Value>
+          <WorkflowStep>
+            <Ref>2</Ref>
+            <ServiceOutputName>sauvolaBinaryImage</ServiceOutputName>
+          </WorkflowStep>
+        </Value>
+      </Data>
+    </Inputs>
+  </Step>
 </Steps>
-</WorkflowDefinition>
+</Workflow>
