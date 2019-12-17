@@ -6,7 +6,7 @@ import xml2js from "xml2js";
 import { getWebserviceByName } from "../constants/globals";
 import { app } from "../app";
 import { CATEGORY_DATATEST, CATEGORY_SERVICE } from "../constants/constants";
-import { Validation, XMLBuilders } from "divaservices-utils";
+import { Validation, XMLBuilders, DivaServices } from "divaservices-utils";
 import { sendWorkflowSteps } from "../api/requests";
 import { getOrderedElements } from "../elements/orderElement";
 
@@ -29,7 +29,7 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
     // .filter(({ category }) => category != CATEGORY_DATATEST)
     // .forEach((box, i) => {
     const { type, boxId } = box;
-    const Name = type.replace(/\s/g, "");
+    const Name = DivaServices.buildNameForRequest(type);
     const No = i;
     const Inputs = { Parameter: [], Data: [] };
 
@@ -120,7 +120,10 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
       targetWebservice.Inputs.Data.push(p);
 
       _targetWebservice.inputs.data.push({
-        [link.target.portName]: `$${name}/$${link.source.portName}`
+        [link.target.portName]: DivaServices.buildInputReferenceName(
+          name,
+          link.source.portName
+        )
       });
     } else {
       const sourceDataBox = app.currentDataElements.find(
@@ -133,7 +136,12 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
         const file = sourceDataBox.data[0]; // suppose one file
         allFiles.push(file);
         const dataName =
-          targetWebservice.Name + "_" + link.target.portName + "_" + i++;
+          DivaServices.buildInputNameForService(
+            targetWebservice.Name,
+            link.target.portName
+          ) +
+          "_" +
+          i++;
         const fileData = {
           [dataName]: file.identifier
         };
