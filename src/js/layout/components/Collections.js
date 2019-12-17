@@ -5,6 +5,7 @@ import { getCollectionsAPI } from "../../api/requests";
 import { app } from "../../app";
 import { updateImgPreview } from "../../elements/addDataElement";
 import { DRAGGABLE_GROUP_NAME } from "../../constants/constants";
+import { mapState } from "vuex";
 
 const Collections = Vue.component("Collections", {
   data() {
@@ -23,7 +24,8 @@ const Collections = Vue.component("Collections", {
         group: DRAGGABLE_GROUP_NAME,
         ghostClass: "ghost"
       };
-    }
+    },
+    ...mapState("Interface", ["elements"])
   },
   watch: {
     // id(newValue) {
@@ -39,7 +41,7 @@ const Collections = Vue.component("Collections", {
 
       // if doesnt exist in obj, add it
       if (!(boxId in this.files)) {
-        const data = app.elementsData.find(
+        const data = this.elements.find(
           ({ boxId: thisBoxId }) => thisBoxId == boxId
         ).data;
         const definedData = data ? [data[0]] : [];
