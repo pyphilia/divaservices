@@ -10,15 +10,29 @@ import { mapState } from "vuex";
 const Collections = Vue.component("Collections", {
   data() {
     return {
-      collections: [],
+      collections: undefined,
       files: {},
-      id: null
+      id: null,
+      mimeType: ""
     };
   },
   components: {
     draggable
   },
   computed: {
+    filteredCollections() {
+      if (!this.collections || !this.collections.length) {
+        return this.collections;
+      }
+      return this.collections
+        .map(coll => ({
+          ...coll,
+          files: coll.files.filter(
+            ({ options }) => options["mime-type"] == this.mimeType
+          )
+        }))
+        .filter(({ files }) => files.length);
+    },
     dragOptions() {
       return {
         group: DRAGGABLE_GROUP_NAME,
@@ -36,8 +50,9 @@ const Collections = Vue.component("Collections", {
     // }
   },
   methods: {
-    openCollectionModel(boxId) {
+    openCollectionModel(boxId, mimeType) {
       this.id = boxId;
+      this.mimeType = mimeType;
 
       // if doesnt exist in obj, add it
       if (!(boxId in this.files)) {
@@ -54,9 +69,7 @@ const Collections = Vue.component("Collections", {
       const data = this.files[this.id];
       app.updateDataInDataElement({ boxId: this.id, data });
       // @TODO: suppose one image
-      if (data[0].options["mime-type"].includes("image")) {
-        updateImgPreview(this.id, data);
-      }
+      updateImgPreview(this.id, data);
 
       // close modal
       $("#collections").modal("hide");
@@ -88,11 +101,13 @@ const Collections = Vue.component("Collections", {
         </button>
       </div>
 
-    <div v-if="collections.length == 0" >Loading...</div>
+      <div v-if="!filteredCollections" >Loading...</div>
+
+      <div class="no-file-found" v-else-if="filteredCollections && filteredCollections.length == 0" >No file available</div>
 
     <div id="collections-wrapper">
 
-      <div v-for="({files, name, url, statusMessage, error, loaded}, idx) in collections" class="collection accordion">
+      <div v-for="({files, name, url, statusMessage, error, loaded}, idx) in filteredCollections" class="collection accordion">
 
         <!-- @click="loadCollection(idx)" -->
         <div class="card-header" :id="'heading'+idx" data-toggle="collapse" :data-target="'#collapse-'+idx" aria-expanded="true" :aria-controls="'collapse-'+idx">
@@ -124,7 +139,7 @@ const Collections = Vue.component("Collections", {
         </a>
       </span>
       <div class="delete-button">
-        <span @click="deleteFile(name, file)" title="delete">x</span>
+        <span @click="deleteFile(file)" title="delete">x</span>
       </div>
     </div>
 

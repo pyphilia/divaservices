@@ -97,11 +97,11 @@ const createFolderInput = boxId => {
 //   return input;
 // };
 
-const createFileInputNew = ({ boxId }) => {
+const createFileInputNew = ({ boxId, mimeType }) => {
   const btn = document.createElement("button");
   btn.innerText = "Choose a file";
   btn.addEventListener("click", function() {
-    app.$refs.collections.openCollectionModel(boxId);
+    app.$refs.collections.openCollectionModel(boxId, mimeType);
   });
   btn.classList.add("btn");
   btn.classList.add("btn-primary");
@@ -116,11 +116,18 @@ const createImgPreview = () => {
 };
 
 export const updateImgPreview = (boxId, data) => {
-  const { url, identifier } = data[0]; // suppose one file
   const preview = document.querySelector(
     `${INTERFACE_ROOT} foreignObject[boxId='${boxId}'] .preview`
   );
-  preview.innerHTML = `<img src="${url}"/> <span>${identifier}</span>`;
+
+  if (data && data[0] && data[0].options["mime-type"].includes("image")) {
+    const { url, identifier } = data[0]; // suppose one file
+    preview.innerHTML = `<img src="${url}"/> <span>${identifier}</span>`;
+  }
+  // if the image is removed
+  else {
+    preview.innerHTML = "";
+  }
 };
 
 const createContentBox = () => {
@@ -179,9 +186,7 @@ const addContent = dataEl => {
   foreignObj.appendChild(content);
 
   // add preview if already exist
-  if (data.length && mimeType.includes("image")) {
-    updateImgPreview(boxId, data);
-  }
+  updateImgPreview(boxId, data);
 };
 
 export const addDataBox = data => {

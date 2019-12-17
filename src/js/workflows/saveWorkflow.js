@@ -129,22 +129,24 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
 
       // @TODO get folder when folder type
       let i = 0;
-      const file = sourceDataBox.data[0]; // suppose one file
-      allFiles.push(file);
-      const dataName =
-        targetWebservice.Name + "_" + link.target.portName + "_" + i++;
-      const fileData = {
-        [dataName]: file.identifier
-      };
-      data.push(fileData);
+      if (sourceDataBox.data && sourceDataBox.data.length) {
+        const file = sourceDataBox.data[0]; // suppose one file
+        allFiles.push(file);
+        const dataName =
+          targetWebservice.Name + "_" + link.target.portName + "_" + i++;
+        const fileData = {
+          [dataName]: file.identifier
+        };
+        data.push(fileData);
 
-      targetWebservice.Inputs.Data.push({
-        Name: link.target.portName,
-        Path: file.identifier
-      });
-      _targetWebservice.inputs.data.push({
-        [link.target.portName]: file.identifier
-      });
+        targetWebservice.Inputs.Data.push({
+          Name: link.target.portName,
+          Path: file.identifier
+        });
+        _targetWebservice.inputs.data.push({
+          [link.target.portName]: file.identifier
+        });
+      }
     }
   });
 
