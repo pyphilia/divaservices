@@ -1,7 +1,7 @@
 import Vue from "vue";
 import * as $ from "jquery";
 import draggable from "vuedraggable";
-import { getCollectionsAPI } from "../../api/requests";
+import { getCollections } from "../../api/requests";
 import { app } from "../../app";
 import { updateImgPreview } from "../../elements/addDataElement";
 import { DRAGGABLE_GROUP_NAME } from "../../constants/constants";
@@ -88,7 +88,7 @@ const Collections = Vue.component("Collections", {
     }
   },
   async mounted() {
-    this.collections = await getCollectionsAPI();
+    this.collections = await getCollections();
   },
   template: `
   <div id="collections"  class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">

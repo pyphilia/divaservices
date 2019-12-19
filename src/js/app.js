@@ -4,7 +4,7 @@ import { mapActions, mapState } from "vuex";
 import plugins from "./plugins";
 import components from "./layout/components";
 import store from "./store/store";
-import { Constants } from "divaservices-utils";
+import { Constants, DivaServices } from "divaservices-utils";
 const { Types } = Constants;
 import { initWebservices } from "./constants/globals";
 import { initPaperEvents } from "./events/paperEvents";
@@ -269,8 +269,7 @@ export let app;
 
         if (process.env.NODE_ENV === "production") {
           // check id, if there is no id, go back to workflows
-          const url_string = window.location.href.split("id=")[1];
-          const id = parseInt(url_string);
+          const id = DivaServices.getUrlParameters().id;
           if (!isNaN(id)) {
             this.workflowId = id;
             readWorkflow(id);

@@ -1,60 +1,26 @@
-import fetch from "node-fetch";
-import { app } from "../app";
-import { Decorators } from "divaservices-utils";
-import {
-  SERVICES_API,
-  WEBSERVICES_XML_FILEPATH,
-  COLLECTIONS_API,
-  WORKFLOWS_API
-} from "../../config";
+import { Decorators, API } from "divaservices-utils";
+import { WEBSERVICES_XML_FILEPATH } from "../../config";
+import { webservices } from "../constants/globals";
 
-export const getServicesAPI = async () => {
-  let xml;
+export const getServices = async () => {
   if (process.env.NODE_ENV === "production") {
-    const xmlApi = await fetch(SERVICES_API);
-    xml = await xmlApi.text();
+    return await API.getServices();
   } else {
     const filepath = WEBSERVICES_XML_FILEPATH;
-    xml = (await import(`!!raw-loader!../../${filepath}`)).default;
+    const xml = (await import(`!!raw-loader!../../${filepath}`)).default;
+    return await Decorators.webservicesDecorator(xml);
   }
-  return xml;
 };
 
-export const sendWorkflowSteps = async (xml, installation = false) => {
-  // const xhr = new XMLHttpRequest();
-  // xhr.open(
-  //   "POST",
-  //   "http://diufvm17.unifr.ch:8080/exist/projects/diae/api/workflow/save?id=" +
-  //     app.workflowId,
-  //   true
-  // );
-  // xhr.setRequestHeader("Content-Type", "text/xml");
-  // xhr.setRequestHeader("username", USERNAME);
-  // xhr.setRequestHeader("password", PASSWORD);
-  // xhr.send(xml);
-
-  const install = installation ? "install=true&" : "";
-
-  return await fetch(`${WORKFLOWS_API}/save?${install}id=${app.workflowId}`, {
-    method: "POST",
-    body: xml,
-    headers: {
-      "Content-Type": "text/xml"
-    }
-  });
-};
-
-export const openWorkflowFromId = async id => {
-  let xml;
+export const getWorkflowById = async (id, asXml = false) => {
   if (process.env.NODE_ENV === "production") {
-    const workflow = await fetch(`${WORKFLOWS_API}?id=${id}`, {
-      headers: {
-        "Content-Type": "text/xml"
-      }
-    });
-    xml = await workflow.text();
+    if (asXml) {
+      return await API.getWorkflowByIdJSON(id);
+    } else {
+      return await API.getWorkflowById(id);
+    }
   } else {
-    xml = `<Workflow>
+    const xml = `<Workflow>
     <Id>116</Id>
     <Information>
         <Name>new rofklow</Name>
@@ -94,19 +60,17 @@ export const openWorkflowFromId = async id => {
   </Step>
 </Steps>
 </Workflow>`;
+    return asXml ? xml : await Decorators.workflowDecorator(xml, webservices);
   }
-  return xml;
 };
 
-export const getCollectionsAPI = async () => {
-  let xml;
+export const getCollections = async () => {
   if (process.env.NODE_ENV === "production") {
-    const xmlApi = await fetch(COLLECTIONS_API);
-    xml = await xmlApi.text();
+    return await API.getCollections();
   } else {
     // const filepath = "collections.xml";
     // xml = (await import(`raw-loader!./${filepath}`)).default;
-    xml = `<Collections>
+    const xml = `<Collections>
     <Collection>
     <Id>134</Id>
     <Url>http://134.21.72.190:8080/collections/qwertz</Url>
@@ -335,7 +299,6 @@ export const getCollectionsAPI = async () => {
         </File>
     </Files>
 </Collection></Collections>`;
+    return await Decorators.collectionsDecorator(xml);
   }
-
-  return await Decorators.collectionsDecorator(xml);
 };

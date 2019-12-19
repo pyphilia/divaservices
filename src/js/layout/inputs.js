@@ -4,7 +4,6 @@ const $ = jQuery;
 global.$ = global.jQuery = $;
 
 import "select2js";
-import { BASE_URL } from "../../config";
 import {
   TOOLTIP_BREAK_LINE,
   PARAM_COL,
@@ -29,7 +28,7 @@ import { objectToString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
 import { elementOnChangePosition } from "../events/paperEvents";
-import { Validation, Constants } from "divaservices-utils";
+import { Validation, Constants, API } from "divaservices-utils";
 const { Types } = Constants;
 
 export const setSelectValueInElement = (boxId, parameters) => {
@@ -424,10 +423,7 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
         "data-placement": "right"
       })
       .on("click", function() {
-        const win = window.open(
-          `${BASE_URL}services/${serviceId}/view`,
-          "_blank"
-        );
+        const win = window.open(API.getServiceViewUrl(serviceId), "_blank");
         win.focus();
       })
       .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`));

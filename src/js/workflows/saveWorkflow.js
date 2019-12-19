@@ -6,8 +6,7 @@ import xml2js from "xml2js";
 import { getWebserviceByName } from "../constants/globals";
 import { app } from "../app";
 import { CATEGORY_DATATEST, CATEGORY_SERVICE } from "../constants/constants";
-import { Validation, XMLBuilders, DivaServices } from "divaservices-utils";
-import { sendWorkflowSteps } from "../api/requests";
+import { Validation, XMLBuilders, DivaServices, API } from "divaservices-utils";
 import { getOrderedElements } from "../elements/orderElement";
 
 // we use the actual graph nodes to get the workflow
@@ -47,7 +46,9 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
             Name: paramName,
             Value
           });
-          _inputs.parameters[paramName] = JSON.parse(Value);
+          _inputs.parameters[paramName] = DivaServices.parseParameterValue(
+            Value
+          );
         }
         const validity = Validation.checkValue(Value, paramType, values);
         if (!validity) {
@@ -182,7 +183,7 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
   // var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
   // saveAs(blob, "../../tmp/hello.xml");
 
-  await sendWorkflowSteps(xml, installation);
+  await API.saveWorkflow(xml, app.workflowId, installation);
 
   return request;
 };

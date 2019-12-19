@@ -11,12 +11,12 @@ import {
 } from "../elements/addElement";
 import { app } from "../app";
 import { isParamInput, generateUniqueId } from "../layout/utils";
-import { openWorkflowFromId } from "../api/requests";
+import { getWorkflowById } from "../api/requests";
 import { buildDataElement } from "../elements/addDataElement";
+import { API } from "divaservices-utils";
 
 export const readWorkflow = async id => {
-  const xml = await openWorkflowFromId(id);
-
+  const xml = await getWorkflowById(id, true);
   const elements = [];
   const links = [];
   const linksTmp = [];
@@ -79,11 +79,11 @@ export const readWorkflow = async id => {
             // add input box
             const ref = generateUniqueId();
             const mimetype = mime.lookup(Path[0]);
-            const [collectionName, filename] = Path[0].split("/");
+            const identifier = Path[0];
             const dataEl = buildDataElement(mimetype, [
               {
-                identifier: Path[0],
-                url: `http://134.21.72.190:8080/files/${collectionName}/original/${filename}`,
+                identifier,
+                url: API.buildFileUrlFromIdentifier(identifier),
                 options: {
                   "mime-type": mimetype
                 }

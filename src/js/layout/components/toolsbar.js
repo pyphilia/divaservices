@@ -13,7 +13,7 @@ import { getElementByBoxId } from "../utils";
 import { saveWorkflow } from "../../workflows/saveWorkflow";
 import { fireAlert } from "../../utils/alerts";
 import { MESSAGE_SAVE_SUCCESS } from "../../constants/messages";
-import { WORKFLOWS_API, WORKFLOWS_EXECUTION_ENDPOINT } from "../../../config";
+import { API } from "divaservices-utils";
 
 const Toolsbar = Vue.component("Toolsbar", {
   props: ["selectedElements", "paper", "scale"],
@@ -163,7 +163,9 @@ const Toolsbar = Vue.component("Toolsbar", {
           "save and install": {
             action: async () => {
               await saveWorkflow(app.graph.toJSON(), true);
-              top.window.location.href = `${WORKFLOWS_API}/${app.workflowId}/${WORKFLOWS_EXECUTION_ENDPOINT}`;
+              top.window.location.href = API.getExecutionViewUrl(
+                app.workflowId
+              );
             },
             icon: "fas fa-download",
             enabledCondition: true

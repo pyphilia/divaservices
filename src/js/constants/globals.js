@@ -1,14 +1,8 @@
-import { Decorators } from "divaservices-utils";
-import { getServicesAPI } from "../api/requests";
+import { getServices } from "../api/requests";
 import { DATATEST_TYPE } from "./constants";
 
 export let webservices;
 export let dataInputs;
-
-const _initWebservices = async () => {
-  const xml = await getServicesAPI();
-  webservices = await Decorators.webservicesDecorator(xml);
-};
 
 const _initDataInputs = async () => {
   dataInputs = [
@@ -32,7 +26,7 @@ const _initDataInputs = async () => {
 
 // init webservices from xml file
 export const initWebservices = async () => {
-  await _initWebservices();
+  webservices = await getServices();
   await _initDataInputs();
 };
 
