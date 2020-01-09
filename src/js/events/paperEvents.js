@@ -1,3 +1,7 @@
+/**
+ * This file contains all events on joint.js paper
+ */
+
 import * as $ from "jquery";
 import * as joint from "jointjs";
 import Vue from "vue";
@@ -49,7 +53,7 @@ export const initPaperEvents = () => {
     move = spaceDown;
 
     if (!ctrlDown) {
-      app.unSelectAllElements();
+      app.$unSelectAllElements();
     }
     // unfocus inputs when clicks
     const focusedInput = document.querySelector("input:focus");
@@ -75,6 +79,14 @@ export const initPaperEvents = () => {
     }
   });
 
+  document.body.addEventListener("mouseup", () => {
+    if (app.$resizing) {
+      app.$endResize(paper);
+    }
+  });
+
+  // /*------------MOVE */
+
   document
     .querySelector(INTERFACE_ROOT)
     .addEventListener("mousemove", event => {
@@ -90,12 +102,6 @@ export const initPaperEvents = () => {
         app.$computeAreaSelection();
       }
     });
-
-  document.body.addEventListener("mouseup", () => {
-    if (app.$resizing) {
-      app.$endResize(paper);
-    }
-  });
 
   // /*------------LINK EVENTS */
 
@@ -141,12 +147,19 @@ export const initPaperEvents = () => {
       // the current selection is reset
 
       if (!ctrlDown) {
-        app.unSelectAllElements();
+        app.$unSelectAllElements();
       }
 
       app.addElementToSelection(cellView);
     } else {
       app.$initResize(e);
+    }
+  });
+
+  paper.on("element:pointerup", () => {
+    if (changePosition) {
+      changePosition = false;
+      app.$moveSelectedElements();
     }
   });
 
@@ -158,7 +171,7 @@ export const initPaperEvents = () => {
     // if control key is not hold, a different
     // the current selection is reset
     if (!ctrlDown) {
-      app.unSelectAllElements();
+      app.$unSelectAllElements();
     }
 
     app.addElementToSelection(cellView);
@@ -172,19 +185,18 @@ export const initPaperEvents = () => {
     contextMenu.setPositionToContextMenu(CONTEXT_MENU_PAPER, { x, y });
     return false;
   });
-
-  paper.on("element:pointerup", () => {
-    if (changePosition) {
-      changePosition = false;
-      app.moveSelectedElements();
-    }
-  });
 };
 
+/**
+ * move operation callback
+ * support multiple elements moving
+ *
+ * @param {*} stopPropagation if true, avoid movements propagation callback (avoid infinite loop)
+ */
 export const elementOnChangePosition = (
   el,
   newPosition,
-  { multitranslate }
+  { stopPropagation }
 ) => {
   changePosition = true;
   const allSelect = $(`${INTERFACE_ROOT} .select ${Types.SELECT.tag}`);
@@ -193,11 +205,11 @@ export const elementOnChangePosition = (
 
   const { selectedElements } = app;
   // need to move all elements at the same time
-  if (!multitranslate && selectedElements.length) {
+  if (!stopPropagation && selectedElements.length) {
     // move all elements except current moved element
     const { boxId: currentBoxId } = el.attributes;
     const { position: oldPosition } = selectedElements.find(
-      el => el.boxId == currentBoxId
+      el => el.boxId === currentBoxId
     );
     const deltaPosition = {
       x: newPosition.x - oldPosition.x,

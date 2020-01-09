@@ -1,10 +1,11 @@
 /**
- * Initialize toolsbar
+ * Elements search component
  */
 import Vue from "vue";
 import { app } from "../../app";
 import { buildSearchRegex } from "../../utils/utils";
 import { centerBoxInPaperByBoxId } from "../utils";
+import { SEARCH_ELEMENTS_ID } from "../../constants/selectors";
 
 const Search = Vue.component("SearchElements", {
   props: ["selectedElements", "paper", "scale"],
@@ -17,12 +18,14 @@ const Search = Vue.component("SearchElements", {
     };
   },
   methods: {
+    /**
+     * open search bar
+     */
     openSearch() {
-      console.log("open");
       this.open = true;
     },
     searchForElements() {
-      this.query = document.getElementById("search-elements").value;
+      this.query = document.getElementById(SEARCH_ELEMENTS_ID).value;
 
       // @TODO: check on searchStr
       const regex = buildSearchRegex(this.query);
@@ -43,18 +46,21 @@ const Search = Vue.component("SearchElements", {
       }
     },
     nextCandidate() {
+      // if is last element, return to first element
       if (++this.currentId >= this.candidates.length) {
         this.currentId = 0;
-      } else if (this.currentId < 0) {
+      }
+      // go to next element
+      else if (this.currentId < 0) {
         this.currentId = this.candidates.length - 1;
       }
+      // move paper to center box
       centerBoxInPaperByBoxId(this.candidates[this.currentId].boxId);
     }
   },
-  // @TODO search done twice because of a
   template: `
     <div v-if="open" id="search-component">
-            <input id="search-elements" type="text" placeholder="Search for an element..." />
+            <input id="${SEARCH_ELEMENTS_ID}" type="text" placeholder="Search for an element..." />
             {{candidates.length ? currentId+1 : 0}} / {{candidates.length}}
             <button type="button" @click="searchForElements()">Search</button>
             <button type="button" @click="nextCandidate()" :disabled="!candidates.length">Next</button>

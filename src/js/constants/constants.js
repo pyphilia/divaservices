@@ -1,4 +1,9 @@
-import { PORT_SELECTOR, OUT_PORT_CLASS, IN_PORT_CLASS } from "./selectors";
+import {
+  PORT_SELECTOR,
+  OUT_PORT_CLASS,
+  IN_PORT_CLASS,
+  TOOLTIP_CLASS
+} from "./selectors";
 
 export const BOX_HIGHLIGHTERS = [
   {
@@ -47,7 +52,7 @@ export const MAX_SCALE = 1;
 
 export const TOOLTIP_OPTIONS = { html: true, scrollParent: "viewport" };
 export const TOOLTIP_BREAK_LINE = "<br>";
-export const TOOLTIP_HTML = `<span><i class="fas fa-info-circle"></i></span>`;
+export const TOOLTIP_HTML = `<span class="${TOOLTIP_CLASS}" data-toggle="tooltip" data-placement="right"><i class="fas fa-info-circle"></i></span>`;
 export const BOX_TITLE_HTML_TAG = "h3";
 
 export const TOOLTIP_COL = "col-1";
@@ -61,6 +66,10 @@ export const TOOLTIP_BOX_COL = "col-2";
 
 export const MIN_ELEMENT_WIDTH = 150;
 export const MIN_ELEMENT_HEIGHT = 100;
+export const DEFAULT_BOX_SIZE = {
+  width: MIN_ELEMENT_WIDTH,
+  height: MIN_ELEMENT_HEIGHT
+};
 
 export const MimeTypes = {
   folder: {
@@ -97,10 +106,10 @@ export const PORT_LABEL_MARKUP = [{ tagName: "text", selector: "mainText" }];
 
 export const PORT_ATTRS = position => {
   let refX, magnet;
-  if (position == IN_PORT_CLASS) {
+  if (position === IN_PORT_CLASS) {
     magnet = "passive";
     refX = 0;
-  } else if (position == OUT_PORT_CLASS) {
+  } else if (position === OUT_PORT_CLASS) {
     magnet = "active";
     refX = -20;
   }
@@ -186,3 +195,17 @@ export const Shortcuts = {
 };
 
 export const DRAGGABLE_GROUP_NAME = "files";
+
+export const PRODUCTION_MODE = "production";
+
+export const ICON_DELETE = "fas fa-trash";
+export const ICON_DUPLICATE = "fas fa-clone";
+export const ICON_UNDO = "fas fa-undo";
+export const ICON_REDO = "fas fa-redo";
+export const ICON_ZOOM_IN = "fas fa-search-plus";
+export const ICON_ZOOM_OUT = "fas fa-search-minus";
+export const ICON_RESIZE = "fas fa-expand";
+export const ICON_SETTINGS = "fas fa-cog";
+export const ICON_SEARCH = "fas fa-search";
+export const ICON_SAVE = "fas fa-save";
+export const ICON_INSTALL = "fas fa-download";

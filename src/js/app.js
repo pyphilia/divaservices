@@ -4,14 +4,13 @@ import { mapActions, mapState } from "vuex";
 import plugins from "./plugins";
 import components from "./layout/components";
 import store from "./store/store";
-import { Constants, DivaServices } from "divaservices-utils";
-const { Types } = Constants;
+import { DivaServices } from "divaservices-utils";
 import { initWebservices } from "./constants/globals";
 import { initPaperEvents } from "./events/paperEvents";
 import { getElementByBoxId, getLinkBySourceTarget } from "./layout/utils";
 import { highlightSelection, unHighlight } from "./store/modules/highlight";
 import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "./constants/constants";
-import { addElementByName, addLinkFromLink } from "./elements/addElement";
+import { addElementFromName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
 import { resizeElements } from "./elements/resizeElement";
 import {
@@ -55,13 +54,12 @@ export let app;
       graph: new joint.dia.Graph(),
       paper: null,
       translation: { tx: 0, ty: 0 },
-      workflowId: 0
+      workflowId: undefined
     },
     components,
     computed: {
       // this computed method is necessary since we shouldn't
       // listen to the store directly
-      // we should use getters but for some reason (namespace?) it is not working
       elementsData() {
         return this.elements;
       },
@@ -106,55 +104,64 @@ export let app;
     },
     methods: {
       addElementToSelection(cellView) {
-        this.addElementToSelection(cellView);
+        this.$addElementToSelection(cellView);
       },
       translate(newX, newY) {
         this.paper.translate(newX * this.scale, newY * this.scale);
         this.translation = this.paper.translate();
       },
       addLinkFromApp(payload) {
-        this.addLink({ ...payload, graph: this.graph });
+        this.$addLink({ ...payload, graph: this.graph });
       },
       deleteLinkFromApp(payload) {
-        this.deleteLink({ ...payload, graph: this.graph });
+        this.$deleteLink({ ...payload, graph: this.graph });
       },
       deleteElementByCellView(cellView) {
         const boxId = cellView.model.attributes.boxId;
-        this.deleteElements({
-          elements: [this.elements.find(el => el.boxId == boxId)]
+        this.$deleteElements({
+          elements: [this.elements.find(el => el.boxId === boxId)]
         });
       },
+
+      /**
+       * zoom call
+       */
       zoomInFromApp() {
         this.$zoomIn(this.paper);
       },
       zoomOutFromApp() {
         this.$zoomOut(this.paper);
       },
+
       resizeElementByBoxId(boxId, size) {
-        const element = this.elements.find(el => el.boxId == boxId);
-        this.resizeElement({ element, size });
+        const element = this.elements.find(el => el.boxId === boxId);
+        this.$resizeElement({ element, size });
       },
       ...mapActions("Interface", [
-        "unSelectAllElements",
-        "clearElements",
-        "selectAllElements",
-        "addElementToSelection",
-        "addUniqueElementToSelection",
-        "copySelectedElements",
-        "duplicateElements",
-        "deleteElements",
-        "setSelectValueInElement",
-        "setInputValueInElement",
-        "addLink",
+        "$unSelectAllElements",
+        "$clearElements",
+        "$selectAllElements",
+        "$addElementToSelection",
+        "$addUniqueElementToSelection",
+        "$copySelectedElements",
+        "$duplicateElements",
+        "$deleteElements",
+        "$setSelectValueInElement",
+        "$setInputValueInElement",
+        "$addLink",
         "deleteLink",
-        "moveSelectedElements",
-        "resizeElement",
-        "openWorkflow",
-        "updateDataInDataElement",
-        "selectElements"
+        "$moveSelectedElements",
+        "$resizeElement",
+        "$openWorkflow",
+        "$updateDataInDataElement",
+        "$selectElements"
       ])
     },
     watch: {
+      /**
+       * watches current elements
+       * add new elements, remove deleted elements
+       */
       currentElements: {
         handler(newValue, oldValue) {
           // if boxId element does not exist in the graph, we add it
@@ -162,7 +169,7 @@ export let app;
             const { type, category } = el;
             switch (category) {
               case CATEGORY_SERVICE:
-                addElementByName(type, el);
+                addElementFromName(type, el);
                 break;
               case CATEGORY_DATATEST:
                 addDataBox(el);
@@ -180,17 +187,26 @@ export let app;
         }
       },
 
+      /**
+       * watches current data elements
+       * current state: debug
+       */
       currentDataElements: {
         deep: true,
         handler(newValue, oldValue) {
           const difference = findDifferenceBy(newValue, oldValue, "boxId");
           console.log("TCL: handler -> difference", difference);
           // for (const { boxId, defaultParams } of difference) {
-          //   setSelectValueInElement(boxId, defaultParams[Types.SELECT.type]);
-          //   setInputValueInElement(boxId, defaultParams[Types.NUMBER.type]);
+          //   setSelectValueInElement(...);
+          //   setInputValueInElement(...);
           // }
         }
       },
+      /**
+       * watch parameters of elements
+       * on direct changes, nothing changes (mechanic operation)
+       * only apply changes on undo-redo
+       */
       defaultParamsElements: {
         deep: true,
         handler(newValue, oldValue) {
@@ -199,12 +215,17 @@ export let app;
             oldValue,
             "defaultParams"
           );
-          for (const { boxId, defaultParams } of difference) {
-            setSelectValueInElement(boxId, defaultParams[Types.SELECT.type]);
-            setInputValueInElement(boxId, defaultParams[Types.NUMBER.type]);
+          for (const box of difference) {
+            setSelectValueInElement(box);
+            setInputValueInElement(box);
           }
         }
       },
+      /**
+       * watch moved elements
+       * on direct move operation, nothing changes (mechanic operation)
+       * only apply changes on undo-redo
+       */
       movedElements: {
         deep: true,
         handler(newValue, oldValue) {
@@ -212,6 +233,11 @@ export let app;
           moveElements(difference);
         }
       },
+      /**
+       * watch moved elements
+       * on direct resize operation, nothing changes (mechanic operation)
+       * only apply changes on undo-redo
+       */
       resizedElements: {
         deep: true,
         handler(newValue, oldValue) {
@@ -219,6 +245,12 @@ export let app;
           resizeElements(difference);
         }
       },
+      /**
+       * watch links
+       * on direct operation, nothing changes (mechanic operation)
+       * on start, add parsed links
+       * apply changes on undo-redo
+       */
       links(newValue, oldValue) {
         for (const l of getNewLinks(newValue)) {
           addLinkFromLink(l);
@@ -227,18 +259,25 @@ export let app;
         // remove links removed from arr
         // cannot use arr.includes because states are deep cloned
         for (const el of oldValue.filter(
-          el => newValue.filter(v => equalObjects(v, el)).length == 0
+          el => newValue.filter(v => equalObjects(v, el)).length === 0
         )) {
           const link = getLinkBySourceTarget(el.source, el.target);
           deleteLink(link);
         }
       },
+      /**
+       * watches deleted elements
+       */
       deletedElements(newValue) {
         // if element is not in elements but exist in graph, delete it
+        // @TODO: optimize ?
         for (const element of getElementsInGraph(newValue)) {
           deleteElementByBoxId(element.boxId);
         }
       },
+      /**
+       * watches selected elements
+       */
       selectedElements(newValue, oldValue) {
         // highlight current selection
         for (const { boxId } of newValue) {
@@ -256,6 +295,9 @@ export let app;
           }
         }
       },
+      /**
+       * watches paper scale
+       */
       scale(nextScale, currentScale) {
         this.$changePaperScale(this.paper, nextScale, currentScale);
       }
@@ -264,27 +306,24 @@ export let app;
       this.paper = initPaper(this.graph);
 
       this.$nextTick(() => {
+        // init events
         initPaperEvents();
         initKeyboardEvents(); // WARNiNG promise
 
-        if (process.env.NODE_ENV === "production") {
-          // check id, if there is no id, go back to workflows
-          const id = DivaServices.getUrlParameters().id;
-          if (!isNaN(id)) {
-            this.workflowId = id;
-            readWorkflow(id);
-          } else {
-            alert("error with id " + id);
-          }
+        // retrieve workflow id
+        const id = DivaServices.getUrlParameters().id;
+        if (!isNaN(id)) {
+          this.workflowId = id;
+          readWorkflow(id);
         } else {
-          this.workflowId = 32;
-          readWorkflow();
+          throw "Error with id " + id;
         }
       });
 
+      // initialize rezisable split
       initSplit();
 
-      console.log(this.paper.svg);
+      // init tutorial tour
       initTour();
     }
   });

@@ -1,3 +1,7 @@
+/**
+ * Resize plugin
+ */
+
 import { app } from "../app";
 import * as joint from "jointjs";
 import { resizeElementBox } from "../elements/resizeElement";
@@ -15,18 +19,6 @@ const plugin = {
   install(Vue) {
     Vue.prototype.$resizing = false;
 
-    Vue.prototype.$removeResizer = () => {
-      if (resizer) {
-        resizer.remove();
-        resizer = null;
-      }
-    };
-
-    Vue.prototype.$endResize = () => {
-      Vue.prototype.$resizing = false;
-      app.resizeElementByBoxId(boxId, currentElement.attributes.size);
-    };
-
     Vue.prototype.$initResize = () => {
       Vue.prototype.$resizing = true;
 
@@ -37,9 +29,18 @@ const plugin = {
       startingElementPos = { ...position, ...size };
     };
 
+    Vue.prototype.$endResize = () => {
+      Vue.prototype.$resizing = false;
+      app.resizeElementByBoxId(boxId, currentElement.attributes.size);
+    };
+
+    /**
+     * create element to allow resizing
+     */
     Vue.prototype.$createResizer = cellView => {
       const { graph } = app;
 
+      // select dom element
       currentElement = cellView.model;
       boxId = currentElement.attributes.boxId;
       currentState = app.elements.find(el => el.boxId == boxId);
@@ -47,6 +48,7 @@ const plugin = {
         `foreignObject[boxId='${boxId}']`
       );
 
+      // create resizer
       resizer = new joint.shapes.standard.Rectangle();
       resizer.attributes.class = "resizer";
       resizer.resize(15, 15);
@@ -64,10 +66,23 @@ const plugin = {
       });
     };
 
+    /**
+     * remove resizer element
+     */
+    Vue.prototype.$removeResizer = () => {
+      if (resizer) {
+        resizer.remove();
+        resizer = null;
+      }
+    };
+
+    /**
+     * resize operation
+     */
     Vue.prototype.$resize = ({ x, y }) => {
       const deltaX = -startingResizerPos.x + x;
       const deltaY = -startingResizerPos.y + y;
-      // @TODO min - max
+      // @TODO: constrain to min - max value
       const height = Math.max(
         startingElementPos.height + deltaY,
         MIN_ELEMENT_HEIGHT

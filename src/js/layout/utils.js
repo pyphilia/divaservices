@@ -57,8 +57,8 @@ export const getLinkBySourceTarget = (source, target) => {
     return (
       sourceBoxId == source.boxId &&
       targetBoxId == target.boxId &&
-      sPortName == source.portName &&
-      tPortName == target.portName
+      sPortName === source.portName &&
+      tPortName === target.portName
     );
   });
 };
@@ -71,7 +71,7 @@ export const generateUniqueId = () => {
 
 export const isParamInput = input => {
   if (input.type) {
-    return input.type == Types.SELECT.type || input.type == Types.NUMBER.type;
+    return input.type === Types.SELECT.type || input.type === Types.NUMBER.type;
   }
 
   return input[Types.SELECT.type] || input[Types.NUMBER.type];
@@ -79,7 +79,7 @@ export const isParamInput = input => {
 
 export const isPort = el => {
   if (el.type) {
-    return el.type == Types.FILE.type || el.type == Types.FOLDER.type;
+    return el.type === Types.FILE.type || el.type === Types.FOLDER.type;
   }
   return el[Types.FILE.type] || el[Types.FOLDER.type];
 };
@@ -87,7 +87,7 @@ export const isPort = el => {
 export const isPortUserdefined = el => {
   if (el.type) {
     return (
-      el.type == Types.FILE.type || el.type == Types.FOLDER.type
+      el.type === Types.FILE.type || el.type === Types.FOLDER.type
       // && el.userdefined
     );
   }
@@ -151,10 +151,10 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
   const inputsHeight = showParameters ? nbParam * paramHeight : 0;
 
   const inPorts = portsItems.length
-    ? portsItems.filter(x => x.group == IN_PORT_CLASS)
+    ? portsItems.filter(x => x.group === IN_PORT_CLASS)
     : [];
   const outPorts = portsItems.length
-    ? portsItems.filter(x => x.group == OUT_PORT_CLASS)
+    ? portsItems.filter(x => x.group === OUT_PORT_CLASS)
     : [];
 
   const maxPortEntry = Math.max(inPorts.length, outPorts.length);
@@ -165,25 +165,6 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
     inputsHeight + computeTitleLength(el, fromSVG).titleHeight
   );
 };
-
-/* break line every 3 times
-let i= 0 
-let found = 0;
-originalStr = 'wefw,ergerg,ergeth,'
-str= originalStr
-while(found != -1) {
-found = str.search(/,/)
-str = str.substr(found+1, str.length)
-console.log(found)
-if(i==3) {
-  originalStr.replace(str, )
-}
-i++;
-  if(i==8) {
-    break;
-  }
-}
-*/
 
 export const buildPortAttrs = (name, type, typeAllowed) => {
   const showPortDetails = layoutSettingsApp.isShowPortsDetailsChecked();
@@ -298,5 +279,5 @@ export const centerBoxInPaperByBoxId = boxId => {
   );
 
   // highlight element
-  app.addUniqueElementToSelection(el.findView(paper));
+  app.$addUniqueElementToSelection(el.findView(paper));
 };

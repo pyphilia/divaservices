@@ -1,5 +1,10 @@
 import { app } from "../app";
 
+/**
+ * order graph elements from source to target
+ *
+ * @param {graph} graph
+ */
 export const orderGraph = graph => {
   let i = 100;
   let j = i;
@@ -7,7 +12,7 @@ export const orderGraph = graph => {
   const margin = 700;
   const verticalMargin = 300;
 
-  app.unSelectAllElements(); // disable position onmove event on selected elements
+  app.$unSelectAllElements(); // disable position onmove event on selected elements
 
   // source elements or not linked elements
   const sources = graph.getSources();
@@ -39,6 +44,9 @@ export const orderGraph = graph => {
   app.$fitContent(app.paper);
 };
 
+/**
+ * get elements in order, from source to target
+ */
 export const getOrderedElements = () => {
   const order = [];
   const { graph } = app;

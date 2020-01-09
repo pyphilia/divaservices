@@ -1,19 +1,12 @@
-import { MAX_SCALE, MIN_SCALE } from "../../constants/constants";
 import {
   ATTR_TYPE_ALLOWED,
   ATTR_TYPE,
   IN_PORT_CLASS
 } from "../../constants/selectors";
 
-export const zoomInCondition = scale => {
-  return scale >= MAX_SCALE;
-};
-
-export const zoomOutCondition = scale => {
-  return scale <= MIN_SCALE;
-};
-
-// matching algorithm for ports to be linked and highlighted
+/**
+ * matching algorithm to validate port connection
+ */
 /* eslint-disable-next-line no-unused-vars */
 export const validateConnection = (vS, mS, vT, mT, end, lV) => {
   if (!mT) {
@@ -45,7 +38,7 @@ export const validateConnection = (vS, mS, vT, mT, end, lV) => {
   const allowedS = mS.getAttribute(ATTR_TYPE_ALLOWED).split(",");
   const allowedT = mT.getAttribute(ATTR_TYPE_ALLOWED).split(",");
   const commonType = allowedS.filter(value => -1 !== allowedT.indexOf(value));
-  if (commonType.length == 0) {
+  if (commonType.length === 0) {
     return false;
   }
 

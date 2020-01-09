@@ -1,9 +1,15 @@
+/**
+ * This file contains all requests to fetch or send
+ * data to DIVA Services
+ */
+
 import { Decorators, API } from "divaservices-utils";
 import { WEBSERVICES_XML_FILEPATH } from "../../config";
 import { webservices } from "../constants/globals";
+import { PRODUCTION_MODE } from "../constants/constants";
 
 export const getServices = async () => {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === PRODUCTION_MODE) {
     return await API.getServices();
   } else {
     const filepath = WEBSERVICES_XML_FILEPATH;
@@ -13,7 +19,7 @@ export const getServices = async () => {
 };
 
 export const getWorkflowById = async (id, asXml = false) => {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === PRODUCTION_MODE) {
     if (asXml) {
       return await API.getWorkflowByIdJSON(id);
     } else {
@@ -38,6 +44,9 @@ export const getWorkflowById = async (id, asXml = false) => {
         <Name>inputImage</Name>
         <Path>qwertz/2299942_0.jpg</Path>
       </Data>
+      <Parameter>
+      <Name>skewsteps</Name>
+      <Value>543</Value></Parameter>
     </Inputs>
   </Step>
   <Step>
@@ -65,7 +74,7 @@ export const getWorkflowById = async (id, asXml = false) => {
 };
 
 export const getCollections = async () => {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === PRODUCTION_MODE) {
     return await API.getCollections();
   } else {
     // const filepath = "collections.xml";

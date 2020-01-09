@@ -1,3 +1,7 @@
+/**
+ * Split.js configuration
+ */
+
 import Split from "split.js";
 import { LEFT_SIDEBAR, MAIN_INTERFACE } from "../constants/selectors";
 

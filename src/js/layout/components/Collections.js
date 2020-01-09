@@ -1,3 +1,8 @@
+/**
+ * Collection component
+ * state: on development
+ */
+
 import Vue from "vue";
 import * as $ from "jquery";
 import draggable from "vuedraggable";
@@ -28,7 +33,7 @@ const Collections = Vue.component("Collections", {
         .map(coll => ({
           ...coll,
           files: coll.files.filter(
-            ({ options }) => options["mime-type"] == this.mimeType
+            ({ options }) => options["mime-type"] === this.mimeType
           )
         }))
         .filter(({ files }) => files.length);
@@ -67,7 +72,7 @@ const Collections = Vue.component("Collections", {
     updateDataFile() {
       console.log("update");
       const data = this.files[this.id];
-      app.updateDataInDataElement({ boxId: this.id, data });
+      app.$updateDataInDataElement({ boxId: this.id, data });
       // @TODO: suppose one image
       updateImgPreview(this.id, data);
 
@@ -95,7 +100,7 @@ const Collections = Vue.component("Collections", {
   <div class="modal-dialog modal-lg">
   <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Choose a file</h5>
+        <h5 class="modal-title" id="collectionModal">Choose a file</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -103,7 +108,7 @@ const Collections = Vue.component("Collections", {
 
       <div v-if="!filteredCollections" >Loading...</div>
 
-      <div class="no-file-found" v-else-if="filteredCollections && filteredCollections.length == 0" >No file available</div>
+      <div class="no-file-found" v-else-if="filteredCollections && filteredCollections.length === 0" >No file available</div>
 
     <div id="collections-wrapper">
 

@@ -1,3 +1,7 @@
+/**
+ * Zoom plugin
+ * it handles every zoom operation on the paper
+ */
 import {
   MIN_SCALE,
   MAX_SCALE,
@@ -21,12 +25,19 @@ const plugin = {
   install(Vue) {
     Vue.prototype.$zoom = Vue.observable({ scale: DEFAULT_SCALE, x: 0, y: 0 });
 
+    /**
+     * zoom out by a certain amount
+     */
     Vue.prototype.$zoomOut = paper => {
       const currentScale = Vue.prototype.$zoom.scale;
       const nextScale = currentScale - 2 / ZOOM_STEP;
       const position = computePaperCenterPosition(paper);
       Vue.prototype.$changeZoom(1, position.x, position.y, nextScale);
     };
+
+    /**
+     * zoom in by a certain amount
+     */
     Vue.prototype.$zoomIn = paper => {
       const currentScale = Vue.prototype.$scale;
       const nextScale = currentScale + 2 / ZOOM_STEP;
@@ -38,6 +49,10 @@ const plugin = {
       Vue.prototype.$changeZoom(1, position.x, position.y, nextScale);
     };
 
+    /**
+     * zoom by delta, in the direction of delta,
+     * centered at thisX, thisY
+     */
     // zoom algorithm: https://github.com/clientIO/joint/issues/1027
     Vue.prototype.$changeZoom = (delta, thisX, thisY, stateScale) => {
       const nextScale = !stateScale
@@ -61,6 +76,9 @@ const plugin = {
       Vue.prototype.$zoom.scale = paper.scale().sx;
     };
 
+    /**
+     * change scale to currentScale
+     */
     Vue.prototype.$changePaperScale = (paper, nextScale, currentScale) => {
       if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
         const zoom = Vue.prototype.$zoom;

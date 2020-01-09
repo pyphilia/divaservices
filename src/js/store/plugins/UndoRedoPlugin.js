@@ -1,6 +1,11 @@
+/**
+ * Undo-Redo Plugin
+ */
+
 import { cloneDeep } from "lodash";
 import UndoRedoHistory from "./UndoRedoHistory";
 
+// operations which can be undo/redo
 const savedOperations = [
   "Interface/INIT_GRAPH",
   "Interface/INIT_PAPER",

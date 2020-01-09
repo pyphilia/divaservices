@@ -1,3 +1,8 @@
+/**
+ * This file contains the configuration of the tutorial tour
+ * state: on develpment
+ */
+
 import Shepherd from "shepherd.js";
 import {
   INTERFACE_ROOT,

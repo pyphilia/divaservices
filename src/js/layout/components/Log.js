@@ -1,3 +1,9 @@
+/**
+ * Log component
+ * report value errors
+ * state: in development
+ */
+
 import Vue from "vue";
 import { centerBoxInPaperByBoxId } from "../utils";
 
@@ -11,7 +17,7 @@ const Log = Vue.component("Log", {
   methods: {
     findMessage(message) {
       return this.messages.findIndex(
-        m => m.boxId == message.boxId && m.paramName == message.paramName
+        m => m.boxId == message.boxId && m.paramName === message.paramName
       );
     },
     setLogMessages(messages) {
@@ -22,20 +28,20 @@ const Log = Vue.component("Log", {
       // if the input is not already false
       if (mId < 0) {
         this.messages.push(message);
-        this.hacky(message);
+        // this.hacky(message);
       }
       // replace the message
       else {
         this.$set(this.messages[mId], "value", message.value);
       }
     },
-    hacky(message) {
-      // BUG HACK: add twice the message for first pushed message:
-      if (!this.activated) {
-        this.messages.push(message);
-        this.activated = true;
-      }
-    },
+    // hacky(message) {
+    //   // BUG HACK: add twice the message for first pushed message:
+    //   if (!this.activated) {
+    //     this.messages.push(message);
+    //     this.activated = true;
+    //   }
+    // },
     removeMessage(message) {
       this.messages.splice(this.findMessage(message), 1);
     },

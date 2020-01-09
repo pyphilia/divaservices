@@ -1,3 +1,7 @@
+/**
+ * History stack
+ */
+
 import { cloneDeep } from "lodash";
 import { equalObjects } from "../../utils/utils";
 
@@ -28,15 +32,12 @@ class UndoRedoHistory {
     if (!equalObjects(state, this.history[this.currentIndex])) {
       this.history.push(state);
       this.currentIndex++;
-      // console.log(this.history);
-      // console.log("HISTORY ->", this.history[this.currentIndex]);
     }
   }
 
   replaceLastState(state) {
     this.history.splice(-1);
     this.history.push(state);
-    // console.log("HISTORY ->", this.history[this.currentIndex]);
   }
 
   undo() {

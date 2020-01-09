@@ -1,6 +1,11 @@
+/**
+ * Interface store
+ * handles graph elements data
+ */
+
 import Vue from "vue";
 import { cloneDeep } from "lodash";
-import { buildElementFromName } from "../../elements/addElement";
+import { createElementObjectFromName } from "../../elements/addElement";
 import {
   generateUniqueId,
   getElementByBoxId,
@@ -15,7 +20,9 @@ import {
   selectedElements,
   selectElement,
   addLinktoLinks,
-  removeLinksWithDeletedElements
+  removeLinksWithDeletedElements,
+  unSelectAllElements,
+  findElementByBoxId
 } from "./utils";
 import {
   ADD_ELEMENT,
@@ -62,7 +69,7 @@ const Interface = {
       for (const el of elements) {
         deleteElement(el);
       }
-
+      // remove links linked to deleted elements
       state.links = removeLinksWithDeletedElements(state.elements, state.links);
     },
     [ADD_ELEMENT_TO_SELECTION](state, { model }) {
@@ -70,7 +77,7 @@ const Interface = {
       selectElementByBoxId(state.elements, boxId);
     },
     [ADD_UNIQUE_ELEMENT_TO_SELECTION](state, { model }) {
-      state.elements.map(el => (el.selected = false));
+      unSelectAllElements(state.elements);
       const { boxId } = model.attributes;
       selectElementByBoxId(state.elements, boxId);
     },
@@ -80,21 +87,17 @@ const Interface = {
       }
     },
     [UNSELECT_ALL_ELEMENTS](state) {
-      state.elements.map(el => (el.selected = false));
+      unSelectAllElements(state.elements);
     },
     [COPY_SELECTION](state) {
       state.elements.forEach(el => (el.copied = el.selected));
     },
     [SET_SELECT_VALUE](state, { element, value, attr }) {
-      const el = state.elements.find(
-        el => el.boxId == element.attributes.boxId
-      );
+      const el = findElementByBoxId(state.elements, element.attributes.boxId);
       Vue.set(el.defaultParams[Types.SELECT.type][attr], "value", value);
     },
     [SET_INPUT_VALUE](state, { element, value, attr }) {
-      const el = state.elements.find(
-        el => el.boxId == element.attributes.boxId
-      );
+      const el = findElementByBoxId(state.elements, element.attributes.boxId);
       Vue.set(el.defaultParams[Types.NUMBER.type][attr], "value", value);
     },
     [ADD_LINK](state, { link, graph }) {
@@ -128,19 +131,19 @@ const Interface = {
     }
   },
   actions: {
-    addElementByName({ commit }, name) {
+    $addElementByName({ commit }, name) {
       // buils necessary data to build an element afterwards
-      const elementPayload = buildElementFromName(name);
+      const elementPayload = createElementObjectFromName(name);
       commit(ADD_ELEMENT, elementPayload);
     },
-    addDataElement({ commit }, name) {
+    $addDataElement({ commit }, name) {
       const el = buildDataElement(name);
       commit(ADD_ELEMENT, el);
     },
-    clearElements({ commit }) {
+    $clearElements({ commit }) {
       commit(CLEAR_ELEMENTS);
     },
-    duplicateElements({ commit }, { elements }) {
+    $duplicateElements({ commit }, { elements }) {
       const newElements = [];
       for (const el of elements) {
         const fromId = el.boxId; // duplicate case, reference to another element
@@ -157,51 +160,51 @@ const Interface = {
       });
       fireAlert("success", MESSAGE_PASTE_SUCCESS);
     },
-    deleteElements({ commit }, { elements }) {
+    $deleteElements({ commit }, { elements }) {
       commit(DELETE_ELEMENTS, {
         elements
       });
     },
-    addElementToSelection({ commit }, payload) {
+    $addElementToSelection({ commit }, payload) {
       commit(ADD_ELEMENT_TO_SELECTION, payload);
     },
-    addUniqueElementToSelection({ commit }, payload) {
+    $addUniqueElementToSelection({ commit }, payload) {
       commit(ADD_UNIQUE_ELEMENT_TO_SELECTION, payload);
     },
-    unSelectAllElements({ commit }) {
+    $unSelectAllElements({ commit }) {
       commit(UNSELECT_ALL_ELEMENTS);
     },
-    selectElements({ commit }, payload) {
+    $selectElements({ commit }, payload) {
       commit(ADD_ELEMENTS_TO_SELECTION, payload);
     },
-    selectAllElements({ commit, state }) {
+    $selectAllElements({ commit, state }) {
       commit(ADD_ELEMENTS_TO_SELECTION, { elements: state.elements });
     },
-    copySelectedElements({ commit }) {
+    $copySelectedElements({ commit }) {
       commit(COPY_SELECTION);
     },
-    setSelectValueInElement({ commit }, payload) {
+    $setSelectValueInElement({ commit }, payload) {
       commit(SET_SELECT_VALUE, payload);
     },
-    setInputValueInElement({ commit }, payload) {
+    $setInputValueInElement({ commit }, payload) {
       commit(SET_INPUT_VALUE, payload);
     },
-    addLink({ commit }, payload) {
+    $addLink({ commit }, payload) {
       commit(ADD_LINK, payload);
     },
-    deleteLink({ commit }, payload) {
+    $deleteLink({ commit }, payload) {
       commit(DELETE_LINK, payload);
     },
-    moveSelectedElements({ commit, state }) {
+    $moveSelectedElements({ commit, state }) {
       commit(MOVE_ELEMENTS, { elements: selectedElements(state.elements) });
     },
-    resizeElement({ commit }, payload) {
+    $resizeElement({ commit }, payload) {
       commit(RESIZE_ELEMENT, payload);
     },
-    openWorkflow({ commit }, payload) {
+    $openWorkflow({ commit }, payload) {
       commit(OPEN_WORKFLOW, payload);
     },
-    updateDataInDataElement({ commit }, payload) {
+    $updateDataInDataElement({ commit }, payload) {
       commit(UPDATE_DATA_IN_DATA_ELEMENT, payload);
     }
   }

@@ -1,8 +1,19 @@
+/**
+ * This file contains highlight-related functions
+ * Highlights appear when a box is selected
+ */
+
 import { BOX_HIGHLIGHTERS } from "../../constants/constants";
 import { app } from "../../app";
 const MARGIN = 15;
 const HIGHLIGHT_TOOLSBAR = "highlight-toolsbar";
 
+/**
+ * Append a highlight toolbar
+ * state: on development
+ *
+ * @param {cellView} cellView
+ */
 export const appendHighlightToolsbar = cellView => {
   const { size } = cellView.model.attributes;
 
@@ -43,6 +54,11 @@ export function highlightSelection(cellView) {
   }
 }
 
+/**
+ * remove highlight on given cellView
+ *
+ * @param {cellView} cellView
+ */
 export function unHighlight(cellView) {
   for (const highlight of BOX_HIGHLIGHTERS) {
     cellView.unhighlight(null, highlight);
@@ -51,17 +67,32 @@ export function unHighlight(cellView) {
   // removeHighlightToolsbar(cellView)
 }
 
+/**
+ * remove highlight for all given elements
+ *
+ * @param {array} elements
+ */
 export function unHighlightAllElements(elements) {
   for (const el of elements) {
     unHighlight(el);
   }
 }
 
-export const resetHighlight = el => {
-  unHighlight(el);
-  highlightSelection(el);
+/**
+ * reset highlight on element
+ *
+ * @param {element} element
+ */
+export const resetHighlight = element => {
+  unHighlight(element);
+  highlightSelection(element);
 };
 
+/**
+ * reset highlight on all elements
+ *
+ * @param {araay} elements
+ */
 export function resetHighlightAllElements(elements) {
   for (const el of elements) {
     resetHighlight(el);

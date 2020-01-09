@@ -1,14 +1,30 @@
 /**
- * Initialize toolsbar
+ * Toolsbar component
+ * gather all operations on paper and elements
  */
 import Vue from "vue";
 import * as $ from "jquery";
-import { MAX_SCALE, MIN_SCALE, Shortcuts } from "../../constants/constants";
+import {
+  MAX_SCALE,
+  MIN_SCALE,
+  Shortcuts,
+  ICON_DELETE,
+  ICON_DUPLICATE,
+  ICON_UNDO,
+  ICON_REDO,
+  ICON_ZOOM_IN,
+  ICON_ZOOM_OUT,
+  ICON_RESIZE,
+  ICON_SETTINGS,
+  ICON_SEARCH,
+  ICON_INSTALL,
+  ICON_SAVE
+} from "../../constants/constants";
 import { mapState, mapActions } from "vuex";
 import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
 import { app } from "../../app";
 import { TOOLSBAR } from "../../constants/selectors";
-import { shortcutToString, buildSearchRegex } from "../../utils/utils";
+import { shortcutToString } from "../../utils/utils";
 import { getElementByBoxId } from "../utils";
 import { saveWorkflow } from "../../workflows/saveWorkflow";
 import { fireAlert } from "../../utils/alerts";
@@ -25,29 +41,17 @@ const Toolsbar = Vue.component("Toolsbar", {
       this.$setZoom(event.target.value / 100, this.paper);
     },
     deleteAction() {
-      this.deleteElements({ elements: this.selectedElements });
+      this.$deleteElements({ elements: this.selectedElements });
     },
     duplicateAction() {
-      this.duplicateElements({ elements: this.selectedElements });
+      this.$duplicateElements({ elements: this.selectedElements });
     },
     toggleLeftSidebar() {
       this.$root.$refs.leftsidebar.toggle();
     },
-    searchForElements() {
-      const searchStr = document.getElementById("search-elements").value;
-      // @TODO: check on searchStr
-      const regex = buildSearchRegex(searchStr);
-      const candidates = app.elements.filter(({ type }) =>
-        type.toLowerCase().search(regex)
-      );
-      console.log("TCL: searchForElements -> candidates", candidates);
-    },
-    ...mapActions("Interface", ["duplicateElements", "deleteElements"])
+    ...mapActions("Interface", ["$duplicateElements", "$deleteElements"])
   },
   computed: {
-    isLeftsidebarOpen() {
-      return this.$root.$refs.leftsidebar.open;
-    },
     ...mapState("Interface", ["elements"]),
     existSelection() {
       return this.selectedElements.length > 0;
@@ -65,14 +69,14 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           delete: {
             action: this.deleteAction,
-            icon: "fas fa-trash",
+            icon: ICON_DELETE,
             id: "delete",
             enabledCondition: this.existSelection,
             shortcut: Shortcuts.DELETE
           },
           duplicate: {
             action: this.duplicateAction,
-            icon: "fas fa-clone",
+            icon: ICON_DUPLICATE,
             id: "duplicate",
             enabledCondition: this.existSelection
           }
@@ -84,7 +88,7 @@ const Toolsbar = Vue.component("Toolsbar", {
             },
             id: "undo",
             // classNames: "disabled",
-            icon: "fas fa-undo",
+            icon: ICON_UNDO,
             enabledCondition: UndoRedoHistory.canUndo(),
             shortcut: Shortcuts.UNDO
           },
@@ -94,7 +98,7 @@ const Toolsbar = Vue.component("Toolsbar", {
             },
             // classNames: "disabled",
             id: "redo",
-            icon: "fas fa-redo",
+            icon: ICON_REDO,
             enabledCondition: UndoRedoHistory.canRedo(),
             shortcut: Shortcuts.REDO
           }
@@ -104,14 +108,14 @@ const Toolsbar = Vue.component("Toolsbar", {
             action: () => {
               app.zoomInFromApp();
             },
-            icon: "fas fa-search-plus",
+            icon: ICON_ZOOM_IN,
             enabledCondition: this.scale < MAX_SCALE
           },
           "zoom out": {
             action: () => {
               app.zoomOutFromApp();
             },
-            icon: "fas fa-search-minus",
+            icon: ICON_ZOOM_OUT,
             enabledCondition: this.scale > MIN_SCALE
           },
           "zoom slider": {
@@ -127,8 +131,8 @@ const Toolsbar = Vue.component("Toolsbar", {
               ).findView(app.paper);
               app.$createResizer(cellView);
             },
-            icon: "fas fa-expand",
-            enabledCondition: this.selectedElements.length == 1
+            icon: ICON_RESIZE,
+            enabledCondition: this.selectedElements.length === 1
           }
         },
         {
@@ -136,7 +140,7 @@ const Toolsbar = Vue.component("Toolsbar", {
             action: () => {
               $("#exampleModal").modal("show");
             },
-            icon: "fas fa-cog",
+            icon: ICON_SETTINGS,
             enabledCondition: true
           }
         },
@@ -146,7 +150,7 @@ const Toolsbar = Vue.component("Toolsbar", {
               console.log(app.$refs);
               app.$refs.searchElements.openSearch();
             },
-            icon: "fas fa-search",
+            icon: ICON_SEARCH,
             enabledCondition: true
           }
         },
@@ -157,7 +161,7 @@ const Toolsbar = Vue.component("Toolsbar", {
               await saveWorkflow(app.graph.toJSON());
               fireAlert("success", MESSAGE_SAVE_SUCCESS);
             },
-            icon: "fas fa-save",
+            icon: ICON_SAVE,
             enabledCondition: true
           },
           "save and install": {
@@ -167,7 +171,7 @@ const Toolsbar = Vue.component("Toolsbar", {
                 app.workflowId
               );
             },
-            icon: "fas fa-download",
+            icon: ICON_INSTALL,
             enabledCondition: true
           }
         }
@@ -186,7 +190,7 @@ const Toolsbar = Vue.component("Toolsbar", {
       :id="id" :title="name + ' ' + shortcutToString(shortcut)" @click="enabledCondition ? action($event) : $event.preventDefault()"
       :class="{disabled: !enabledCondition}">
       
-        <div v-if="name == 'zoom slider'" class="dropdown">
+        <div v-if="name === 'zoom slider'" class="dropdown">
           <button class="btn btn-secondary btn-sm  dropdown-toggle" type="button" id="zoomDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {{sliderValue}}%
           </button>

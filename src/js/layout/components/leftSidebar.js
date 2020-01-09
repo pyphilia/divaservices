@@ -1,5 +1,5 @@
 /**
- * Initialize the left sidebar
+ * Left sidebar component
  */
 import Vue from "vue";
 import { groupBy } from "lodash"; // we use lodash since it is a dependency of jointjs
@@ -16,6 +16,12 @@ import { mapActions } from "vuex";
 import { toggleSplit } from "../split";
 import { buildSearchRegex } from "../../utils/utils";
 
+/**
+ * utility function to order alphabetically
+ *
+ * @param {object} a must contain an attribute name
+ * @param {object} b must contain an attribute name
+ */
 const alphabeticalOrder = (a, b) => {
   const x = a.name.toLowerCase();
   const y = b.name.toLowerCase();
@@ -27,13 +33,14 @@ const LeftSidebar = Vue.component("LeftSidebar", {
     return {
       open: true,
       search: null,
+      // group services per category, and sort them alphabetically
       services: (() => {
         const mapped = webservices
           .map(service => {
             const { category, name } = service;
             return { category, name };
           })
-          .concat(dataInputs);
+          .concat(dataInputs); // add data inputs category
 
         const servicesPerCategory = groupBy(mapped, "category");
         const sorted = [];
@@ -49,7 +56,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
           .map(algo => algo.category)
           .filter((v, i, a) => a.indexOf(v) === i) // get unique value
           .sort();
-        categories.push(DATATEST_TYPE);
+        categories.push(DATATEST_TYPE); // add data inputs category name
 
         return categories;
       })()
@@ -57,9 +64,9 @@ const LeftSidebar = Vue.component("LeftSidebar", {
   },
   computed: {
     results() {
-      // if search sth
+      // on search
       if (this.search && this.search.length) {
-        document.querySelector(`#${ALGO_ITEM_WRAPPER}`).scrollTo(0, 0);
+        document.getElementById(ALGO_ITEM_WRAPPER).scrollTo(0, 0);
 
         const searchQuery = this.search.toLowerCase();
 
@@ -75,24 +82,34 @@ const LeftSidebar = Vue.component("LeftSidebar", {
             .filter(({ value }) => value != -1)
             .sort((a, b) => a.value - b.value)
         );
-      } else {
+      }
+      // by default, display all services
+      else {
         return this.services;
       }
     }
   },
   methods: {
-    addData(name) {
-      this.addDataElement(name);
-    },
+    /**
+     * toggle left sidebar
+     */
     toggle() {
       this.open = toggleSplit(this.open);
     },
+    /**
+     * reset search query
+     */
     resetSearch() {
       this.search = "";
     },
     getCategoryName(c) {
       return categoryName[c];
     },
+    /**
+     * emphasize search query in service names
+     *
+     * @param {string} string
+     */
     boldRegInString(string) {
       if (this.search) {
         // build regex to take into account capital letters
@@ -107,33 +124,39 @@ const LeftSidebar = Vue.component("LeftSidebar", {
         return string;
       }
     },
+    /**
+     * category click callback
+     * scroll to the first element of the category
+     *
+     * @param {string} category
+     */
     categoryClick(category) {
       this.resetSearch();
 
       this.$nextTick(function() {
         const searchHeight = document
-          .querySelector(`#${ALGO_SEARCH_CONTAINER}`)
+          .getElementById(ALGO_SEARCH_CONTAINER)
           .getBoundingClientRect().height;
 
         const firstEl = document.querySelector(`#${ALGO_ITEMS} .${category}`);
         // @TODO cross browser solutions https://stackoverflow.com/questions/52276194/window-scrollto-with-options-not-working-on-microsoft-edge
-        document.querySelector(`#${ALGO_ITEM_WRAPPER}`).scrollTo({
+        document.getElementById(ALGO_ITEM_WRAPPER).scrollTo({
           top: firstEl.offsetTop - searchHeight,
           left: 0,
           behavior: "smooth"
         });
       });
     },
-    ...mapActions("Interface", ["addElementByName", "addDataElement"])
+    ...mapActions("Interface", ["$addElementByName", "$addDataElement"])
   },
   template: `
   <div id="${LEFT_SIDEBAR}" class="d-flex p-0 flex-nowrap">
     <div class="nav flex-column nav-pills col-3 no-gutters p-0" id="algo-categories" role="tablist" aria-orientation="vertical">
       <div v-for="category in categories" class="category-tab">
-        <span :class="category" @click="categoryClick(category)">
+        <div :class="category + ' category'" @click="categoryClick(category)">
           <div class="icon"></div>
           {{getCategoryName(category)}}
-        </span>
+        </div>
       </div>
     </div>
     <div class="col pr-0" id="algo-tab">
@@ -142,7 +165,7 @@ const LeftSidebar = Vue.component("LeftSidebar", {
       </div>
       <div id="${ALGO_ITEM_WRAPPER}">
         <div id="${ALGO_ITEMS}">
-          <div v-for="{category, name} in results" :class="'${ALGO_ITEM_CLASS} ' + category" :name="name" @click="category == '${DATATEST_TYPE}' ? addData(name) : addElementByName(name)">
+          <div v-for="{category, name} in results" :class="'${ALGO_ITEM_CLASS} ' + category" :data-name="name" @click="category === '${DATATEST_TYPE}' ? $addDataElement(name) : $addElementByName(name)">
             <span class="icon"></span><span class="name" v-html="boldRegInString(name)"></span>
           </div>
         </div>

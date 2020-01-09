@@ -1,3 +1,7 @@
+/**
+ * Minimap component
+ * navigation, overall view of the graph
+ */
 import Vue from "vue";
 import * as joint from "jointjs";
 import {
@@ -80,8 +84,9 @@ const Minimap = Vue.component("Minimap", {
     }
   },
   mounted() {
+    // ensure paper and graph are initialized
     this.$nextTick(function() {
-      // ensure paper and graph are initialized
+      // init minimap with current graph
       this.minimapPaper = new joint.dia.Paper({
         el: document.getElementById(MINIMAP_PAPER_ID),
         model: this.graph,
@@ -94,8 +99,9 @@ const Minimap = Vue.component("Minimap", {
       this.minimapPaper.scaleContentToFit();
       this.mapScale = this.minimapPaper.scale().sx;
 
-      this.navigator = document.querySelector(`#${MINIMAP_NAVIGATOR_SELECTOR}`);
+      this.navigator = document.getElementById(MINIMAP_NAVIGATOR_SELECTOR);
 
+      // add minimap listeners: move
       this.navigator.addEventListener("mousedown", e => {
         this.mapDragFlag = true;
         const { clientY, clientX } = e;

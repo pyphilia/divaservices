@@ -31,7 +31,7 @@ export const initWebservices = async () => {
 };
 
 export const getWebserviceByName = name => {
-  const webservice = webservices.find(service => service.name == name);
+  const webservice = webservices.find(service => service.name === name);
   if (!webservice) {
     throw "Cannot find webservice with name " + name;
   }
@@ -47,7 +47,7 @@ export const getWebserviceById = id => {
 };
 
 export const getDataInputByName = name => {
-  const dataInput = dataInputs.find(inp => inp.name == name);
+  const dataInput = dataInputs.find(inp => inp.name === name);
   if (!dataInput) {
     throw "Cannot find dataInput with name " + name;
   }

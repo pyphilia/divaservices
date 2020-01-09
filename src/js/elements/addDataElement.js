@@ -1,3 +1,7 @@
+/**
+ * state: in development
+ */
+
 import * as joint from "jointjs";
 import { app } from "../app";
 import { getDataInputByName } from "../constants/globals";
@@ -80,7 +84,7 @@ const createFolderInput = boxId => {
   input.odirectory = true;
   input.addEventListener("change", function() {
     const data = [...this.files];
-    app.updateDataInDataElement({ boxId, data });
+    app.$updateDataInDataElement({ boxId, data });
   });
   return input;
 };
@@ -92,7 +96,7 @@ const createFolderInput = boxId => {
 //   // input.setAttribute("accept", mimeType);
 //   input.addEventListener("change", function() {
 //     const data = [...this.files];
-//     app.updateDataInDataElement({ boxId, data });
+//     app.$updateDataInDataElement({ boxId, data });
 //   });
 //   return input;
 // };
@@ -125,7 +129,7 @@ export const updateImgPreview = (boxId, data) => {
     preview.innerHTML = `<img src="${url}"/> <span>${identifier}</span>`;
   }
   // if the image is removed
-  else {
+  else if (preview) {
     preview.innerHTML = "";
   }
 };

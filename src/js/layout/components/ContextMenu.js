@@ -1,3 +1,7 @@
+/**
+ * Context Menu component
+ */
+
 import Vue from "vue";
 import {
   CONTEXT_MENU_ELEMENT,
@@ -17,6 +21,7 @@ const ContextMenus = Vue.component("ContextMenus", {
   props: ["selectedElements", "copiedElements", "paper", "currentElements"],
   data() {
     return {
+      // define 2 context menus: for element, for paper
       contextMenus: {
         [CONTEXT_MENU_ELEMENT]: {
           visible: false,
@@ -32,7 +37,7 @@ const ContextMenus = Vue.component("ContextMenus", {
               className: DUPLICATE_CLASS,
               action: () => {
                 if (this.selectedElements.length) {
-                  this.duplicateElements({
+                  this.$duplicateElements({
                     elements: this.selectedElements
                   });
                 }
@@ -41,7 +46,7 @@ const ContextMenus = Vue.component("ContextMenus", {
             Delete: {
               className: DELETE_CLASS,
               action: () => {
-                this.deleteElements({
+                this.$deleteElements({
                   elements: this.selectedElements
                 });
               }
@@ -55,7 +60,7 @@ const ContextMenus = Vue.component("ContextMenus", {
             Paste: {
               className: PASTE_CLASS,
               action: () => {
-                this.duplicateElements({
+                this.$duplicateElements({
                   elements: this.copiedElements
                 });
               }
@@ -63,7 +68,7 @@ const ContextMenus = Vue.component("ContextMenus", {
             Clear: {
               className: CLEAR_CLASS,
               action: () => {
-                this.deleteElements({
+                this.$deleteElements({
                   elements: this.currentElements
                 });
               }
@@ -75,7 +80,7 @@ const ContextMenus = Vue.component("ContextMenus", {
   },
   computed: {},
   methods: {
-    ...mapActions("Interface", ["duplicateElements", "deleteElements"]),
+    ...mapActions("Interface", ["$duplicateElements", "$deleteElements"]),
     setPositionToContextMenu(menuName, { x, y }) {
       const screenPos = this.paper.localToClientPoint(x, y);
       const offset = this.paper.clientOffset();

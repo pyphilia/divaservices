@@ -1,3 +1,8 @@
+/**
+ * Files Collection component
+ * state: in development
+ */
+
 import Vue from "vue";
 import draggable from "vuedraggable";
 

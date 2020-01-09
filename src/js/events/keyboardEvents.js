@@ -1,7 +1,11 @@
+/**
+ * Keyboard events
+ * handles shortcuts
+ */
+
 import { copy } from "./controls";
 import { app } from "../app";
 import UndoRedoHistory from "../store/plugins/UndoRedoHistory";
-import { readWorkflow } from "../workflows/readWorkflow";
 import { saveWorkflow } from "../workflows/saveWorkflow";
 
 export let ctrlDown;
@@ -28,7 +32,7 @@ export const initKeyboardEvents = async () => {
             break;
           }
           case "v": {
-            app.duplicateElements({ elements: app.copiedElements });
+            app.$duplicateElements({ elements: app.copiedElements });
             break;
           }
           case "z": {
@@ -39,11 +43,6 @@ export const initKeyboardEvents = async () => {
           }
           case "y": {
             UndoRedoHistory.redo();
-            break;
-          }
-          case "o": {
-            readWorkflow();
-            event.preventDefault();
             break;
           }
           case "s": {
@@ -59,28 +58,28 @@ export const initKeyboardEvents = async () => {
           // case "ArrowDown": {
           //   for (const { boxId } of app.selectedElements) {
           //     getElementByBoxId(boxId).translate(0, 50);
-          //     app.moveSelectedElements();
+          //     app.$moveSelectedElements();
           //   }
           //   break;
           // }
           // case "ArrowUp": {
           //   for (const { boxId } of app.selectedElements) {
           //     getElementByBoxId(boxId).translate(0, -50);
-          //     app.moveSelectedElements();
+          //     app.$moveSelectedElements();
           //   }
           //   break;
           // }
           // case "ArrowRight": {
           //   for (const { boxId } of app.selectedElements) {
           //     getElementByBoxId(boxId).translate(50, 0);
-          //     app.moveSelectedElements();
+          //     app.$moveSelectedElements();
           //   }
           //   break;
           // }
           // case "ArrowLeft": {
           //   for (const { boxId } of app.selectedElements) {
           //     getElementByBoxId(boxId).translate(-50, 0);
-          //     app.moveSelectedElements();
+          //     app.$moveSelectedElements();
           //   }
           //   break;
           // }
@@ -88,7 +87,7 @@ export const initKeyboardEvents = async () => {
             // do not delete element if an input is focused
             const focusedInput = document.querySelector("input:focus");
             if (!focusedInput) {
-              app.deleteElements({ elements: app.selectedElements });
+              app.$deleteElements({ elements: app.selectedElements });
             }
             break;
           }
@@ -113,7 +112,7 @@ export const initKeyboardEvents = async () => {
   document.addEventListener("keyup", event => {
     const evt = event || window.event; // IE support
     ctrlDown = evt.ctrlKey || evt.metaKey; // Mac support
-    if (event.key == " ") {
+    if (event.key === " ") {
       spaceDown = false;
     }
   });

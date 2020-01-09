@@ -3,6 +3,11 @@ import { THEME } from "../constants/constants";
 import { INTERFACE_ROOT } from "../constants/selectors";
 import { validateConnection } from "./components/utils";
 
+/**
+ * initialize joint.js graph
+ *
+ * @param {graph} graph
+ */
 export const initPaper = graph => {
   const paper = new joint.dia.Paper({
     el: document.querySelector(INTERFACE_ROOT),

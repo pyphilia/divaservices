@@ -1,3 +1,7 @@
+/**
+ * Input and select parameters-related functions
+ */
+
 // we import jquery as below for test to work
 import jQuery from "jquery";
 const $ = jQuery;
@@ -29,10 +33,19 @@ import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
 import { elementOnChangePosition } from "../events/paperEvents";
 import { Validation, Constants, API } from "divaservices-utils";
+import { NO_PARAMETER_TEXT } from "../constants/messages";
 const { Types } = Constants;
 
-export const setSelectValueInElement = (boxId, parameters) => {
-  for (const [key, { value }] of Object.entries(parameters)) {
+/**
+ * set select value in DOM
+ *
+ * @param {string} boxId
+ * @param {object} defaultParams
+ */
+export const setSelectValueInElement = ({ boxId, defaultParams }) => {
+  for (const [key, { value }] of Object.entries(
+    defaultParams[Types.SELECT.type]
+  )) {
     // we need to precise paper root because of the minimap duplicate elements
     const el = $(
       `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] .select[name="${key}"] ${Types.SELECT.tag}`
@@ -45,10 +58,21 @@ export const setSelectValueInElement = (boxId, parameters) => {
   }
 };
 
-export const setInputValueInElement = (box, parameters) => {
-  console.log("TCL: setInputValueInElement -> box", box);
-  const { boxId, type: boxName } = box;
-  for (const [key, { value }] of Object.entries(parameters)) {
+/**
+ * set input value in DOM
+ *
+ * @param {string} boxId
+ * @param {string} type
+ * @param {object} defaultParams
+ */
+export const setInputValueInElement = ({
+  boxId,
+  type: boxName,
+  defaultParams
+}) => {
+  for (const [key, { value }] of Object.entries(
+    defaultParams[Types.NUMBER.type]
+  )) {
     // we need to precise paper root because of the minimap duplicate elements
     const el = $(
       `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Types.NUMBER.tag}[name="${key}"]`
@@ -58,6 +82,11 @@ export const setInputValueInElement = (box, parameters) => {
   }
 };
 
+/**
+ * reset value of input or select element
+ *
+ * @param {event} event
+ */
 export function resetValue(event) {
   const el = event.target;
   const defaultValue = el.dataset.value;
@@ -80,6 +109,19 @@ export function resetValue(event) {
   }
 }
 
+/**
+ * create select DOM element, with
+ * - name
+ * - select tag
+ * - reset button
+ * - information
+ *
+ * @param {*} element element to append select
+ * @param {*} param parameter data
+ * @param {*} resetButton reset button html element
+ * @param {*} defaultTooltip default tooltip html element
+ * @param {*} defaultValue default value
+ */
 export const createSelect = (
   element,
   param,
@@ -170,7 +212,7 @@ export const createSelect = (
     const s = select.find(":selected");
     const value = s.attr("value");
 
-    app.setSelectValueInElement({ element, attr: name, value });
+    app.$setSelectValueInElement({ element, attr: name, value });
   });
 
   selectEl.on("select2:open", function() {
@@ -189,6 +231,19 @@ export const createSelect = (
   return newSelect;
 };
 
+/**
+ * create input DOM element, with
+ * - name
+ * - input tag
+ * - reset button
+ * - information
+ *
+ * @param {*} element element to append select
+ * @param {*} param parameter data
+ * @param {*} resetButton reset button html element
+ * @param {*} defaultTooltip default tooltip html element
+ * @param {*} givenDefaultValue default value
+ */
 export const createInput = (
   element,
   param,
@@ -216,7 +271,7 @@ export const createInput = (
 
   // param input
   let required = false;
-  if (attributes && attributes.Status == "required") {
+  if (attributes && attributes.Status === "required") {
     required = true;
   }
   const { min, max, step } = values;
@@ -252,7 +307,7 @@ export const createInput = (
       const input = $(this);
       const value = input.val();
       const attr = input.attr("name");
-      app.setInputValueInElement({ element, attr, value });
+      app.$setInputValueInElement({ element, attr, value });
       checkInputValue(input, boxParams);
     },
     click: function() {
@@ -286,6 +341,14 @@ export const createInput = (
   return newInput;
 };
 
+/**
+ * check input value
+ * if there is an error, report it in log
+ *
+ * @param {*} input
+ * @param {*} boxName
+ * @param {*} boxId
+ */
 export const checkInputValue = (input, { boxName, boxId }) => {
   const currentVal = input.val();
   const { min, max, step } = input.data();
@@ -315,9 +378,18 @@ export const checkInputValue = (input, { boxName, boxId }) => {
   input.toggleClass("is-invalid", !isValid);
 };
 
+/**
+ * create and append parameters in foreign object of element
+ *
+ * @param {element} element
+ * @param {objet} defaultParams
+ */
 // cannot merge defaultParams in element, because element needs to be "pure"
 // in order to modify it with jointjs functions
-export const setParametersInForeignObject = (element, defaultParams = {}) => {
+export const createParametersInForeignObject = (
+  element,
+  defaultParams = {}
+) => {
   const {
     description,
     type: label,
@@ -328,6 +400,7 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
   const selectsArr = [];
   const inputsArr = [];
 
+  // create reset button
   const resetButton = $("<button/>", {
     class: `${RESET_BUTTON_CLASS} btn ${RESET_COL}`,
     text: "Reset",
@@ -337,21 +410,18 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
   for (const param of originalParams) {
     const { name: paramName, type } = param;
 
+    // default tooltip button
     const defaultTooltip = $(`${TOOLTIP_HTML}`)
-      .addClass(`${TOOLTIP_CLASS} ${INFO_TOOLTIP_CLASS}`)
+      .addClass(`${INFO_TOOLTIP_CLASS}`)
       .attr({
         "data-id": paramName,
-        "data-param": label,
-        "data-toggle": "tooltip",
-        "data-placement": "right"
+        "data-param": label
       });
 
+    // define default value
     const defaultValue = defaultParams[type][paramName]
       ? defaultParams[type][paramName].value || defaultParams[type][paramName]
       : null;
-    // const defaultValue = defaultParams.params
-    //   ? defaultParams.params[paramName].value
-    //   : null;
 
     switch (type) {
       case Types.SELECT.type: {
@@ -377,13 +447,11 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
         break;
       }
       default:
-        alert("not handled type : ", type);
-      // }
+        throw "Type " + type + " not handled";
     }
   }
 
   // append selects and inputs
-  // add params
   const selects = $("<div/>", { class: PARAMETER_SELECTS });
   const inputs = $("<div/>", { class: PARAMETER_INPUTS });
   selects.append(selectsArr);
@@ -397,11 +465,12 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
     .find(`.${BOX_CONTAINER_CLASS}`)
     .append(inputs, selects);
 
+  // create text if no parameter
   let noParameter = $();
-  if (inputs.children().length + selects.children().length == 0) {
-    noParameter = $(`<div />`, {
+  if (inputs.children().length + selects.children().length === 0) {
+    noParameter = $(`<div/>`, {
       class: NO_PARAMETER_CLASS,
-      text: "No parameter"
+      text: NO_PARAMETER_TEXT
     }).appendTo(container);
   }
 
@@ -416,11 +485,9 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
   // main tooltip
   if (description) {
     $(TOOLTIP_HTML)
-      .addClass(`${TOOLTIP_CLASS} tooltip-box`)
+      .addClass(`tooltip-box`)
       .attr({
-        "data-title": description,
-        "data-toggle": "tooltip",
-        "data-placement": "right"
+        "data-title": description
       })
       .on("click", function() {
         const win = window.open(API.getServiceViewUrl(serviceId), "_blank");
@@ -436,6 +503,8 @@ export const setParametersInForeignObject = (element, defaultParams = {}) => {
   // remove resizer if exists
   app.$removeResizer();
 
+  // apply tooltip bootstrap js
+  // and layout option
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
     const t = $(tooltip);
     t.tooltip(TOOLTIP_OPTIONS);

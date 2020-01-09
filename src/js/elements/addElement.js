@@ -1,6 +1,6 @@
 /**
  * Add an element
- * note: jointjs is its own id to track the element
+ * note: jointjs uses its own id to track the element
  * for undo/redo purpose, we need to keep track of added-deleted item with a boxId
  * (in jointjs a deleted-recreated element is not the same)
  */
@@ -16,7 +16,8 @@ import {
   TITLE_COL,
   CATEGORY_SERVICE,
   PORT_MARKUP,
-  PORT_LABEL_MARKUP
+  PORT_LABEL_MARKUP,
+  DEFAULT_BOX_SIZE
 } from "../constants/constants";
 import {
   isParamInput,
@@ -27,7 +28,7 @@ import {
   getElementByBoxId,
   findEmptyPosition
 } from "../layout/utils";
-import { setParametersInForeignObject } from "../layout/inputs";
+import { createParametersInForeignObject } from "../layout/inputs";
 import { createPort } from "../layout/utils";
 import {
   TITLE_ROW_CLASS,
@@ -38,6 +39,9 @@ import {
 } from "../constants/selectors";
 import { layoutSettingsApp } from "../layoutSettings";
 
+/**
+ * create graphical and element object with given parameters
+ */
 const createBox = (
   e,
   { position, size, boxId, defaultParams = {}, ports: { items }, serviceId }
@@ -46,7 +50,7 @@ const createBox = (
   const { category, label, description, params = {} } = e;
 
   if (!size) {
-    size = { width: 100, height: 100 };
+    size = DEFAULT_BOX_SIZE;
   }
 
   // we do not add inputs and select in the markup because of the
@@ -113,11 +117,16 @@ const createBox = (
   return element;
 };
 
+/**
+ * build default parameters for an element
+ *
+ * @param {object} params
+ */
 export const buildDefaultParameters = params => {
   const defaultParams = { select: {}, number: {} };
   for (const p of params) {
     let { type, name, defaultValue, values } = p;
-    if (type == Types.SELECT.type) {
+    if (type === Types.SELECT.type) {
       defaultValue = values[defaultValue];
     }
     defaultParams[type][name] = { value: defaultValue, defaultValue, values };
@@ -125,10 +134,15 @@ export const buildDefaultParameters = params => {
   return defaultParams;
 };
 
-export const transformWebserviceForGraph = webservice => {
+/**
+ * construct corresponding object for webservice
+ * compute all necessary data to create a graphical box
+ *
+ * @param {object} webservice
+ */
+export const constructServiceObject = webservice => {
   if (!webservice.name) {
-    alert("problem with ", webservice);
-    return {};
+    throw "webservice " + webservice + " has name '" + name + "'";
   }
   const { name: label, description, inputs = [], category, ports } = webservice;
 
@@ -150,9 +164,13 @@ export const transformWebserviceForGraph = webservice => {
   return ret;
 };
 
-// Create a custom element.
-// ------------------------
-export const addElementFromTransformedJSON = (e, parameters = {}) => {
+/**
+ * create a custom element from an object element
+ *
+ * @param {object} e element as object
+ * @param {object} parameters default parameters
+ */
+export const addElementFromServiceObject = (e, parameters = {}) => {
   const { label } = e;
 
   if (!label) {
@@ -163,11 +181,17 @@ export const addElementFromTransformedJSON = (e, parameters = {}) => {
 
   const element = createBox(e, { ...parameters, boxId });
 
-  setParametersInForeignObject(element, parameters.defaultParams);
+  createParametersInForeignObject(element, parameters.defaultParams);
 
   return element;
 };
 
+/**
+ * create ports description from inputs and outputs
+ *
+ * @param {array} inputs
+ * @param {array} outputs
+ */
 const createPortsFromInputOutput = (inputs, outputs) => {
   const ports = { items: [] };
   inputs
@@ -187,12 +211,17 @@ const createPortsFromInputOutput = (inputs, outputs) => {
   return ports;
 };
 
-export const buildElementFromName = name => {
+/**
+ * create element object from service name
+ *
+ * @param {string} name
+ */
+export const createElementObjectFromName = name => {
   // find webservice given name
   const webservice = getWebserviceByName(name);
   const { outputs = [], inputs = [], id } = webservice;
 
-  const el = transformWebserviceForGraph(webservice);
+  const el = constructServiceObject(webservice);
 
   // handle ports
   const ports = createPortsFromInputOutput(inputs, outputs);
@@ -224,17 +253,14 @@ export const buildElementFromName = name => {
 /**
  * From a JSON description, add the webservice to the graph
  */
-export const addElementToGraphFromServiceDescription = (
-  webservice,
-  defaultParameters = {}
-) => {
-  const transformedWebservice = transformWebserviceForGraph(webservice);
+export const addElementFromService = (webservice, defaultParameters = {}) => {
+  const serviceObj = constructServiceObject(webservice);
 
   let { position, size } = defaultParameters;
   // avoid adding overlapping elements
   defaultParameters.position = findEmptyPosition(size, position);
 
-  const element = addElementFromTransformedJSON(transformedWebservice, {
+  const element = addElementFromServiceObject(serviceObj, {
     size,
     ...defaultParameters
   });
@@ -242,13 +268,13 @@ export const addElementToGraphFromServiceDescription = (
   return element;
 };
 
-// add element given a name. It will then retrieve the webservice
-// info from the services xml descriptions
-// returns boxId and position for undo-redo purpose
-export const addElementByName = (name, defaultParams = {}) => {
+/**
+ * add element given a name
+ */
+export const addElementFromName = (name, defaultParams = {}) => {
   const algo = getWebserviceByName(name);
   if (algo) {
-    addElementToGraphFromServiceDescription(algo, defaultParams);
+    addElementFromService(algo, defaultParams);
   } else {
     console.error(`${name} doesnt exist`);
   }
@@ -256,20 +282,30 @@ export const addElementByName = (name, defaultParams = {}) => {
 
 /*ADD LINKS*/
 
+/**
+ * add link from link jointjs description object
+ *
+ * @param {link} link
+ */
 export const addLinkFromJSON = link => {
   const { graph } = app;
   const linkEl = new joint.shapes.standard.Link(link);
   graph.addCell(linkEl);
 };
 
+/**
+ * add link from link description
+ *
+ * @param {link} link
+ */
 export const addLinkFromLink = link => {
   const { source, target, id } = link;
 
   const s = getElementByBoxId(source.boxId);
   const t = getElementByBoxId(target.boxId);
 
-  const sPort = s.getPorts().find(p => p.name == source.portName).id;
-  const tPort = t.getPorts().find(p => p.name == target.portName).id;
+  const sPort = s.getPorts().find(p => p.name === source.portName).id;
+  const tPort = t.getPorts().find(p => p.name === target.portName).id;
 
   const newLink = {
     id,
