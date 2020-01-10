@@ -23,7 +23,7 @@ export const getWorkflowById = async (id, asXml = false) => {
     if (asXml) {
       return await API.getWorkflowByIdJSON(id);
     } else {
-      return await API.getWorkflowById(id);
+      return await API.getWorkflowById(id, webservices);
     }
   } else {
     const xml = `<Workflow>
@@ -33,41 +33,8 @@ export const getWorkflowById = async (id, asXml = false) => {
         <Author/>
     </Information>
     <Steps>
-  <Step>
-    <No>0</No>
-    <Name>OcropusBinarization</Name>
-    <Service>
-      <Key>6</Key>
-    </Service>
-    <Inputs>
-      <Data>
-        <Name>inputImage</Name>
-        <Path>qwertz/2299942_0.jpg</Path>
-      </Data>
-      <Parameter>
-      <Name>skewsteps</Name>
-      <Value>543</Value></Parameter>
-    </Inputs>
-  </Step>
-  <Step>
-    <No>1</No>
-    <Name>OtsuBinarization</Name>
-    <Service>
-      <Key>0</Key>
-    </Service>
-    <Inputs>
-      <Data>
-        <Name>inputImage</Name>
-        <Value>
-          <WorkflowStep>
-            <Ref>0</Ref>
-            <ServiceOutputName>ocropusBinaryImage</ServiceOutputName>
-          </WorkflowStep>
-        </Value>
-      </Data>
-    </Inputs>
-  </Step>
-</Steps>
+    <Step> <No>0</No> <Name>FilePickermimetypes</Name> <Service> <Key>47</Key> </Service> <Inputs> <Parameter> <Name>regex</Name> <Value>12345</Value> </Parameter> </Inputs> </Step> <Step> <No>1</No> <Name>OcropusBinarization</Name> <Service> <Key>6</Key> </Service> <Inputs> <Parameter> <Name>enableSkew</Name> <Value>true</Value> </Parameter> </Inputs> </Step> 
+    </Steps>
 </Workflow>`;
     return asXml ? xml : await Decorators.workflowDecorator(xml, webservices);
   }

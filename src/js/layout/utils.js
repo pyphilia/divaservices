@@ -69,33 +69,53 @@ export const generateUniqueId = () => {
     .substr(2, 9);
 };
 
+/**
+ * return whether the input is of type parameter
+ * useful to differentiate from inputs and ports parameters
+ *
+ * @param {*} input
+ */
 export const isParamInput = input => {
+  const validParameterTypes = [
+    Types.SELECT.type,
+    Types.NUMBER.type,
+    Types.TEXT.type
+  ];
   if (input.type) {
-    return input.type === Types.SELECT.type || input.type === Types.NUMBER.type;
+    return validParameterTypes.includes(input.type);
   }
 
-  return input[Types.SELECT.type] || input[Types.NUMBER.type];
+  return validParameterTypes.map(type => input[type]).includes(true);
 };
 
-export const isPort = el => {
-  if (el.type) {
-    return el.type === Types.FILE.type || el.type === Types.FOLDER.type;
+// export const isPort = el => {
+//   if (el.type) {
+//     return el.type === Types.FILE.type || el.type === Types.FOLDER.type;
+//   }
+//   return el[Types.FILE.type] || el[Types.FOLDER.type];
+// };
+
+/**
+ * return whether the element is of port
+ * useful to differentiate from inputs and ports parameters
+ *
+ * @param {*} input
+ */
+export const isPortUserdefined = input => {
+  const validPortTypes = [Types.FILE.type, Types.FOLDER.type];
+  if (input.type) {
+    return validPortTypes.includes(input.type);
+    // && input.userdefined
   }
-  return el[Types.FILE.type] || el[Types.FOLDER.type];
+  return validPortTypes.map(type => input[type]).includes(true); //&& el[Object.keys(el)[0]].userdefined
 };
 
-export const isPortUserdefined = el => {
-  if (el.type) {
-    return (
-      el.type === Types.FILE.type || el.type === Types.FOLDER.type
-      // && el.userdefined
-    );
-  }
-  return (
-    el[Types.FILE.type] || el[Types.FOLDER.type] //&& el[Object.keys(el)[0]].userdefined
-  );
-};
-
+/**
+ * transform object to a readable string
+ * use to format values constraints (min, max, default, ...)
+ *
+ * @param {object} obj
+ */
 export const objectToString = obj => {
   let str = "";
   for (let p in obj) {

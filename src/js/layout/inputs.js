@@ -26,7 +26,8 @@ import {
   NO_PARAMETER_CLASS,
   PARAMETER_SELECTS,
   PARAMETER_INPUTS,
-  INTERFACE_ROOT
+  INTERFACE_ROOT,
+  PARAMETER_TEXTS
 } from "../constants/selectors";
 import { objectToString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
@@ -379,6 +380,97 @@ export const checkInputValue = (input, { boxName, boxId }) => {
 };
 
 /**
+ * create text DOM element, with
+ * - name
+ * - text tag
+ * - reset button
+ * - information
+ *
+ * @param {*} element element to append select
+ * @param {*} param parameter data
+ * @param {*} resetButton reset button html element
+ * @param {*} defaultTooltip default tooltip html element
+ * @param {*} givenDefaultValue default value
+ */
+export const createText = (
+  element,
+  param,
+  resetButton,
+  defaultTooltip,
+  givenDefaultValue
+) => {
+  const {
+    name,
+    values = {},
+    defaultValue: defaultOption,
+    description,
+    $: attributes
+  } = param;
+
+  // wrapper
+  const newText = $("<div/>", { class: "input row" });
+
+  // param name
+  const nameEl = $("<span/>", {
+    class: `${PARAM_NAME_CLASS} ${NAME_COL}`,
+    text: name,
+    title: name
+  });
+
+  // param input
+  let required = false;
+  if (attributes && attributes.Status === "required") {
+    required = true;
+  }
+
+  const inputEl = $(`<${Types.TEXT.tag} />`, {
+    class: `${PARAM_COL} form-control mr-1`,
+    prop: { disabled: false, required }, // userdefined?
+    attr: {
+      type: "text",
+      name,
+      "data-default": defaultOption,
+      value: givenDefaultValue ? givenDefaultValue : defaultOption
+    }
+  });
+
+  // update param
+  inputEl.on({
+    blur: function() {
+      const input = $(this);
+      const value = input.val();
+      const attr = input.attr("name");
+      app.$setTextValueInElement({ element, attr, value });
+    },
+    click: function() {
+      $(this).select();
+    },
+    input: function() {
+      // do not save each time you write, or it would be annoying
+    }
+  });
+
+  // reset
+  const resetButtonNumber = resetButton.clone(true).attr({
+    "data-parent": "input",
+    "data-value": defaultOption
+  });
+
+  // add tooltip
+  let tooltip = $();
+  if (description || values.length) {
+    const tooltipText = `${description}${TOOLTIP_BREAK_LINE}${objectToString({
+      default: defaultOption,
+      ...values
+    })}`;
+    tooltip = defaultTooltip.attr("data-title", tooltipText);
+  }
+
+  newText.append(nameEl, inputEl, resetButtonNumber, tooltip);
+  return newText;
+};
+
+/**
  * create and append parameters in foreign object of element
  *
  * @param {element} element
@@ -399,6 +491,7 @@ export const createParametersInForeignObject = (
 
   const selectsArr = [];
   const inputsArr = [];
+  const textsArr = [];
 
   // create reset button
   const resetButton = $("<button/>", {
@@ -446,6 +539,17 @@ export const createParametersInForeignObject = (
         inputsArr.push(newInput);
         break;
       }
+      case Types.TEXT.type: {
+        const newText = createText(
+          element,
+          param,
+          resetButton,
+          defaultTooltip,
+          defaultValue
+        );
+        textsArr.push(newText);
+        break;
+      }
       default:
         throw "Type " + type + " not handled";
     }
@@ -454,8 +558,11 @@ export const createParametersInForeignObject = (
   // append selects and inputs
   const selects = $("<div/>", { class: PARAMETER_SELECTS });
   const inputs = $("<div/>", { class: PARAMETER_INPUTS });
+  const texts = $("<div/>", { class: PARAMETER_TEXTS });
   selects.append(selectsArr);
   inputs.append(inputsArr);
+  texts.append(textsArr);
+  const parameters = [selects, inputs, texts];
 
   // add params to boxes
   const foreignObject = $(
@@ -463,11 +570,16 @@ export const createParametersInForeignObject = (
   );
   const container = foreignObject
     .find(`.${BOX_CONTAINER_CLASS}`)
-    .append(inputs, selects);
+    .append(parameters);
 
   // create text if no parameter
   let noParameter = $();
-  if (inputs.children().length + selects.children().length === 0) {
+  if (
+    inputs.children().length +
+      selects.children().length +
+      texts.children().length ===
+    0
+  ) {
     noParameter = $(`<div/>`, {
       class: NO_PARAMETER_CLASS,
       text: NO_PARAMETER_TEXT
@@ -477,8 +589,7 @@ export const createParametersInForeignObject = (
   // hide parameters depending on theme options
   const showParameters = layoutSettingsApp.isShowParametersChecked();
   if (!showParameters) {
-    selects.hide();
-    inputs.hide();
+    parameters.forEach(el => el.hide());
     noParameter.hide();
   }
 

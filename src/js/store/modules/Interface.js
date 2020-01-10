@@ -33,7 +33,6 @@ import {
   DELETE_LINK,
   ADD_LINK,
   SET_INPUT_VALUE,
-  SET_SELECT_VALUE,
   COPY_SELECTION,
   UNSELECT_ALL_ELEMENTS,
   MOVE_ELEMENTS,
@@ -92,13 +91,9 @@ const Interface = {
     [COPY_SELECTION](state) {
       state.elements.forEach(el => (el.copied = el.selected));
     },
-    [SET_SELECT_VALUE](state, { element, value, attr }) {
+    [SET_INPUT_VALUE](state, { type, element, value, attr }) {
       const el = findElementByBoxId(state.elements, element.attributes.boxId);
-      Vue.set(el.defaultParams[Types.SELECT.type][attr], "value", value);
-    },
-    [SET_INPUT_VALUE](state, { element, value, attr }) {
-      const el = findElementByBoxId(state.elements, element.attributes.boxId);
-      Vue.set(el.defaultParams[Types.NUMBER.type][attr], "value", value);
+      Vue.set(el.defaultParams[type][attr], "value", value);
     },
     [ADD_LINK](state, { link, graph }) {
       addLinktoLinks(state.links, link, graph);
@@ -184,10 +179,13 @@ const Interface = {
       commit(COPY_SELECTION);
     },
     $setSelectValueInElement({ commit }, payload) {
-      commit(SET_SELECT_VALUE, payload);
+      commit(SET_INPUT_VALUE, { type: Types.SELECT.type, ...payload });
     },
     $setInputValueInElement({ commit }, payload) {
-      commit(SET_INPUT_VALUE, payload);
+      commit(SET_INPUT_VALUE, { type: Types.NUMBER.type, ...payload });
+    },
+    $setTextValueInElement({ commit }, payload) {
+      commit(SET_INPUT_VALUE, { type: Types.TEXT.type, ...payload });
     },
     $addLink({ commit }, payload) {
       commit(ADD_LINK, payload);

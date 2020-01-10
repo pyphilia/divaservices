@@ -13,6 +13,7 @@ export const DATA_INPUT_CONTENT_CLASS = "content";
 
 export const PARAMETER_INPUTS = "inputs";
 export const PARAMETER_SELECTS = "selects";
+export const PARAMETER_TEXTS = "texts";
 
 export const AREA_SELECTION_ELEMENT = "areaSelectionHighlight";
 export const TRASH_SELECTOR = "#trash";

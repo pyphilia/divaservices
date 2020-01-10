@@ -123,13 +123,17 @@ const createBox = (
  * @param {object} params
  */
 export const buildDefaultParameters = params => {
-  const defaultParams = { select: {}, number: {} };
+  const defaultParams = { select: {}, number: {}, text: {} };
   for (const p of params) {
-    let { type, name, defaultValue, values } = p;
+    let { type, name, defaultValue, definedValue, values } = p;
     if (type === Types.SELECT.type) {
       defaultValue = values[defaultValue];
     }
-    defaultParams[type][name] = { value: defaultValue, defaultValue, values };
+    defaultParams[type][name] = {
+      value: definedValue ? definedValue : defaultValue,
+      defaultValue,
+      values
+    };
   }
   return defaultParams;
 };

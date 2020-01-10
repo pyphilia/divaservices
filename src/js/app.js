@@ -148,6 +148,7 @@ export let app;
         "$deleteElements",
         "$setSelectValueInElement",
         "$setInputValueInElement",
+        "$setTextValueInElement",
         "$addLink",
         "deleteLink",
         "$moveSelectedElements",
