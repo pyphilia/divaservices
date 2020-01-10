@@ -167,7 +167,7 @@ const Toolsbar = Vue.component("Toolsbar", {
           "save and install": {
             action: async () => {
               await saveWorkflow(app.graph.toJSON(), true);
-              top.window.location.href = API.getExecutionViewUrl(
+              top.window.location.href = API.getWorkflowExecutionViewUrl(
                 app.workflowId
               );
             },
