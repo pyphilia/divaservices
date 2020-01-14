@@ -24,7 +24,7 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
 
   for (const [i, { attributes: box }] of orderedElements.entries()) {
     const { type, boxId } = box;
-    const Name = DivaServices.buildNameForRequest(type);
+    const Name = DivaServices.buildServiceNameForRequest(type, boxId);
     const No = i;
     const Inputs = { Parameter: [], Data: [] };
 

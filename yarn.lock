@@ -2747,7 +2747,7 @@ diffie-hellman@^5.0.0:
 
 "divaservices-utils@https://github.com/pyphilia/divaservices-utils":
   version "1.0.0"
-  resolved "https://github.com/pyphilia/divaservices-utils#dc3bf6dd7dd75e0c7d02526d713ff665eddfd8a6"
+  resolved "https://github.com/pyphilia/divaservices-utils#c3a31e1c287ce1f479352f993e5796e91903bd0d"
   dependencies:
     eslint "^6.6.0"
     node-fetch "^2.6.0"
