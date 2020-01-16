@@ -13,7 +13,9 @@ import { getOrderedElements } from "../elements/orderElement";
  * @param {boolean} installation if true, send an installation request
  */
 export const saveWorkflow = async (jsonGraph, installation = false) => {
-  const orderedElements = getOrderedElements().filter(
+  const { elements, isLoop } = getOrderedElements();
+
+  const orderedElements = elements.filter(
     ({ attributes: { category } }) => category === CATEGORY_SERVICE
   );
 
@@ -43,7 +45,8 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
             Value
           });
           _inputs.parameters[paramName] = DivaServices.parseParameterValue(
-            Value
+            Value,
+            paramType
           );
         }
         const validity = Validation.checkValue(Value, paramType, values);
@@ -158,7 +161,8 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
   // set found errors in log
   app.$refs.log.setLogMessages(log);
 
-  await API.saveWorkflow(xml, app.workflowId, installation);
+  const isInstallation = installation && !isLoop;
+  await API.saveWorkflow(xml, app.workflowId, isInstallation);
 
   return request;
 };

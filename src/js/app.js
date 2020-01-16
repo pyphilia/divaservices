@@ -150,7 +150,7 @@ export let app;
         "$setInputValueInElement",
         "$setTextValueInElement",
         "$addLink",
-        "deleteLink",
+        "$deleteLink",
         "$moveSelectedElements",
         "$resizeElement",
         "$openWorkflow",
