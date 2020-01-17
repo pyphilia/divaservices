@@ -44,12 +44,25 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
             Name: paramName,
             Value
           });
-          _inputs.parameters[paramName] = DivaServices.parseParameterValue(
-            Value,
-            paramType
-          );
+
+          try {
+            _inputs.parameters[paramName] = DivaServices.parseParameterValue(
+              Value,
+              paramType
+            );
+          } catch (e) {
+            console.log(e);
+            _inputs.parameters[paramName] = Value;
+          }
         }
-        const validity = Validation.checkValue(Value, paramType, values);
+
+        let validity = true;
+        try {
+          validity = Validation.checkValue(Value, paramType, values);
+        } catch (e) {
+          console.log(e);
+          validity = false;
+        }
         if (!validity) {
           log.push({
             value: Value,
