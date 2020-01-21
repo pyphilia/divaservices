@@ -22,37 +22,44 @@
 
         <collections ref="collections"></collections>
 
-    <div id="content-wrapper" class="row">
-        <left-sidebar ref="leftsidebar"></left-sidebar>
-        <div id="main" class="col p-0 h-100">
+        <div id="content-wrapper" class="row">
+
+            <left-sidebar ref="leftsidebar"></left-sidebar>
+
+            <div id="main" class="col p-0 h-100">
+                
+                <context-menus
+                ref="contextmenu"
+                :paper="paper"
+                :current-elements="currentElements"
+                :copied-elements="copiedElements"
+                :selected-elements="selectedElements">
+                </context-menus>
             
-            <context-menus
-            ref="contextmenu"
-            :paper="paper"
-            :current-elements="currentElements"
-            :copied-elements="copiedElements"
-            :selected-elements="selectedElements">
-            </context-menus>
-        
-        
-        
-        <!-- minimap -->
-        <minimap :scale="scale" :moved-elements="movedElements" :translation="translation" :paper="paper" :graph="graph"></minimap>
-        
-        <log ref="log"></log>
-        
-        <!-- content -->
-        <div id="paper-html-elements" class="h-100"></div>
-        
-        <div id="message"></div>
-        
-        <toolsbar :scale="scale"  :paper="paper" :selected-elements="selectedElements"></toolsbar>
-        
-        <search-elements ref="searchElements"></search-elements>
+                <!-- minimap -->
+                <minimap
+                :scale="scale"
+                :moved-elements="movedElements"
+                :translation="translation"
+                :paper="paper"
+                :graph="graph">
+                </minimap>
+            
+                <log ref="log"></log>
+            
+                <!-- content -->
+                <div id="paper-html-elements" class="h-100"></div>
+            
+                <div id="message"></div>
+            
+                <toolsbar :scale="scale" :graph="graph" :paper="paper" :selected-elements="selectedElements"></toolsbar>
+            
+                <search-elements ref="searchElements"></search-elements>
+            </div>
+        </div>
     </div>
-</div>
-</div>
-<script src="main.js"></script>
-<script src="css.js"></script>
+
+    <script src="main.js"></script>
+    <script src="css.js"></script>
 </body>
 </html>

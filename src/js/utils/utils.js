@@ -63,8 +63,8 @@ export const findDifferenceBy = (a, b, param) => {
  *
  * @param {array} arr elements
  */
-export const getNewElements = arr => {
-  return arr.filter(({ boxId }) => !getElementByBoxId(boxId));
+export const getNewElements = (graph, arr) => {
+  return arr.filter(({ boxId }) => !getElementByBoxId(graph, boxId));
 };
 
 /**
@@ -92,8 +92,8 @@ export const getNewLinks = links => {
  *
  * @param {array} arr array of elements
  */
-export const getElementsInGraph = arr => {
-  return arr.filter(el => getElementByBoxId(el.boxId));
+export const getElementsInGraph = (graph, arr) => {
+  return arr.filter(el => getElementByBoxId(graph, el.boxId));
 };
 
 /**

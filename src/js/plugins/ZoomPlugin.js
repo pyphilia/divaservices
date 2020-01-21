@@ -21,9 +21,12 @@ const computePaperCenterPosition = paper => {
   return { x, y };
 };
 
+// mouse position
+let x, y;
+
 const plugin = {
   install(Vue) {
-    Vue.prototype.$zoom = Vue.observable({ scale: DEFAULT_SCALE, x: 0, y: 0 });
+    Vue.prototype.$zoom = Vue.observable({ scale: DEFAULT_SCALE });
 
     /**
      * zoom out by a certain amount
@@ -44,6 +47,7 @@ const plugin = {
       const position = computePaperCenterPosition(paper);
       Vue.prototype.$changeZoom(1, position.x, position.y, nextScale);
     };
+
     Vue.prototype.$setZoom = (nextScale, paper) => {
       const position = computePaperCenterPosition(paper);
       Vue.prototype.$changeZoom(1, position.x, position.y, nextScale);
@@ -52,8 +56,10 @@ const plugin = {
     /**
      * zoom by delta, in the direction of delta,
      * centered at thisX, thisY
+     *
+     * if stateScale is not defined, the next scale is computed using
+     * delta and the current scale value
      */
-    // zoom algorithm: https://github.com/clientIO/joint/issues/1027
     Vue.prototype.$changeZoom = (delta, thisX, thisY, stateScale) => {
       const nextScale = !stateScale
         ? Vue.prototype.$zoom.scale + delta / ZOOM_STEP // the current paper scale changed by delta
@@ -61,11 +67,15 @@ const plugin = {
 
       if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
         Vue.prototype.$zoom.scale = nextScale;
-        Vue.prototype.$zoom.x = thisX;
-        Vue.prototype.$zoom.y = thisY;
+        x = thisX;
+        y = thisY;
       }
     };
 
+    /**
+     * change scale to fit content
+     *
+     */
     Vue.prototype.$fitContent = paper => {
       paper.scaleContentToFit({
         minScaleX: MIN_SCALE,
@@ -73,20 +83,22 @@ const plugin = {
         maxScaleX: MAX_SCALE,
         maxScaleY: MAX_SCALE
       });
+
+      // @TODO bounds
+
       Vue.prototype.$zoom.scale = paper.scale().sx;
     };
 
     /**
      * change scale to currentScale
      */
+    // zoom algorithm: https://github.com/clientIO/joint/issues/1027
     Vue.prototype.$changePaperScale = (paper, nextScale, currentScale) => {
       if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
-        const zoom = Vue.prototype.$zoom;
-
         const beta = currentScale / nextScale;
 
-        const ax = zoom.x - zoom.x * beta;
-        const ay = zoom.y - zoom.y * beta;
+        const ax = x - x * beta;
+        const ay = y - y * beta;
 
         const translate = paper.translate();
 

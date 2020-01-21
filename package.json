@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
@@ -72,6 +73,23 @@
   "jest": {
     "setupFiles": [
       "./test/setup-jest.js"
-    ]
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "mjs"
+    ],
+    "transform": {
+      "^.+\\.(m?)js$": "babel-jest"
+    },
+    "moduleNameMapper": {
+      "^vue$": "<rootDir>/node_modules/vue",
+      "jquery$": "<rootDir>/node_modules/jquery/dist/jquery.min.js",
+      "^bootstrapjs$": "<rootDir>/node_modules/bootstrap/dist/js/bootstrap.min.js",
+      "^select2js$": "<rootDir>/node_modules/select2/dist/js/select2.min.js",
+      "^shepherd.js$": "<rootDir>/node_modules/shepherd.js/dist/js/shepherd.esm.min.js",
+      "^lodash$": "<rootDir>/node_modules/lodash/lodash.min.js",
+      "^backbone$": "<rootDir>/node_modules/backbone/backbone-min.js"
+    }
   }
 }

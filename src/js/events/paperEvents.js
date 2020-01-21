@@ -25,7 +25,7 @@ let changePosition = false;
  * links management
  */
 export const initPaperEvents = () => {
-  const { paper } = app;
+  const { paper, graph } = app;
   const contextMenu = app.$refs.contextmenu;
 
   document.addEventListener("click", function() {
@@ -49,7 +49,6 @@ export const initPaperEvents = () => {
 
   paper.on("blank:pointerdown", (event, x, y) => {
     dragStartPosition = { x: x, y: y };
-
     move = spaceDown;
 
     if (!ctrlDown) {
@@ -65,6 +64,11 @@ export const initPaperEvents = () => {
     if (!spaceDown && !app.$resizing) {
       app.$initAreaSelection(event);
     }
+
+    if (!app.$resizing) {
+      // remove resizer if exists
+      app.$removeResizer();
+    }
   });
 
   paper.on("cell:pointerup blank:pointerup", () => {
@@ -76,12 +80,6 @@ export const initPaperEvents = () => {
 
     if (app.$resizing) {
       Vue.prototype.$endResize(paper);
-    }
-  });
-
-  document.body.addEventListener("mouseup", () => {
-    if (app.$resizing) {
-      app.$endResize(paper);
     }
   });
 
@@ -159,7 +157,7 @@ export const initPaperEvents = () => {
   paper.on("element:pointerup", () => {
     if (changePosition) {
       changePosition = false;
-      app.$moveSelectedElements();
+      app.$moveSelectedElements({ graph });
     }
   });
 
@@ -188,6 +186,18 @@ export const initPaperEvents = () => {
 };
 
 /**
+ * Utility function to clear interactions on the paper
+ */
+const clearInteractions = () => {
+  // close select manually
+  const allSelect = $(`${INTERFACE_ROOT} .select ${Types.SELECT.tag}`);
+  allSelect.select2("close");
+
+  // remove resizer
+  app.$removeResizer();
+};
+
+/**
  * move operation callback
  * support multiple elements moving
  *
@@ -199,9 +209,8 @@ export const elementOnChangePosition = (
   { stopPropagation }
 ) => {
   changePosition = true;
-  const allSelect = $(`${INTERFACE_ROOT} .select ${Types.SELECT.tag}`);
-  allSelect.select2("close");
-  app.$removeResizer();
+
+  clearInteractions();
 
   const { selectedElements } = app;
   // need to move all elements at the same time

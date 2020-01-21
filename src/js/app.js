@@ -166,7 +166,7 @@ export let app;
       currentElements: {
         handler(newValue, oldValue) {
           // if boxId element does not exist in the graph, we add it
-          for (const el of getNewElements(newValue)) {
+          for (const el of getNewElements(this.graph, newValue)) {
             const { type, category } = el;
             switch (category) {
               case CATEGORY_SERVICE:
@@ -183,7 +183,7 @@ export let app;
           // remove element removed from arr
           // cannot use arr.includes because states are deep cloned
           for (const el of getDeletedElements(oldValue, newValue)) {
-            deleteElementByBoxId(el.boxId);
+            deleteElementByBoxId(this.graph, el.boxId);
           }
         }
       },
@@ -272,8 +272,8 @@ export let app;
       deletedElements(newValue) {
         // if element is not in elements but exist in graph, delete it
         // @TODO: optimize ?
-        for (const element of getElementsInGraph(newValue)) {
-          deleteElementByBoxId(element.boxId);
+        for (const element of getElementsInGraph(this.graph, newValue)) {
+          deleteElementByBoxId(this.graph, element.boxId);
         }
       },
       /**
@@ -282,12 +282,14 @@ export let app;
       selectedElements(newValue, oldValue) {
         // highlight current selection
         for (const { boxId } of newValue) {
-          const cellView = getElementByBoxId(boxId).findView(this.paper);
+          const cellView = getElementByBoxId(this.graph, boxId).findView(
+            this.paper
+          );
           highlightSelection(cellView);
         }
         // remove unselected element if not deleted
         for (const { boxId } of oldValue.filter(el => !newValue.includes(el))) {
-          const el = getElementByBoxId(boxId);
+          const el = getElementByBoxId(this.graph, boxId);
 
           // on delete, these might be still be selected
           if (el) {

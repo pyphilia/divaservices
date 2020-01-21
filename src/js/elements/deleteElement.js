@@ -14,8 +14,8 @@ const deleteElement = element => {
  *
  * @param {*} boxId
  */
-export const deleteElementByBoxId = boxId => {
-  const cell = getElementByBoxId(boxId);
+export const deleteElementByBoxId = (graph, boxId) => {
+  const cell = getElementByBoxId(graph, boxId);
   deleteElement(cell);
 };
 

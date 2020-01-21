@@ -9,7 +9,9 @@ import {
 import {
   IN_PORT_CLASS,
   OUT_PORT_CLASS,
-  PORT_SELECTOR
+  PORT_SELECTOR,
+  ATTR_TYPE_ALLOWED,
+  ATTR_TYPE
 } from "../constants/selectors";
 import { app } from "./../app";
 import { layoutSettingsApp } from "../layoutSettings";
@@ -30,8 +32,8 @@ export const shortenString = (string, maxLength = 15) => {
   return string;
 };
 
-export const getElementByBoxId = id => {
-  return app.graph.getElements().find(el => el.attributes.boxId == id);
+export const getElementByBoxId = (graph, id) => {
+  return graph.getElements().find(el => el.attributes.boxId == id);
 };
 
 export const getLinkBySourceTarget = (source, target) => {
@@ -282,9 +284,9 @@ export const findEmptyPosition = (size, startingPoint) => {
 };
 
 export const centerBoxInPaperByBoxId = boxId => {
-  const { paper } = app;
+  const { paper, graph } = app;
 
-  const el = getElementByBoxId(boxId);
+  const el = getElementByBoxId(graph, boxId);
   const bbox = el.getBBox();
   const { left, top, width, height } = paper.svg.getBoundingClientRect();
   const canvasDimensions = paper.clientToLocalRect({
@@ -300,4 +302,45 @@ export const centerBoxInPaperByBoxId = boxId => {
 
   // highlight element
   app.$addUniqueElementToSelection(el.findView(paper));
+};
+
+/**
+ * matching algorithm to validate port connection
+ */
+/* eslint-disable-next-line no-unused-vars */
+export const validateConnection = (vS, mS, vT, mT, end, lV) => {
+  if (!mT) {
+    return false;
+  }
+  if (vS === vT) {
+    return false;
+  }
+  if (mT.getAttribute("port-group") !== IN_PORT_CLASS) {
+    return false;
+  }
+
+  // input accept only one source
+  const usedInPorts = vT.model.attributes.getUsedInPorts();
+  const matchId = usedInPorts.find(({ id }) => id === mT.getAttribute("port"));
+  if (matchId) {
+    return false;
+  }
+
+  // allow only same input-output type
+  if (
+    mT.getAttribute(ATTR_TYPE) === undefined ||
+    mS.getAttribute(ATTR_TYPE) === undefined
+  ) {
+    return false;
+  }
+
+  // check allowed type
+  const allowedS = mS.getAttribute(ATTR_TYPE_ALLOWED).split(",");
+  const allowedT = mT.getAttribute(ATTR_TYPE_ALLOWED).split(",");
+  const commonType = allowedS.filter(value => -1 !== allowedT.indexOf(value));
+  if (commonType.length === 0) {
+    return false;
+  }
+
+  return true;
 };

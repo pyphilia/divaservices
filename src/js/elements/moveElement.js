@@ -1,4 +1,5 @@
 import { getElementByBoxId } from "../layout/utils";
+import { app } from "../app";
 
 /**
  * move elements
@@ -7,8 +8,9 @@ import { getElementByBoxId } from "../layout/utils";
  * @param {array} elements
  */
 export const moveElements = elements => {
+  const { graph } = app;
   for (const { boxId, position } of elements) {
-    const el = getElementByBoxId(boxId);
+    const el = getElementByBoxId(graph, boxId);
     const { x, y } = position;
     el.position(x, y, { stopPropagation: true });
   }
@@ -23,8 +25,9 @@ export const moveElements = elements => {
  * @param {object} deltaPosition difference of position of reference element
  */
 export const moveAllElements = (elements, deltaPosition) => {
+  const { graph } = app;
   for (const el of elements) {
-    const cellView = getElementByBoxId(el.boxId);
+    const cellView = getElementByBoxId(graph, el.boxId);
     const { x: previousX, y: previousY } = el.position;
     cellView.position(
       previousX + deltaPosition.x,

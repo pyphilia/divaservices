@@ -38,6 +38,7 @@ import {
   OUT_PORT_CLASS
 } from "../constants/selectors";
 import { layoutSettingsApp } from "../layoutSettings";
+import { elementOnChangePosition } from "../events/paperEvents";
 
 /**
  * create graphical and element object with given parameters
@@ -187,6 +188,9 @@ export const addElementFromServiceObject = (e, parameters = {}) => {
 
   createParametersInForeignObject(element, parameters.defaultParams);
 
+  // ELEMENT EVENTS
+  element.on("change:position", elementOnChangePosition);
+
   return element;
 };
 
@@ -305,8 +309,9 @@ export const addLinkFromJSON = link => {
 export const addLinkFromLink = link => {
   const { source, target, id } = link;
 
-  const s = getElementByBoxId(source.boxId);
-  const t = getElementByBoxId(target.boxId);
+  const { graph } = app;
+  const s = getElementByBoxId(graph, source.boxId);
+  const t = getElementByBoxId(graph, target.boxId);
 
   const sPort = s.getPorts().find(p => p.name === source.portName).id;
   const tPort = t.getPorts().find(p => p.name === target.portName).id;

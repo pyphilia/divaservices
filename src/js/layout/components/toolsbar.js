@@ -32,7 +32,7 @@ import { MESSAGE_SAVE_SUCCESS } from "../../constants/messages";
 import { API } from "divaservices-utils";
 
 const Toolsbar = Vue.component("Toolsbar", {
-  props: ["selectedElements", "paper", "scale"],
+  props: ["selectedElements", "paper", "scale", "graph"],
   methods: {
     shortcutToString(shortcut) {
       return shortcutToString(shortcut);
@@ -127,9 +127,10 @@ const Toolsbar = Vue.component("Toolsbar", {
           resize: {
             action: () => {
               const cellView = getElementByBoxId(
+                this.graph,
                 this.selectedElements[0].boxId
-              ).findView(app.paper);
-              app.$createResizer(cellView);
+              ).findView(this.paper);
+              this.$createResizer(cellView);
             },
             icon: ICON_RESIZE,
             enabledCondition: this.selectedElements.length === 1
@@ -147,8 +148,7 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           search: {
             action: () => {
-              console.log(app.$refs);
-              app.$refs.searchElements.openSearch();
+              this.$refs.searchElements.openSearch();
             },
             icon: ICON_SEARCH,
             enabledCondition: true

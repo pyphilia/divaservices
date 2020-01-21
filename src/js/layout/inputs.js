@@ -32,7 +32,6 @@ import {
 import { objectToString } from "./utils";
 import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
-import { elementOnChangePosition } from "../events/paperEvents";
 import { Validation, Constants, API } from "divaservices-utils";
 import { NO_PARAMETER_TEXT } from "../constants/messages";
 const { Types } = Constants;
@@ -606,13 +605,6 @@ export const createParametersInForeignObject = (
       })
       .appendTo(foreignObject.find(`.${TITLE_ROW_CLASS}`));
   }
-
-  // ELEMENT EVENTS
-
-  element.on("change:position", elementOnChangePosition);
-
-  // remove resizer if exists
-  app.$removeResizer();
 
   // apply tooltip bootstrap js
   // and layout option

@@ -1,7 +1,7 @@
 import * as joint from "jointjs";
 import { THEME } from "../constants/constants";
 import { INTERFACE_ROOT } from "../constants/selectors";
-import { validateConnection } from "./components/utils";
+import { validateConnection } from "./utils";
 
 /**
  * initialize joint.js graph

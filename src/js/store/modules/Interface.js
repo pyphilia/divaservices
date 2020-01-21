@@ -101,10 +101,10 @@ const Interface = {
     [DELETE_LINK](state, { link }) {
       state.links = state.links.filter(thisL => thisL.id != link.id);
     },
-    [MOVE_ELEMENTS](state, { elements }) {
+    [MOVE_ELEMENTS](state, { elements, graph }) {
       for (const el of elements) {
         const { boxId } = el;
-        const graphEl = getElementByBoxId(boxId);
+        const graphEl = getElementByBoxId(graph, boxId);
         el.position = graphEl.position();
       }
     },
@@ -193,8 +193,11 @@ const Interface = {
     $deleteLink({ commit }, payload) {
       commit(DELETE_LINK, payload);
     },
-    $moveSelectedElements({ commit, state }) {
-      commit(MOVE_ELEMENTS, { elements: selectedElements(state.elements) });
+    $moveSelectedElements({ commit, state }, { graph }) {
+      commit(MOVE_ELEMENTS, {
+        elements: selectedElements(state.elements),
+        graph
+      });
     },
     $resizeElement({ commit }, payload) {
       commit(RESIZE_ELEMENT, payload);
