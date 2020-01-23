@@ -163,6 +163,7 @@ const createBox = (
     },
 
     getUsedInPorts: function() {
+      const graph = this.graph;
       if (!graph) return [];
       const connectedLinks = graph.getConnectedLinks(this, { inbound: true });
       return connectedLinks.map(link => {
