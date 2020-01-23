@@ -15,7 +15,7 @@ import { API, Constants } from "divaservices-utils";
  *
  * @param {number} id workflow id to read
  */
-export const readWorkflow = async id => {
+export const openWorkflow = async id => {
   const workflow = await getWorkflowById(id);
 
   const elements = [];

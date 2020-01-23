@@ -1,4 +1,4 @@
-import { getElementByBoxId } from "../layout/utils";
+import Graph from "../classes/Graph";
 
 /**
  * delete element from joint.js graph
@@ -14,8 +14,8 @@ const deleteElement = element => {
  *
  * @param {*} boxId
  */
-export const deleteElementByBoxId = (graph, boxId) => {
-  const cell = getElementByBoxId(graph, boxId);
+export const deleteElementByBoxId = boxId => {
+  const cell = Graph.getElementByBoxId(boxId);
   deleteElement(cell);
 };
 

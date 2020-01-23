@@ -1,4 +1,5 @@
 import { CATEGORY_DATATEST } from "../../constants/constants";
+import Graph from "../../classes/Graph";
 
 /**
  * find in elements the element with given boxId
@@ -16,16 +17,16 @@ export const findElementByBoxId = (elements, boxId) => {
  * @param {graph} graph
  * @param {link} link
  */
-export const buildLinkForStore = (graph, link) => {
+export const buildLinkForStore = link => {
   const source = link.source;
   const target = link.target;
 
-  const sourceCell = graph.getCell(source.id);
+  const sourceCell = Graph.graph.getCell(source.id);
   const sourceBoxId = sourceCell.attributes.boxId;
   const sPortId = source.port;
   const sPortName = sourceCell.getPort(sPortId).name;
 
-  const targetCell = graph.getCell(target.id);
+  const targetCell = Graph.graph.getCell(target.id);
   const targetBoxId = targetCell.attributes.boxId;
   const tPortId = target.port;
   const tPortName = targetCell.getPort(tPortId).name;
@@ -80,8 +81,8 @@ export const deleteLink = (links, link) => {
  * @param {object} link
  * @param {graph} graph
  */
-export const addLinktoLinks = (links, link, graph) => {
-  const l = buildLinkForStore(graph, link);
+export const addLinktoLinks = (links, link) => {
+  const l = buildLinkForStore(link);
   links.push(l);
 };
 

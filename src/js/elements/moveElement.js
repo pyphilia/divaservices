@@ -1,6 +1,4 @@
-import { getElementByBoxId } from "../layout/utils";
-import { app } from "../app";
-
+import Graph from "../classes/Graph";
 /**
  * move elements
  * applied on undo-redo operations
@@ -8,9 +6,8 @@ import { app } from "../app";
  * @param {array} elements
  */
 export const moveElements = elements => {
-  const { graph } = app;
   for (const { boxId, position } of elements) {
-    const el = getElementByBoxId(graph, boxId);
+    const el = Graph.getElementByBoxId(boxId);
     const { x, y } = position;
     el.position(x, y, { stopPropagation: true });
   }
@@ -25,14 +22,14 @@ export const moveElements = elements => {
  * @param {object} deltaPosition difference of position of reference element
  */
 export const moveAllElements = (elements, deltaPosition) => {
-  const { graph } = app;
   for (const el of elements) {
-    const cellView = getElementByBoxId(graph, el.boxId);
+    const cellView = Graph.getElementByBoxId(el.boxId);
     const { x: previousX, y: previousY } = el.position;
     cellView.position(
       previousX + deltaPosition.x,
       previousY + deltaPosition.y,
       {
+        elements,
         stopPropagation: true
       }
     );

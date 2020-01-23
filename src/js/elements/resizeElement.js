@@ -1,6 +1,5 @@
-import { getElementByBoxId } from "../layout/utils";
 import { FOREIGN_CLASS } from "../constants/selectors";
-import { app } from "../app";
+import Graph from "../classes/Graph";
 
 /**
  * resize model and foreignObjects content
@@ -25,9 +24,8 @@ export const resizeElementBox = (model, foreignObjs, { width, height }) => {
  * @param {array} elements
  */
 export const resizeElements = elements => {
-  const { graph } = app;
   for (const { boxId, size } of elements) {
-    const model = getElementByBoxId(graph, boxId);
+    const model = Graph.getElementByBoxId(boxId);
     const foreignObjs = document.querySelectorAll(
       `foreignObject.${FOREIGN_CLASS}[boxId='${boxId}']`
     );

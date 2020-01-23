@@ -21,30 +21,35 @@ import {
   ICON_SAVE
 } from "../../constants/constants";
 import { mapState, mapActions } from "vuex";
-import UndoRedoHistory from "../../store/plugins/UndoRedoHistory";
-import { app } from "../../app";
 import { TOOLSBAR } from "../../constants/selectors";
 import { shortcutToString } from "../../utils/utils";
-import { getElementByBoxId } from "../utils";
-import { saveWorkflow } from "../../workflows/saveWorkflow";
-import { fireAlert } from "../../utils/alerts";
-import { MESSAGE_SAVE_SUCCESS } from "../../constants/messages";
-import { API } from "divaservices-utils";
+import Graph from "../../classes/Graph";
+import Paper from "../../classes/Paper";
 
 const Toolsbar = Vue.component("Toolsbar", {
-  props: ["selectedElements", "paper", "scale", "graph"],
+  props: [
+    "selectedElements",
+    "scale",
+    "undo",
+    "redo",
+    "canUndo",
+    "canRedo",
+    "saveWorkflow"
+  ],
   methods: {
     shortcutToString(shortcut) {
       return shortcutToString(shortcut);
     },
     updateZoom(event) {
-      this.$setZoom(event.target.value / 100, this.paper);
+      Paper.setZoom(event.target.value / 100);
     },
     deleteAction() {
       this.$deleteElements({ elements: this.selectedElements });
     },
     duplicateAction() {
-      this.$duplicateElements({ elements: this.selectedElements });
+      this.$duplicateElements({
+        elements: this.selectedElements
+      });
     },
     toggleLeftSidebar() {
       this.$root.$refs.leftsidebar.toggle();
@@ -84,36 +89,36 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           undo: {
             action: () => {
-              UndoRedoHistory.undo();
+              this.undo();
             },
             id: "undo",
             // classNames: "disabled",
             icon: ICON_UNDO,
-            enabledCondition: UndoRedoHistory.canUndo(),
+            enabledCondition: this.canUndo(),
             shortcut: Shortcuts.UNDO
           },
           redo: {
             action: () => {
-              UndoRedoHistory.redo();
+              this.redo();
             },
             // classNames: "disabled",
             id: "redo",
             icon: ICON_REDO,
-            enabledCondition: UndoRedoHistory.canRedo(),
+            enabledCondition: this.canRedo(),
             shortcut: Shortcuts.REDO
           }
         },
         {
           "zoom in": {
             action: () => {
-              app.zoomInFromApp();
+              Paper.zoomIn();
             },
             icon: ICON_ZOOM_IN,
             enabledCondition: this.scale < MAX_SCALE
           },
           "zoom out": {
             action: () => {
-              app.zoomOutFromApp();
+              Paper.zoomOut();
             },
             icon: ICON_ZOOM_OUT,
             enabledCondition: this.scale > MIN_SCALE
@@ -126,11 +131,10 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           resize: {
             action: () => {
-              const cellView = getElementByBoxId(
-                this.graph,
-                this.selectedElements[0].boxId
-              ).findView(this.paper);
-              this.$createResizer(cellView);
+              const cellView = Paper.findViewInPaper(
+                Graph.getElementByBoxId(this.selectedElements[0].boxId)
+              );
+              this.$createResizer(this.elements, cellView);
             },
             icon: ICON_RESIZE,
             enabledCondition: this.selectedElements.length === 1
@@ -148,7 +152,7 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           search: {
             action: () => {
-              this.$refs.searchElements.openSearch();
+              this.$root.$refs.searchElements.openSearch();
             },
             icon: ICON_SEARCH,
             enabledCondition: true
@@ -157,19 +161,14 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           save: {
             action: async () => {
-              // @TODO receive response and fire correct alert
-              await saveWorkflow(app.graph.toJSON());
-              fireAlert("success", MESSAGE_SAVE_SUCCESS);
+              this.saveWorkflow();
             },
             icon: ICON_SAVE,
             enabledCondition: true
           },
           "save and install": {
             action: async () => {
-              await saveWorkflow(app.graph.toJSON(), true);
-              top.window.location.href = API.getWorkflowExecutionViewUrl(
-                app.workflowId
-              );
+              this.saveWorkflow(true);
             },
             icon: ICON_INSTALL,
             enabledCondition: true

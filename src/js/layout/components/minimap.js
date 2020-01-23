@@ -11,11 +11,13 @@ import {
 } from "../../constants/selectors";
 import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../../constants/constants";
 import { mapState } from "vuex";
+import Graph from "../../classes/Graph";
+import Paper from "../../classes/Paper";
 
 const SCALE_CONTENT_PADDING = 10;
 
 const Minimap = Vue.component("Minimap", {
-  props: ["graph", "paper", "translation", "movedElements", "scale"],
+  props: ["movedElements", "scale"],
   data: function() {
     return {
       mapDragFlag: false,
@@ -47,8 +49,9 @@ const Minimap = Vue.component("Minimap", {
       this.fitContentPaddingX = mCoords.x + SCALE_CONTENT_PADDING;
       this.fitContentPaddingY = mCoords.y + SCALE_CONTENT_PADDING;
 
-      const bcr = this.paper.svg.getBoundingClientRect();
-      const { x, y, width, height } = this.paper.clientToLocalRect({
+      const paper = Paper.paper;
+      const bcr = paper.svg.getBoundingClientRect();
+      const { x, y, width, height } = paper.clientToLocalRect({
         x: bcr.left,
         y: bcr.top,
         width: bcr.width,
@@ -89,7 +92,7 @@ const Minimap = Vue.component("Minimap", {
       // init minimap with current graph
       this.minimapPaper = new joint.dia.Paper({
         el: document.getElementById(MINIMAP_PAPER_ID),
-        model: this.graph,
+        model: Graph.graph,
         width: MINIMAP_WIDTH,
         height: MINIMAP_HEIGHT,
         gridSize: 1,
@@ -126,9 +129,9 @@ const Minimap = Vue.component("Minimap", {
           this.navigator.style.top = `${yScale}px`;
           this.navigator.style.left = `${xScale}px`;
 
-          this.paper.translate(
-            (-this.fitContentPaddingX - newX) * this.scale,
-            (-this.fitContentPaddingY - newY) * this.scale
+          Paper.translate(
+            -this.fitContentPaddingX - newX,
+            -this.fitContentPaddingY - newY
           );
         }
       });

@@ -12,7 +12,7 @@
     "prettier:write": "prettier --write \"src/**/*.js\" \"src/**/*.scss\" \"test/*.js\"",
     "pre-commit": "yarn prettier:check && yarn eslint && yarn test",
     "pre-push": "yarn prettier:check && yarn eslint && yarn test",
-    "test": "exit 0",
+    "test": "jest test/Tool*",
     "webpack": "webpack",
     "webpack:p": "webpack -p"
   },

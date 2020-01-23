@@ -1,20 +1,13 @@
 import "select2js";
 import { Constants } from "divaservices-utils";
 const { Types } = Constants;
-import {
-  TOOLTIP_BREAK_LINE,
-  MimeTypes,
-  BOX_MARGIN
-} from "../constants/constants";
+import { TOOLTIP_BREAK_LINE } from "../constants/constants";
 import {
   IN_PORT_CLASS,
   OUT_PORT_CLASS,
-  PORT_SELECTOR,
   ATTR_TYPE_ALLOWED,
   ATTR_TYPE
 } from "../constants/selectors";
-import { app } from "./../app";
-import { layoutSettingsApp } from "../layoutSettings";
 
 const minWidth = 400;
 const titleFontSize = 18;
@@ -32,38 +25,9 @@ export const shortenString = (string, maxLength = 15) => {
   return string;
 };
 
-export const getElementByBoxId = (graph, id) => {
-  return graph.getElements().find(el => el.attributes.boxId == id);
-};
-
-export const getLinkBySourceTarget = (source, target) => {
-  const { graph } = app;
-  return graph.getLinks().find(link => {
-    const s = link.source();
-    const t = link.target();
-
-    const sourceCell = graph.getCell(s.id);
-    const targetCell = graph.getCell(t.id);
-
-    if (!sourceCell || !targetCell) {
-      return false;
-    }
-    const sourceBoxId = sourceCell.attributes.boxId;
-    const sPortId = s.port;
-    const sPortName = sourceCell.getPort(sPortId).name;
-
-    const targetBoxId = targetCell.attributes.boxId;
-    const tPortId = t.port;
-    const tPortName = targetCell.getPort(tPortId).name;
-
-    return (
-      sourceBoxId == source.boxId &&
-      targetBoxId == target.boxId &&
-      sPortName === source.portName &&
-      tPortName === target.portName
-    );
-  });
-};
+// export const getElementByBoxId = (graph, id) => {
+//   return graph.getElements().find(el => el.attributes.boxId == id);
+// };
 
 export const generateUniqueId = () => {
   return Math.random()
@@ -186,122 +150,6 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
     maxPortEntry * 60,
     inputsHeight + computeTitleLength(el, fromSVG).titleHeight
   );
-};
-
-export const buildPortAttrs = (name, type, typeAllowed) => {
-  const showPortDetails = layoutSettingsApp.isShowPortsDetailsChecked();
-  const showPorts = layoutSettingsApp.isShowPortsChecked();
-  const typeAllowedShort = shortenString(typeAllowed.join(", "), 25);
-
-  return {
-    [PORT_SELECTOR]: {
-      fill: MimeTypes[type].color,
-      type,
-      typeAllowed
-    },
-    circle: {
-      display: showPorts ? "block" : "none"
-    },
-    mainText: {
-      text: `${name}\n${typeAllowedShort}`,
-      display: showPortDetails ? "block" : "none"
-    }
-  };
-};
-
-export const createPort = (param, group) => {
-  let port = {};
-  const { name, mimeTypes } = param;
-  if (group) {
-    //group == OUT_PORT_CLASS || userdefined) {
-    // always create out port, check userdefined for inputs
-
-    let typeAllowed;
-    let type;
-
-    // folder case
-    if (param.type == Types.FOLDER.type) {
-      typeAllowed = [Types.FOLDER.type]; // use options allowed types, otherwise it is a folder
-      type = Types.FOLDER.type;
-    } else {
-      // @TODO display !userdefined ports ?
-      typeAllowed = mimeTypes.allowed;
-      const typeEnd =
-        typeAllowed[0].indexOf("/") < 0
-          ? typeAllowed[0].length
-          : typeAllowed[0].indexOf("/");
-      type = typeAllowed[0].substr(
-        //@TODO diff types ?
-        0,
-        typeEnd
-      );
-    }
-
-    port = {
-      group,
-      name,
-      attrs: buildPortAttrs(name, type, typeAllowed)
-    };
-  }
-  return port;
-};
-
-// helper function to find an empty position to add
-// an element without overlapping other ones
-// it tries to fill the canvas view first horizontally
-// then vertically
-export const findEmptyPosition = (size, startingPoint) => {
-  const { paper, graph } = app;
-  const { left, top, width, height } = paper.svg.getBoundingClientRect();
-  const canvasDimensions = paper.clientToLocalRect({
-    x: left,
-    y: top,
-    width,
-    height
-  });
-
-  const { x: canvasX, y: canvasY, width: canvasW } = canvasDimensions;
-  const position = startingPoint
-    ? startingPoint
-    : { x: canvasX + BOX_MARGIN, y: canvasY + BOX_MARGIN };
-  const { width: sizeWidth, height: sizeHeight } = size;
-
-  while (
-    graph.findModelsInArea({
-      ...position,
-      width: sizeWidth + BOX_MARGIN,
-      height: sizeHeight + BOX_MARGIN
-    }).length
-  ) {
-    position.x += sizeWidth + BOX_MARGIN;
-    if (canvasX + canvasW < position.x + sizeWidth) {
-      position.x = canvasX + BOX_MARGIN;
-      position.y += sizeHeight + BOX_MARGIN;
-    }
-  }
-
-  return position;
-};
-
-export const centerBoxInPaperByBoxId = boxId => {
-  const { paper, graph } = app;
-
-  const el = getElementByBoxId(graph, boxId);
-  const bbox = el.getBBox();
-  const { left, top, width, height } = paper.svg.getBoundingClientRect();
-  const canvasDimensions = paper.clientToLocalRect({
-    x: left,
-    y: top,
-    width,
-    height
-  });
-  app.translate(
-    -bbox.x + canvasDimensions.width / 2 - bbox.width / 2,
-    -bbox.y + canvasDimensions.height / 2 - bbox.height / 2
-  );
-
-  // highlight element
-  app.$addUniqueElementToSelection(el.findView(paper));
 };
 
 /**

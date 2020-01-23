@@ -5,13 +5,13 @@
  */
 
 import Vue from "vue";
-import { centerBoxInPaperByBoxId } from "../utils";
+import Paper from "../../classes/Paper";
 
 const Log = Vue.component("Log", {
   data() {
     return {
       messages: [],
-      activated: false // hacky variable to activate readworkflow initial push
+      activated: false // hacky variable to activate openWorkflow initial push
     };
   },
   methods: {
@@ -19,9 +19,6 @@ const Log = Vue.component("Log", {
       return this.messages.findIndex(
         m => m.boxId == message.boxId && m.paramName === message.paramName
       );
-    },
-    setLogMessages(messages) {
-      this.messages = messages;
     },
     addMessage(message) {
       const mId = this.findMessage(message);
@@ -46,7 +43,7 @@ const Log = Vue.component("Log", {
       this.messages.splice(this.findMessage(message), 1);
     },
     goToBox(name) {
-      centerBoxInPaperByBoxId(name);
+      Paper.centerBoxByBoxId(name);
     }
   },
   template: `

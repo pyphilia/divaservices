@@ -52,9 +52,7 @@ export const orderGraph = graph => {
  * if a loop is found, it still orders the element
  * and return isLoop set to true
  */
-export const getOrderedElements = () => {
-  const { graph } = app;
-
+export const getOrderedElements = graph => {
   const order = [];
   let isLoop = false;
 

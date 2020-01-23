@@ -14,11 +14,11 @@ import {
   PASTE_CLASS,
   CLEAR_CLASS
 } from "../../constants/selectors";
-import { copy } from "../../events/controls";
 import { mapActions } from "vuex";
+import Paper from "../../classes/Paper";
 
 const ContextMenus = Vue.component("ContextMenus", {
-  props: ["selectedElements", "copiedElements", "paper", "currentElements"],
+  props: ["selectedElements", "copiedElements", "currentElements", "copy"],
   data() {
     return {
       // define 2 context menus: for element, for paper
@@ -30,7 +30,7 @@ const ContextMenus = Vue.component("ContextMenus", {
             Copy: {
               className: COPY_CLASS,
               action: () => {
-                copy(this.selectedElements);
+                this.copy();
               }
             },
             Duplicate: {
@@ -82,8 +82,8 @@ const ContextMenus = Vue.component("ContextMenus", {
   methods: {
     ...mapActions("Interface", ["$duplicateElements", "$deleteElements"]),
     setPositionToContextMenu(menuName, { x, y }) {
-      const screenPos = this.paper.localToClientPoint(x, y);
-      const offset = this.paper.clientOffset();
+      const screenPos = Paper.paper.localToClientPoint(x, y);
+      const offset = Paper.paper.clientOffset();
 
       const left = screenPos.x - offset.x;
       const top = screenPos.y - offset.y;

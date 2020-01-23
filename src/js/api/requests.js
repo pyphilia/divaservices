@@ -36,6 +36,7 @@ export const getWorkflowById = async (id, asXml = false) => {
     <Step> <No>0</No> <Name>FilePickermimetypes</Name> <Service> <Key>47</Key> </Service> <Inputs> <Parameter> <Name>regex</Name> <Value>12345</Value> </Parameter> </Inputs> </Step> <Step> <No>1</No> <Name>OcropusBinarization</Name> <Service> <Key>6</Key> </Service> <Inputs> <Parameter> <Name>enableSkew</Name> <Value>true</Value> </Parameter> </Inputs> </Step> 
     </Steps>
 </Workflow>`;
+    console.log(Decorators);
     return asXml ? xml : await Decorators.workflowDecorator(xml, webservices);
   }
 };

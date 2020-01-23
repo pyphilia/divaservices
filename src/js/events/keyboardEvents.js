@@ -3,10 +3,8 @@
  * handles shortcuts
  */
 
-import { copy } from "./controls";
 import { app } from "../app";
 import UndoRedoHistory from "../store/plugins/UndoRedoHistory";
-import { saveWorkflow } from "../workflows/saveWorkflow";
 
 export let ctrlDown;
 export let spaceDown;
@@ -28,11 +26,13 @@ export const initKeyboardEvents = async () => {
       if (ctrlDown) {
         switch (keyName) {
           case "c": {
-            copy(app.selectedElements);
+            app.copy();
             break;
           }
           case "v": {
-            app.$duplicateElements({ elements: app.copiedElements });
+            app.$duplicateElements({
+              elements: app.copiedElements
+            });
             break;
           }
           case "z": {
@@ -46,7 +46,7 @@ export const initKeyboardEvents = async () => {
             break;
           }
           case "s": {
-            saveWorkflow(app.graph.toJSON()); // WARNING: promise
+            app.saveWorkflow(); // WARNING: promise
             break;
           }
           default:

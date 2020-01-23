@@ -2,13 +2,13 @@
  * Elements search component
  */
 import Vue from "vue";
-import { app } from "../../app";
 import { buildSearchRegex } from "../../utils/utils";
-import { centerBoxInPaperByBoxId } from "../utils";
 import { SEARCH_ELEMENTS_ID } from "../../constants/selectors";
 
+import Paper from "../../classes/Paper";
+import { mapState } from "vuex";
+
 const Search = Vue.component("SearchElements", {
-  props: ["selectedElements", "paper", "scale"],
   data() {
     return {
       open: false,
@@ -16,6 +16,9 @@ const Search = Vue.component("SearchElements", {
       candidates: [],
       currentId: 0
     };
+  },
+  computed: {
+    ...mapState("Interface", ["elements"])
   },
   methods: {
     /**
@@ -31,7 +34,7 @@ const Search = Vue.component("SearchElements", {
       const regex = buildSearchRegex(this.query);
 
       // apply search regex
-      this.candidates = app.elements
+      this.candidates = this.elements
         .map(el => {
           return { value: el.type.toLowerCase().search(regex), ...el };
         })
@@ -42,7 +45,7 @@ const Search = Vue.component("SearchElements", {
       this.currentId = 0;
 
       if (this.candidates.length) {
-        centerBoxInPaperByBoxId(this.candidates[this.currentId].boxId);
+        Paper.centerBoxByBoxId(this.candidates[this.currentId].boxId);
       }
     },
     nextCandidate() {
@@ -55,7 +58,7 @@ const Search = Vue.component("SearchElements", {
         this.currentId = this.candidates.length - 1;
       }
       // move paper to center box
-      centerBoxInPaperByBoxId(this.candidates[this.currentId].boxId);
+      Paper.centerBoxByBoxId(this.candidates[this.currentId].boxId);
     }
   },
   template: `

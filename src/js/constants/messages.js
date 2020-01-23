@@ -9,3 +9,5 @@ export const MESSAGE_LOOP =
   "There exist a loop in the workflow, it cannot be installed";
 
 export const NO_PARAMETER_TEXT = "No parameter";
+
+export const UPDATE_TRANSLATION = "UPDATE_TRANSLATION";

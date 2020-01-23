@@ -6,24 +6,22 @@ import {
   NO_PARAMETER_CLASS,
   DATA_BOX_FOREIGNOBJECT_CLASS,
   DATA_INPUT_CONTENT_CLASS
-} from "./constants/selectors";
-import { app } from "./app";
+} from "../../constants/selectors";
+import Graph from "../../classes/Graph";
 
 const changePortDetails = event => {
   const prop = event.target.checked ? "block" : "none";
-  const { graph } = app;
-  for (const el of graph.getElements()) {
+  for (const el of Graph.graph.getElements()) {
     for (const { id } of el.getPorts()) {
-      el.portProp(id, "attrs/text/display", prop);
+      el.portProp(id, "attrs/mainText/display", prop);
     }
   }
 };
 
 const changePorts = event => {
   const prop = event.target.checked ? "block" : "none";
-  const { graph } = app;
   // show prop details
-  for (const el of graph.getElements()) {
+  for (const el of Graph.graph.getElements()) {
     for (const { id } of el.getPorts()) {
       el.portProp(id, "attrs/circle/display", prop);
     }
@@ -82,13 +80,14 @@ const defaultSettings = {
   }
 };
 
-export const layoutSettingsApp = new Vue({
-  el: "#layoutSettings",
-  data: {
-    layout: defaultSettings,
-    checkedOptions: Object.entries(defaultSettings)
-      .filter(x => x[1].checked)
-      .map(x => x[1].name)
+const layoutSettings = Vue.component("LayoutSettings", {
+  data() {
+    return {
+      layout: defaultSettings,
+      checkedOptions: Object.entries(defaultSettings)
+        .filter(x => x[1].checked)
+        .map(x => x[1].name)
+    };
   },
   methods: {
     isShowParametersChecked() {
@@ -132,3 +131,5 @@ export const layoutSettingsApp = new Vue({
       </div>
     </div>`
 });
+
+export default layoutSettings;

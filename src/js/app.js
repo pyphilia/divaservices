@@ -1,13 +1,14 @@
 import Vue from "vue";
-import * as joint from "jointjs";
 import { mapActions, mapState } from "vuex";
 import plugins from "./plugins";
+
+import Graph from "./classes/Graph";
+import Paper from "./classes/Paper";
+
 import components from "./layout/components";
 import store from "./store/store";
 import { DivaServices } from "divaservices-utils";
 import { initWebservices } from "./constants/globals";
-import { initPaperEvents } from "./events/paperEvents";
-import { getElementByBoxId, getLinkBySourceTarget } from "./layout/utils";
 import { highlightSelection, unHighlight } from "./store/modules/highlight";
 import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "./constants/constants";
 import { addElementFromName, addLinkFromLink } from "./elements/addElement";
@@ -15,15 +16,13 @@ import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
 import { resizeElements } from "./elements/resizeElement";
 import {
   setInputValueInElement,
-  setSelectValueInElement
+  setSelectValueInElement,
+  closeSelects
 } from "./layout/inputs";
 import {
   equalObjects,
   findDifferenceBy,
-  getNewElements,
-  getDeletedElements,
-  getNewLinks,
-  getElementsInGraph
+  getDeletedElements
 } from "./utils/utils";
 import {
   selectedElements,
@@ -34,11 +33,18 @@ import {
 } from "./store/modules/utils";
 import { moveElements } from "./elements/moveElement";
 import { addDataBox } from "./elements/addDataElement";
-import { initPaper } from "./layout/initPaper";
 import { initSplit } from "./layout/split";
 import { initKeyboardEvents } from "./events/keyboardEvents";
 import { initTour } from "./utils/walkthrough";
-import { readWorkflow } from "./workflows/readWorkflow";
+import { openWorkflow } from "./workflows/openWorkflow";
+import UndoRedoHistory from "./store/plugins/UndoRedoHistory";
+import { fireAlert } from "./utils/alerts";
+import {
+  MESSAGE_SAVE_SUCCESS,
+  MESSAGE_COPY_SUCCESS,
+  MESSAGE_COPY_ERROR
+} from "./constants/messages";
+import { saveWorkflow } from "./workflows/saveWorkflow";
 
 export let app;
 
@@ -50,14 +56,18 @@ export let app;
   app = new Vue({
     el: "#app",
     store,
+    components,
     data: {
-      graph: new joint.dia.Graph(),
-      paper: null,
-      translation: { tx: 0, ty: 0 },
+      paper: Paper, // in order to watch translation
       workflowId: undefined
     },
-    components,
     computed: {
+      translation() {
+        return Paper.translation;
+      },
+      scale() {
+        return Paper.scale;
+      },
       // this computed method is necessary since we shouldn't
       // listen to the store directly
       elementsData() {
@@ -93,9 +103,6 @@ export let app;
           return { boxId, size };
         });
       },
-      scale() {
-        return this.$zoom.scale;
-      },
       dataElements() {
         return this.dataTest;
       },
@@ -103,34 +110,64 @@ export let app;
       ...mapState("Keyboard", ["ctrl", "space"])
     },
     methods: {
+      /**
+       * Utility function to clear interactions on the paper
+       */
+      clearInteractions() {
+        // close select manually
+        closeSelects();
+
+        // remove resizer
+        this.$removeResizer();
+      },
+      copy() {
+        if (selectedElements.length) {
+          this.$copySelectedElements();
+          fireAlert("success", MESSAGE_COPY_SUCCESS);
+        } else {
+          fireAlert("danger", MESSAGE_COPY_ERROR);
+        }
+      },
+      saveWorkflow(installation = true) {
+        // @TODO receive response and fire correct alert
+        saveWorkflow(
+          {
+            elements: this.currentElements,
+            links: this.links,
+            workflowId: this.workflowId
+          },
+          installation
+        ); // WARNING: promise
+
+        fireAlert("success", MESSAGE_SAVE_SUCCESS);
+      },
+      canUndo() {
+        return UndoRedoHistory.canUndo();
+      },
+      canRedo() {
+        return UndoRedoHistory.canRedo();
+      },
+      redo() {
+        UndoRedoHistory.redo();
+      },
+      undo() {
+        UndoRedoHistory.undo();
+      },
+
       addElementToSelection(cellView) {
         this.$addElementToSelection(cellView);
       },
-      translate(newX, newY) {
-        this.paper.translate(newX * this.scale, newY * this.scale);
-        this.translation = this.paper.translate();
-      },
       addLinkFromApp(payload) {
-        this.$addLink({ ...payload, graph: this.graph });
+        this.$addLink({ ...payload });
       },
       deleteLinkFromApp(payload) {
-        this.$deleteLink({ ...payload, graph: this.graph });
+        this.$deleteLink({ ...payload });
       },
       deleteElementByCellView(cellView) {
         const boxId = cellView.model.attributes.boxId;
         this.$deleteElements({
           elements: [this.elements.find(el => el.boxId === boxId)]
         });
-      },
-
-      /**
-       * zoom call
-       */
-      zoomInFromApp() {
-        this.$zoomIn(this.paper);
-      },
-      zoomOutFromApp() {
-        this.$zoomOut(this.paper);
       },
 
       resizeElementByBoxId(boxId, size) {
@@ -166,7 +203,7 @@ export let app;
       currentElements: {
         handler(newValue, oldValue) {
           // if boxId element does not exist in the graph, we add it
-          for (const el of getNewElements(this.graph, newValue)) {
+          for (const el of Graph.getNewElements(newValue)) {
             const { type, category } = el;
             switch (category) {
               case CATEGORY_SERVICE:
@@ -183,7 +220,7 @@ export let app;
           // remove element removed from arr
           // cannot use arr.includes because states are deep cloned
           for (const el of getDeletedElements(oldValue, newValue)) {
-            deleteElementByBoxId(this.graph, el.boxId);
+            deleteElementByBoxId(el.boxId);
           }
         }
       },
@@ -197,10 +234,12 @@ export let app;
         handler(newValue, oldValue) {
           const difference = findDifferenceBy(newValue, oldValue, "boxId");
           console.log("TCL: handler -> difference", difference);
-          // for (const { boxId, defaultParams } of difference) {
-          //   setSelectValueInElement(...);
-          //   setInputValueInElement(...);
-          // }
+          for (const el of difference) {
+            console.log(el);
+            // const { boxId, defaultParams } = el;
+            // @TODO: suppose one image
+            // updateImgPreview(this.id, data);
+          }
         }
       },
       /**
@@ -253,7 +292,7 @@ export let app;
        * apply changes on undo-redo
        */
       links(newValue, oldValue) {
-        for (const l of getNewLinks(newValue)) {
+        for (const l of Graph.getNewLinks(newValue)) {
           addLinkFromLink(l);
         }
 
@@ -262,7 +301,7 @@ export let app;
         for (const el of oldValue.filter(
           el => newValue.filter(v => equalObjects(v, el)).length === 0
         )) {
-          const link = getLinkBySourceTarget(el.source, el.target);
+          const link = Graph.getLinkBySourceTarget(el.source, el.target);
           deleteLink(link);
         }
       },
@@ -272,8 +311,8 @@ export let app;
       deletedElements(newValue) {
         // if element is not in elements but exist in graph, delete it
         // @TODO: optimize ?
-        for (const element of getElementsInGraph(this.graph, newValue)) {
-          deleteElementByBoxId(this.graph, element.boxId);
+        for (const element of Graph.getElementsInGraph(newValue)) {
+          deleteElementByBoxId(element.boxId);
         }
       },
       /**
@@ -282,18 +321,18 @@ export let app;
       selectedElements(newValue, oldValue) {
         // highlight current selection
         for (const { boxId } of newValue) {
-          const cellView = getElementByBoxId(this.graph, boxId).findView(
-            this.paper
+          const cellView = Paper.findViewInPaper(
+            Graph.getElementByBoxId(boxId)
           );
           highlightSelection(cellView);
         }
         // remove unselected element if not deleted
         for (const { boxId } of oldValue.filter(el => !newValue.includes(el))) {
-          const el = getElementByBoxId(this.graph, boxId);
+          const el = Graph.getElementByBoxId(boxId);
 
           // on delete, these might be still be selected
           if (el) {
-            const cellView = el.findView(this.paper);
+            const cellView = Paper.findViewInPaper(el);
             unHighlight(cellView);
           }
         }
@@ -302,26 +341,22 @@ export let app;
        * watches paper scale
        */
       scale(nextScale, currentScale) {
-        this.$changePaperScale(this.paper, nextScale, currentScale);
+        Paper.changeScale(nextScale, currentScale);
       }
     },
     mounted() {
-      this.paper = initPaper(this.graph);
+      Paper.initPaper(this, Graph.graph);
 
-      this.$nextTick(() => {
-        // init events
-        initPaperEvents();
-        initKeyboardEvents(); // WARNiNG promise
+      initKeyboardEvents(); // WARNiNG promise
 
-        // retrieve workflow id
-        const id = DivaServices.getUrlParameters().id;
-        if (!isNaN(id)) {
-          this.workflowId = id;
-          readWorkflow(id);
-        } else {
-          throw "Error with id " + id;
-        }
-      });
+      // retrieve workflow id
+      const id = DivaServices.getUrlParameters().id;
+      if (!isNaN(id)) {
+        this.workflowId = id;
+        openWorkflow(id);
+      } else {
+        throw "Error with id " + id;
+      }
 
       // initialize rezisable split
       initSplit();

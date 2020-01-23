@@ -1,5 +1,3 @@
-import { getElementByBoxId, getLinkBySourceTarget } from "../layout/utils";
-
 /**
  * utility function to check whether a and b are equal in content
  * @param {object} a
@@ -59,41 +57,12 @@ export const findDifferenceBy = (a, b, param) => {
 };
 
 /**
- * return elements which don't exist in graph, but do in arr
- *
- * @param {array} arr elements
- */
-export const getNewElements = (graph, arr) => {
-  return arr.filter(({ boxId }) => !getElementByBoxId(graph, boxId));
-};
-
-/**
  * compare arr and newArr and return deleted elements (which do not exist in newArr)
  * @param {array} arr
  * @param {array} newArr
  */
 export const getDeletedElements = (arr, newArr) => {
   return arr.filter(el => !newArr.find(v => v.boxId == el.boxId));
-};
-
-/**
- * return links which exist in links, but not in the graph
- *
- * @param {array} links array of links
- */
-export const getNewLinks = links => {
-  return links.filter(
-    ({ source, target }) => !getLinkBySourceTarget(source, target)
-  );
-};
-
-/**
- * return elements which exist in the graph
- *
- * @param {array} arr array of elements
- */
-export const getElementsInGraph = (graph, arr) => {
-  return arr.filter(el => getElementByBoxId(graph, el.boxId));
 };
 
 /**

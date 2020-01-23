@@ -17,7 +17,8 @@ import {
   CATEGORY_SERVICE,
   PORT_MARKUP,
   PORT_LABEL_MARKUP,
-  DEFAULT_BOX_SIZE
+  DEFAULT_BOX_SIZE,
+  MimeTypes
 } from "../constants/constants";
 import {
   isParamInput,
@@ -25,20 +26,79 @@ import {
   computeBoxWidth,
   computeBoxHeight,
   generateUniqueId,
-  getElementByBoxId,
-  findEmptyPosition
+  shortenString
 } from "../layout/utils";
 import { createParametersInForeignObject } from "../layout/inputs";
-import { createPort } from "../layout/utils";
 import {
   TITLE_ROW_CLASS,
   BOX_CONTAINER_CLASS,
   FOREIGN_CLASS,
   IN_PORT_CLASS,
-  OUT_PORT_CLASS
+  OUT_PORT_CLASS,
+  PORT_SELECTOR
 } from "../constants/selectors";
-import { layoutSettingsApp } from "../layoutSettings";
-import { elementOnChangePosition } from "../events/paperEvents";
+import Paper from "../classes/Paper";
+import Graph from "../classes/Graph";
+import { moveAllElements } from "./moveElement";
+const graph = Graph.graph;
+
+export const buildPortAttrs = (name, type, typeAllowed) => {
+  const showPortDetails = app.$refs.layoutSettings.isShowPortsDetailsChecked();
+  const showPorts = app.$refs.layoutSettings.isShowPortsChecked();
+  const typeAllowedShort = shortenString(typeAllowed.join(", "), 25);
+
+  return {
+    [PORT_SELECTOR]: {
+      fill: MimeTypes[type].color,
+      type,
+      typeAllowed
+    },
+    circle: {
+      display: showPorts ? "block" : "none"
+    },
+    mainText: {
+      text: `${name}\n${typeAllowedShort}`,
+      display: showPortDetails ? "block" : "none"
+    }
+  };
+};
+
+export const createPort = (param, group) => {
+  let port = {};
+  const { name, mimeTypes } = param;
+  if (group) {
+    //group == OUT_PORT_CLASS || userdefined) {
+    // always create out port, check userdefined for inputs
+
+    let typeAllowed;
+    let type;
+
+    // folder case
+    if (param.type == Types.FOLDER.type) {
+      typeAllowed = [Types.FOLDER.type]; // use options allowed types, otherwise it is a folder
+      type = Types.FOLDER.type;
+    } else {
+      // @TODO display !userdefined ports ?
+      typeAllowed = mimeTypes.allowed;
+      const typeEnd =
+        typeAllowed[0].indexOf("/") < 0
+          ? typeAllowed[0].length
+          : typeAllowed[0].indexOf("/");
+      type = typeAllowed[0].substr(
+        //@TODO diff types ?
+        0,
+        typeEnd
+      );
+    }
+
+    port = {
+      group,
+      name,
+      attrs: buildPortAttrs(name, type, typeAllowed)
+    };
+  }
+  return port;
+};
 
 /**
  * create graphical and element object with given parameters
@@ -47,7 +107,6 @@ const createBox = (
   e,
   { position, size, boxId, defaultParams = {}, ports: { items }, serviceId }
 ) => {
-  const { graph } = app;
   const { category, label, description, params = {} } = e;
 
   if (!size) {
@@ -104,7 +163,6 @@ const createBox = (
     },
 
     getUsedInPorts: function() {
-      const graph = this.graph;
       if (!graph) return [];
       const connectedLinks = graph.getConnectedLinks(this, { inbound: true });
       return connectedLinks.map(link => {
@@ -167,6 +225,34 @@ export const constructServiceObject = webservice => {
     category
   };
   return ret;
+};
+
+/**
+ * move operation callback
+ * support multiple elements moving
+ *
+ * @param {*} stopPropagation if true, avoid movements propagation callback (avoid infinite loop)
+ */
+const elementOnChangePosition = (el, newPosition, { stopPropagation }) => {
+  Paper.isElementchangePosition = true;
+
+  const { selectedElements } = app;
+  // need to move all elements at the same time
+  if (!stopPropagation && selectedElements.length) {
+    // move all elements except current moved element
+    const { boxId: currentBoxId } = el.attributes;
+    const { position: oldPosition } = selectedElements.find(
+      el => el.boxId === currentBoxId
+    );
+    const deltaPosition = {
+      x: newPosition.x - oldPosition.x,
+      y: newPosition.y - oldPosition.y
+    };
+    moveAllElements(
+      selectedElements.filter(el => el.boxId != currentBoxId),
+      deltaPosition
+    );
+  }
 };
 
 /**
@@ -238,13 +324,13 @@ export const createElementObjectFromName = name => {
   const boxId = generateUniqueId();
   const { defaultParams } = el;
 
-  const showParameter = layoutSettingsApp.isShowParametersChecked();
+  const showParameter = app.$refs.layoutSettings.isShowParametersChecked();
   const size = {
     width: computeBoxWidth(el, showParameter),
     height: computeBoxHeight(el, showParameter)
   };
 
-  const position = position ? position : findEmptyPosition(size);
+  const position = position ? position : Paper.findEmptyPosition(size);
 
   return {
     serviceId: id,
@@ -266,7 +352,7 @@ export const addElementFromService = (webservice, defaultParameters = {}) => {
 
   let { position, size } = defaultParameters;
   // avoid adding overlapping elements
-  defaultParameters.position = findEmptyPosition(size, position);
+  defaultParameters.position = Paper.findEmptyPosition(size, position);
 
   const element = addElementFromServiceObject(serviceObj, {
     size,
@@ -296,7 +382,6 @@ export const addElementFromName = (name, defaultParams = {}) => {
  * @param {link} link
  */
 export const addLinkFromJSON = link => {
-  const { graph } = app;
   const linkEl = new joint.shapes.standard.Link(link);
   graph.addCell(linkEl);
 };
@@ -309,9 +394,8 @@ export const addLinkFromJSON = link => {
 export const addLinkFromLink = link => {
   const { source, target, id } = link;
 
-  const { graph } = app;
-  const s = getElementByBoxId(graph, source.boxId);
-  const t = getElementByBoxId(graph, target.boxId);
+  const s = Graph.getElementByBoxId(source.boxId);
+  const t = Graph.getElementByBoxId(target.boxId);
 
   const sPort = s.getPorts().find(p => p.name === source.portName).id;
   const tPort = t.getPorts().find(p => p.name === target.portName).id;

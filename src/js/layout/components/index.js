@@ -6,6 +6,7 @@ import Log from "./Log";
 import Search from "./Search";
 import Collections from "./Collections";
 import FilesCollection from "./FilesCollection";
+import LayoutSettings from "./LayoutSettings";
 
 const components = {
   LeftSidebar,
@@ -15,7 +16,8 @@ const components = {
   Log,
   Search,
   Collections,
-  FilesCollection
+  FilesCollection,
+  LayoutSettings
 };
 
 export default components;

@@ -7,10 +7,8 @@ import Vue from "vue";
 import * as $ from "jquery";
 import draggable from "vuedraggable";
 import { getCollections } from "../../api/requests";
-import { app } from "../../app";
-import { updateImgPreview } from "../../elements/addDataElement";
 import { DRAGGABLE_GROUP_NAME } from "../../constants/constants";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 const Collections = Vue.component("Collections", {
   data() {
@@ -55,6 +53,7 @@ const Collections = Vue.component("Collections", {
     // }
   },
   methods: {
+    ...mapActions("Interface", ["$updateDataInDataElement"]),
     openCollectionModel(boxId, mimeType) {
       this.id = boxId;
       this.mimeType = mimeType;
@@ -72,9 +71,7 @@ const Collections = Vue.component("Collections", {
     updateDataFile() {
       console.log("update");
       const data = this.files[this.id];
-      app.$updateDataInDataElement({ boxId: this.id, data });
-      // @TODO: suppose one image
-      updateImgPreview(this.id, data);
+      this.$updateDataInDataElement({ boxId: this.id, data });
 
       // close modal
       $("#collections").modal("hide");

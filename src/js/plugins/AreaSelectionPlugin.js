@@ -4,7 +4,6 @@
  */
 
 import { AREA_SELECTION_ELEMENT } from "../constants/selectors";
-import { app } from "../app";
 
 const div = document.getElementById(AREA_SELECTION_ELEMENT);
 
@@ -35,8 +34,8 @@ const reCalc = (x1, x2, y1, y2) => {
  * @param {number} width
  * @param {number} height
  */
-const findViewsInAreaCustom = ({ x, y, width, height }) => {
-  return app.elements.filter(el => {
+const findViewsInAreaCustom = (elements, { x, y, width, height }) => {
+  return elements.filter(el => {
     return !(
       x > el.position.x + el.size.width ||
       x + width < el.position.x ||
@@ -72,29 +71,29 @@ const plugin = {
     /**
      * end selection operation
      */
-    Vue.prototype.$endAreaSelection = paper => {
+    Vue.prototype.$endAreaSelection = (
+      { x: paperOffsetX, y: paperOffsetY },
+      { tx: paperTranslateX, ty: paperTranslateY },
+      scale,
+      elements
+    ) => {
       Vue.prototype.$areaSelection.active = false;
 
       const { x, y, width, height } = div.getBoundingClientRect();
-      const { x: paperOffsetX, y: paperOffsetY } = paper.clientOffset();
-      const { tx: paperTranslateX, ty: paperTranslateY } = paper.translate();
-      const currentScale = paper.scale().sx;
 
-      const pointX = (x - paperOffsetX - paperTranslateX) / currentScale;
-      const pointY = (y - paperOffsetY - paperTranslateY) / currentScale;
+      const pointX = (x - paperOffsetX - paperTranslateX) / scale;
+      const pointY = (y - paperOffsetY - paperTranslateY) / scale;
 
-      const selectedElements = findViewsInAreaCustom({
+      const selectedElements = findViewsInAreaCustom(elements, {
         x: pointX,
         y: pointY,
-        width: width / currentScale,
-        height: height / currentScale
+        width: width / scale,
+        height: height / scale
       });
 
-      if (selectedElements) {
-        app.$selectElements({ elements: selectedElements });
-      }
-
       div.hidden = 1;
+
+      return selectedElements;
     };
 
     /**

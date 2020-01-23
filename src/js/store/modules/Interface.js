@@ -6,11 +6,7 @@
 import Vue from "vue";
 import { cloneDeep } from "lodash";
 import { createElementObjectFromName } from "../../elements/addElement";
-import {
-  generateUniqueId,
-  getElementByBoxId,
-  findEmptyPosition
-} from "../../layout/utils";
+import { generateUniqueId } from "../../layout/utils";
 import { Constants } from "divaservices-utils";
 const { Types } = Constants;
 import {
@@ -45,6 +41,8 @@ import {
 import { fireAlert } from "../../utils/alerts";
 import { MESSAGE_PASTE_SUCCESS } from "../../constants/messages";
 import { buildDataElement } from "../../elements/addDataElement";
+import Paper from "../../classes/Paper";
+import Graph from "../../classes/Graph";
 
 const Interface = {
   namespaced: true,
@@ -95,16 +93,16 @@ const Interface = {
       const el = findElementByBoxId(state.elements, element.attributes.boxId);
       Vue.set(el.defaultParams[type][attr], "value", value);
     },
-    [ADD_LINK](state, { link, graph }) {
-      addLinktoLinks(state.links, link, graph);
+    [ADD_LINK](state, { link }) {
+      addLinktoLinks(state.links, link);
     },
     [DELETE_LINK](state, { link }) {
       state.links = state.links.filter(thisL => thisL.id != link.id);
     },
-    [MOVE_ELEMENTS](state, { elements, graph }) {
+    [MOVE_ELEMENTS](state, { elements }) {
       for (const el of elements) {
         const { boxId } = el;
-        const graphEl = getElementByBoxId(graph, boxId);
+        const graphEl = Graph.getElementByBoxId(boxId);
         el.position = graphEl.position();
       }
     },
@@ -145,7 +143,9 @@ const Interface = {
         newElements.push({
           ...cloneDeep(el),
           fromId,
-          position: findEmptyPosition(el.size, { ...el.position }),
+          position: Paper.findEmptyPosition(el.size, {
+            ...el.position
+          }),
           boxId: generateUniqueId()
         });
       }
@@ -193,10 +193,9 @@ const Interface = {
     $deleteLink({ commit }, payload) {
       commit(DELETE_LINK, payload);
     },
-    $moveSelectedElements({ commit, state }, { graph }) {
+    $moveSelectedElements({ commit, state }) {
       commit(MOVE_ELEMENTS, {
-        elements: selectedElements(state.elements),
-        graph
+        elements: selectedElements(state.elements)
       });
     },
     $resizeElement({ commit }, payload) {

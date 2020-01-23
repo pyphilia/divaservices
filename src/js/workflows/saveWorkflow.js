@@ -1,9 +1,11 @@
 import xml2js from "xml2js";
 import { getWebserviceByName } from "../constants/globals";
-import { app } from "../app";
 import { CATEGORY_SERVICE } from "../constants/constants";
-import { Validation, XMLBuilders, DivaServices, API } from "divaservices-utils";
+import { XMLBuilders, DivaServices, API } from "divaservices-utils";
 import { getOrderedElements } from "../elements/orderElement";
+import { parameterIsValid } from "../layout/inputs";
+import { currentDataElements } from "../store/modules/utils";
+import Graph from "../classes/Graph";
 
 /**
  * Read a workflow build within the main interface area
@@ -12,19 +14,23 @@ import { getOrderedElements } from "../elements/orderElement";
  * @param {object} jsonGraph
  * @param {boolean} installation if true, send an installation request
  */
-export const saveWorkflow = async (jsonGraph, installation = false) => {
-  const { elements, isLoop } = getOrderedElements();
+export const saveWorkflow = async (
+  { elements, links, workflowId },
+  installation = false
+) => {
+  const { elements: orderedElements, isLoop } = getOrderedElements(Graph.graph);
 
-  const orderedElements = elements.filter(
+  const serviceOrderedElements = orderedElements.filter(
     ({ attributes: { category } }) => category === CATEGORY_SERVICE
   );
 
-  const log = [];
+  const currentDataEls = currentDataElements(elements);
+
   const Steps = { Step: [] };
   const _steps = [];
   // NODE
 
-  for (const [i, { attributes: box }] of orderedElements.entries()) {
+  for (const [i, { attributes: box }] of serviceOrderedElements.entries()) {
     const { type, boxId } = box;
     const Name = DivaServices.buildServiceNameForRequest(type, boxId);
     const No = i;
@@ -33,8 +39,7 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
     const _inputs = { parameters: {}, data: [] };
 
     // get actual defaultParams in store
-    const defaultParams = app.elements.find(el => el.boxId == boxId)
-      .defaultParams;
+    const defaultParams = elements.find(el => el.boxId == boxId).defaultParams;
 
     for (const [paramType, values] of Object.entries(defaultParams)) {
       for (const [paramName, options] of Object.entries(values)) {
@@ -45,31 +50,18 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
             Value
           });
 
+          let parsedValue;
           try {
-            _inputs.parameters[paramName] = DivaServices.parseParameterValue(
-              Value,
-              paramType
-            );
+            parsedValue = DivaServices.parseParameterValue(Value, paramType);
           } catch (e) {
             console.log(e);
-            _inputs.parameters[paramName] = Value;
+            parsedValue = Value;
           }
-        }
-
-        let validity = true;
-        try {
-          validity = Validation.checkValue(Value, paramType, values);
-        } catch (e) {
-          console.log(e);
-          validity = false;
-        }
-        if (!validity) {
-          log.push({
-            value: Value,
-            Name: paramName,
-            paramType,
-            name: type,
-            boxId
+          _inputs.parameters[paramName] = parsedValue;
+          parameterIsValid(parsedValue, paramType, values, {
+            paramName,
+            boxId,
+            boxName: type
           });
         }
       }
@@ -92,7 +84,7 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
     Steps.Step.push(step);
   }
 
-  app.links.forEach(link => {
+  links.forEach(link => {
     const {
       source: { boxId: sourceId },
       target: { boxId: targetId }
@@ -125,9 +117,7 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
         )
       });
     } else {
-      const sourceDataBox = app.currentDataElements.find(
-        el => el.boxId == sourceId
-      );
+      const sourceDataBox = currentDataEls.find(el => el.boxId == sourceId);
 
       // @TODO get folder when folder type
       if (sourceDataBox.data && sourceDataBox.data.length) {
@@ -171,11 +161,10 @@ export const saveWorkflow = async (jsonGraph, installation = false) => {
   const finalXml = XMLBuilders.SaveRequest(xml, request);
   console.log(finalXml);
 
-  // set found errors in log
-  app.$refs.log.setLogMessages(log);
-
   const isInstallation = installation && !isLoop;
-  await API.saveWorkflow(xml, app.workflowId, isInstallation);
+  await API.saveWorkflow(xml, workflowId, isInstallation);
 
-  return request;
+  if (isInstallation) {
+    top.window.location.href = API.getWorkflowExecutionViewUrl(workflowId);
+  }
 };

@@ -30,11 +30,15 @@ import {
   PARAMETER_TEXTS
 } from "../constants/selectors";
 import { objectToString } from "./utils";
-import { layoutSettingsApp } from "../layoutSettings";
 import { app } from "../app";
 import { Validation, Constants, API } from "divaservices-utils";
 import { NO_PARAMETER_TEXT } from "../constants/messages";
 const { Types } = Constants;
+
+export const closeSelects = () => {
+  const allSelect = $(`${INTERFACE_ROOT} .select ${Types.SELECT.tag}`);
+  allSelect.select2("close");
+};
 
 /**
  * set select value in DOM
@@ -341,6 +345,36 @@ export const createInput = (
   return newInput;
 };
 
+export const parameterIsValid = (
+  value,
+  paramType,
+  conditions,
+  { paramName, boxName, boxId }
+) => {
+  let isValid = false;
+  try {
+    isValid = Validation.checkValue(value, paramType, conditions);
+  } catch (e) {
+    console.log(e);
+  }
+  if (!isValid) {
+    app.$refs.log.addMessage({
+      value,
+      paramName,
+      paramType,
+      name: boxName,
+      boxId
+    });
+  } else {
+    app.$refs.log.removeMessage({
+      paramName,
+      name: boxName,
+      boxId
+    });
+  }
+  return isValid;
+};
+
 /**
  * check input value
  * if there is an error, report it in log
@@ -353,28 +387,16 @@ export const checkInputValue = (input, { boxName, boxId }) => {
   const currentVal = input.val();
   const { min, max, step } = input.data();
 
-  const isValid = Validation.checkValue(currentVal, Types.NUMBER.type, {
-    min,
-    max,
-    step
-  });
-
-  if (!isValid) {
-    app.$refs.log.addMessage({
-      value: currentVal,
-      paramName: input.attr("name"),
-      paramType: Types.NUMBER.type,
-      name: boxName,
-      boxId
-    });
-  } else {
-    app.$refs.log.removeMessage({
-      paramName: input.attr("name"),
-      name: boxName,
-      boxId
-    });
-  }
-
+  const isValid = parameterIsValid(
+    currentVal,
+    Types.NUMBER.type,
+    {
+      min,
+      max,
+      step
+    },
+    { boxName, boxId, paramName: input.attr("name") }
+  );
   input.toggleClass("is-invalid", !isValid);
 };
 
@@ -586,7 +608,7 @@ export const createParametersInForeignObject = (
   }
 
   // hide parameters depending on theme options
-  const showParameters = layoutSettingsApp.isShowParametersChecked();
+  const showParameters = app.$refs.layoutSettings.isShowParametersChecked();
   if (!showParameters) {
     parameters.forEach(el => el.hide());
     noParameter.hide();
@@ -611,7 +633,7 @@ export const createParametersInForeignObject = (
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
     const t = $(tooltip);
     t.tooltip(TOOLTIP_OPTIONS);
-    if (!layoutSettingsApp.isShowTooltipsChecked()) {
+    if (!app.$refs.layoutSettings.isShowTooltipsChecked()) {
       t.hide();
     }
   }

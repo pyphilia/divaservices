@@ -12,18 +12,16 @@ import {
   PORT_MARKUP,
   PORT_LABEL_MARKUP
 } from "../constants/constants";
-import {
-  generateUniqueId,
-  buildPortAttrs,
-  findEmptyPosition
-} from "../layout/utils";
+import { generateUniqueId } from "../layout/utils";
 import {
   OUT_PORT_CLASS,
   DATA_BOX_FOREIGNOBJECT_CLASS,
   INTERFACE_ROOT,
   DATA_INPUT_CONTENT_CLASS
 } from "../constants/selectors";
-import { layoutSettingsApp } from "../layoutSettings";
+import { buildPortAttrs } from "./addElement";
+import Paper from "../classes/Paper";
+import Graph from "../classes/Graph";
 
 const buildDataMarkup = ({ boxId, size }) => {
   const markup = `<g class="scalable"><rect></rect></g>
@@ -43,7 +41,7 @@ const buildBasicDataRect = ({
   mimeType,
   outputType
 }) => {
-  const position = findEmptyPosition(size);
+  const position = Paper.findEmptyPosition(size);
   const rect = joint.shapes.basic.Rect.define(name, {
     markup: buildDataMarkup({ outputType, mimeType, size, boxId }),
     category: CATEGORY_DATATEST,
@@ -137,7 +135,7 @@ export const updateImgPreview = (boxId, data) => {
 const createContentBox = () => {
   const content = document.createElement("div");
   content.classList.add(DATA_INPUT_CONTENT_CLASS);
-  content.style.display = layoutSettingsApp.isShowParametersChecked()
+  content.style.display = app.$refs.layoutSettings.isShowParametersChecked()
     ? "display"
     : "none";
   return content;
@@ -195,7 +193,7 @@ const addContent = dataEl => {
 
 export const addDataBox = data => {
   const rectangle = buildBasicDataRect(data);
-  rectangle.addTo(app.graph);
+  rectangle.addTo(Graph.graph);
   addContent(data);
 };
 
@@ -221,7 +219,7 @@ export const buildDataElement = (elName, data = undefined) => {
 
   const boxId = generateUniqueId();
 
-  const position = position ? position : findEmptyPosition(size);
+  const position = position ? position : Paper.findEmptyPosition(size);
 
   return {
     category: CATEGORY_DATATEST,

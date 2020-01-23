@@ -2,10 +2,10 @@
  * Resize plugin
  */
 
-import { app } from "../app";
 import * as joint from "jointjs";
 import { resizeElementBox } from "../elements/resizeElement";
 import { MIN_ELEMENT_HEIGHT, MIN_ELEMENT_WIDTH } from "../constants/constants";
+import Graph from "../classes/Graph";
 
 let startingResizerPos = {};
 let startingElementPos;
@@ -31,19 +31,17 @@ const plugin = {
 
     Vue.prototype.$endResize = () => {
       Vue.prototype.$resizing = false;
-      app.resizeElementByBoxId(boxId, currentElement.attributes.size);
+      return { boxId, size: currentElement.attributes.size };
     };
 
     /**
      * create element to allow resizing
      */
-    Vue.prototype.$createResizer = cellView => {
-      const { graph } = app;
-
+    Vue.prototype.$createResizer = (elements, cellView) => {
       // select dom element
       currentElement = cellView.model;
       boxId = currentElement.attributes.boxId;
-      currentState = app.elements.find(el => el.boxId == boxId);
+      currentState = elements.find(el => el.boxId == boxId);
       currentForeignObjs = document.querySelectorAll(
         `foreignObject[boxId='${boxId}']`
       );
@@ -54,7 +52,7 @@ const plugin = {
       resizer.resize(15, 15);
       resizer.attr("body/fill", "red");
       resizer.attr("body/stroke", "none");
-      resizer.addTo(graph);
+      resizer.addTo(Graph.graph);
 
       var bbox = currentElement.getBBox();
       resizer.position(bbox.x + bbox.width, bbox.y + bbox.height);
