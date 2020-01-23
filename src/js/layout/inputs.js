@@ -30,7 +30,6 @@ import {
   PARAMETER_TEXTS
 } from "../constants/selectors";
 import { objectToString } from "./utils";
-import { app } from "../app";
 import { Validation, Constants, API } from "divaservices-utils";
 import { NO_PARAMETER_TEXT } from "../constants/messages";
 const { Types } = Constants;
@@ -46,21 +45,21 @@ export const closeSelects = () => {
  * @param {string} boxId
  * @param {object} defaultParams
  */
-export const setSelectValueInElement = ({ boxId, defaultParams }) => {
-  for (const [key, { value }] of Object.entries(
-    defaultParams[Types.SELECT.type]
-  )) {
-    // we need to precise paper root because of the minimap duplicate elements
-    const el = $(
-      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] .select[name="${key}"] ${Types.SELECT.tag}`
-    );
-    if (el.find(":selected").val() != value) {
-      $(el)
-        .val(value)
-        .trigger("change.select2");
-    }
-  }
-};
+// export const setSelectValueInElement = ({ boxId, defaultParams }) => {
+//   for (const [key, { value }] of Object.entries(
+//     defaultParams[Types.SELECT.type]
+//   )) {
+//     // we need to precise paper root because of the minimap duplicate elements
+//     const el = $(
+//       `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] .select[name="${key}"] ${Types.SELECT.tag}`
+//     );
+//     if (el.find(":selected").val() != value) {
+//       $(el)
+//         .val(value)
+//         .trigger("change.select2");
+//     }
+//   }
+// };
 
 /**
  * set input value in DOM
@@ -69,22 +68,22 @@ export const setSelectValueInElement = ({ boxId, defaultParams }) => {
  * @param {string} type
  * @param {object} defaultParams
  */
-export const setInputValueInElement = ({
-  boxId,
-  type: boxName,
-  defaultParams
-}) => {
-  for (const [key, { value }] of Object.entries(
-    defaultParams[Types.NUMBER.type]
-  )) {
-    // we need to precise paper root because of the minimap duplicate elements
-    const el = $(
-      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Types.NUMBER.tag}[name="${key}"]`
-    );
-    el.val(value);
-    checkInputValue(el, { boxId, boxName });
-  }
-};
+// export const setInputValueInElement = ({
+//   boxId,
+//   type: boxName,
+//   defaultParams
+// }) => {
+//   for (const [key, { value }] of Object.entries(
+//     defaultParams[Types.NUMBER.type]
+//   )) {
+//     // we need to precise paper root because of the minimap duplicate elements
+//     const el = $(
+//       `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Types.NUMBER.tag}[name="${key}"]`
+//     );
+//     el.val(value);
+//     checkInputValue(el, { boxId, boxName });
+//   }
+// };
 
 /**
  * reset value of input or select element
@@ -131,6 +130,7 @@ export const createSelect = (
   param,
   resetButton,
   defaultTooltip,
+  commit,
   defaultValue = null
 ) => {
   const { name, defaultValue: defaultOption, values = [], description } = param;
@@ -216,7 +216,7 @@ export const createSelect = (
     const s = select.find(":selected");
     const value = s.attr("value");
 
-    app.$setSelectValueInElement({ element, attr: name, value });
+    commit({ element, attr: name, value });
   });
 
   selectEl.on("select2:open", function() {
@@ -253,6 +253,7 @@ export const createInput = (
   param,
   resetButton,
   defaultTooltip,
+  commit,
   givenDefaultValue
 ) => {
   const {
@@ -302,17 +303,14 @@ export const createInput = (
     }
   });
 
-  const { boxId, type: boxName } = element.attributes;
-  const boxParams = { boxId, boxName };
-
   // update param
   inputEl.on({
     blur: function() {
       const input = $(this);
       const value = input.val();
       const attr = input.attr("name");
-      app.$setInputValueInElement({ element, attr, value });
-      checkInputValue(input, boxParams);
+      commit({ element, attr, value });
+      checkInputValue(input);
     },
     click: function() {
       $(this).select();
@@ -323,7 +321,7 @@ export const createInput = (
   });
 
   // evaluate default parameters
-  checkInputValue(inputEl, boxParams);
+  checkInputValue(inputEl);
 
   // reset
   const resetButtonNumber = resetButton.clone(true).attr({
@@ -345,36 +343,6 @@ export const createInput = (
   return newInput;
 };
 
-export const parameterIsValid = (
-  value,
-  paramType,
-  conditions,
-  { paramName, boxName, boxId }
-) => {
-  let isValid = false;
-  try {
-    isValid = Validation.checkValue(value, paramType, conditions);
-  } catch (e) {
-    console.log(e);
-  }
-  if (!isValid) {
-    app.$refs.log.addMessage({
-      value,
-      paramName,
-      paramType,
-      name: boxName,
-      boxId
-    });
-  } else {
-    app.$refs.log.removeMessage({
-      paramName,
-      name: boxName,
-      boxId
-    });
-  }
-  return isValid;
-};
-
 /**
  * check input value
  * if there is an error, report it in log
@@ -383,20 +351,20 @@ export const parameterIsValid = (
  * @param {*} boxName
  * @param {*} boxId
  */
-export const checkInputValue = (input, { boxName, boxId }) => {
+export const checkInputValue = input => {
   const currentVal = input.val();
   const { min, max, step } = input.data();
 
-  const isValid = parameterIsValid(
-    currentVal,
-    Types.NUMBER.type,
-    {
+  let isValid = true;
+  try {
+    isValid = Validation.checkValue(currentVal, Types.NUMBER.type, {
       min,
       max,
       step
-    },
-    { boxName, boxId, paramName: input.attr("name") }
-  );
+    });
+  } catch (e) {
+    console.log(e);
+  }
   input.toggleClass("is-invalid", !isValid);
 };
 
@@ -418,6 +386,7 @@ export const createText = (
   param,
   resetButton,
   defaultTooltip,
+  commit,
   givenDefaultValue
 ) => {
   const {
@@ -461,7 +430,7 @@ export const createText = (
       const input = $(this);
       const value = input.val();
       const attr = input.attr("name");
-      app.$setTextValueInElement({ element, attr, value });
+      commit({ element, attr, value });
     },
     click: function() {
       $(this).select();
@@ -501,6 +470,7 @@ export const createText = (
 // in order to modify it with jointjs functions
 export const createParametersInForeignObject = (
   element,
+  { inputCommit, selectCommit, textCommit },
   defaultParams = {}
 ) => {
   const {
@@ -544,6 +514,7 @@ export const createParametersInForeignObject = (
           param,
           resetButton,
           defaultTooltip,
+          selectCommit,
           defaultValue
         );
         selectsArr.push(newSelect);
@@ -555,6 +526,7 @@ export const createParametersInForeignObject = (
           param,
           resetButton,
           defaultTooltip,
+          inputCommit,
           defaultValue
         );
         inputsArr.push(newInput);
@@ -566,6 +538,7 @@ export const createParametersInForeignObject = (
           param,
           resetButton,
           defaultTooltip,
+          textCommit,
           defaultValue
         );
         textsArr.push(newText);
@@ -594,24 +567,16 @@ export const createParametersInForeignObject = (
     .append(parameters);
 
   // create text if no parameter
-  let noParameter = $();
   if (
     inputs.children().length +
       selects.children().length +
       texts.children().length ===
     0
   ) {
-    noParameter = $(`<div/>`, {
+    $(`<div/>`, {
       class: NO_PARAMETER_CLASS,
       text: NO_PARAMETER_TEXT
     }).appendTo(container);
-  }
-
-  // hide parameters depending on theme options
-  const showParameters = app.$refs.layoutSettings.isShowParametersChecked();
-  if (!showParameters) {
-    parameters.forEach(el => el.hide());
-    noParameter.hide();
   }
 
   // main tooltip
@@ -633,8 +598,5 @@ export const createParametersInForeignObject = (
   for (const tooltip of $(`.${TOOLTIP_CLASS}`)) {
     const t = $(tooltip);
     t.tooltip(TOOLTIP_OPTIONS);
-    if (!app.$refs.layoutSettings.isShowTooltipsChecked()) {
-      t.hide();
-    }
   }
 };

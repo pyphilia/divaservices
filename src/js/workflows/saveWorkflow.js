@@ -2,10 +2,66 @@ import xml2js from "xml2js";
 import { getWebserviceByName } from "../constants/globals";
 import { CATEGORY_SERVICE } from "../constants/constants";
 import { XMLBuilders, DivaServices, API } from "divaservices-utils";
-import { getOrderedElements } from "../elements/orderElement";
-import { parameterIsValid } from "../layout/inputs";
 import { currentDataElements } from "../store/modules/utils";
 import Graph from "../classes/Graph";
+
+import * as joint from "jointjs";
+import { fireAlert } from "../utils/alerts";
+import { MESSAGE_LOOP } from "../constants/messages";
+
+/**
+ * get elements in order, from source to target
+ * if a loop is found, it still orders the element
+ * and return isLoop set to true
+ */
+export const getOrderedElements = graph => {
+  const order = [];
+  let isLoop = false;
+
+  const addedBoxId = [];
+
+  let subgraph = new joint.dia.Graph();
+  subgraph.addCells(graph.getCells());
+
+  do {
+    let sources = subgraph.getSources();
+
+    // if no root is found, but there are still elements
+    // it means there is a loop
+    if (!sources.length) {
+      sources = [subgraph.getElements()[0]];
+      fireAlert("danger", MESSAGE_LOOP);
+      isLoop = true;
+    }
+
+    for (const source of sources) {
+      order.push(source);
+      addedBoxId.push(source.attributes.boxId);
+    }
+
+    let remainingEls = subgraph
+      .getElements()
+      .filter(el => !sources.includes(el));
+    let remainingCells = subgraph.getSubgraph(remainingEls);
+
+    // if already added elements are in the graph again, there is a loop
+    if (
+      remainingCells.filter(el => addedBoxId.includes(el.attributes.boxId))
+        .length
+    ) {
+      fireAlert("danger", MESSAGE_LOOP);
+      isLoop = true;
+    }
+
+    remainingCells = remainingCells.filter(
+      el => !addedBoxId.includes(el.attributes.boxId)
+    );
+    subgraph = new joint.dia.Graph();
+    subgraph.addCells(remainingCells);
+  } while (subgraph.getElements().length);
+
+  return { elements: order, isLoop };
+};
 
 /**
  * Read a workflow build within the main interface area
@@ -16,6 +72,7 @@ import Graph from "../classes/Graph";
  */
 export const saveWorkflow = async (
   { elements, links, workflowId },
+  errors = [],
   installation = false
 ) => {
   const { elements: orderedElements, isLoop } = getOrderedElements(Graph.graph);
@@ -43,7 +100,7 @@ export const saveWorkflow = async (
 
     for (const [paramType, values] of Object.entries(defaultParams)) {
       for (const [paramName, options] of Object.entries(values)) {
-        const { value: Value, defaultValue, values } = options;
+        const { value: Value, defaultValue } = options;
         if (Value != defaultValue.toString()) {
           Inputs.Parameter.push({
             Name: paramName,
@@ -58,11 +115,6 @@ export const saveWorkflow = async (
             parsedValue = Value;
           }
           _inputs.parameters[paramName] = parsedValue;
-          parameterIsValid(parsedValue, paramType, values, {
-            paramName,
-            boxId,
-            boxName: type
-          });
         }
       }
     }
@@ -161,7 +213,8 @@ export const saveWorkflow = async (
   const finalXml = XMLBuilders.SaveRequest(xml, request);
   console.log(finalXml);
 
-  const isInstallation = installation && !isLoop;
+  const isInstallation = installation && !isLoop && !errors.length;
+  console.log("installation:", isInstallation);
   await API.saveWorkflow(xml, workflowId, isInstallation);
 
   if (isInstallation) {

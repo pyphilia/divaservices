@@ -5,7 +5,6 @@
 
 import { Decorators, API } from "divaservices-utils";
 import { WEBSERVICES_XML_FILEPATH } from "../../config";
-import { webservices } from "../constants/globals";
 import { PRODUCTION_MODE } from "../constants/constants";
 
 export const getServices = async () => {
@@ -18,7 +17,7 @@ export const getServices = async () => {
   }
 };
 
-export const getWorkflowById = async (id, asXml = false) => {
+export const getWorkflowById = async (id, webservices, asXml = false) => {
   if (process.env.NODE_ENV === PRODUCTION_MODE) {
     if (asXml) {
       return await API.getWorkflowByIdJSON(id);

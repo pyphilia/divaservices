@@ -1,7 +1,4 @@
 import { app } from "../app";
-import * as joint from "jointjs";
-import { fireAlert } from "../utils/alerts";
-import { MESSAGE_LOOP } from "../constants/messages";
 
 /**
  * order graph elements from source to target
@@ -45,58 +42,4 @@ export const orderGraph = graph => {
   }
 
   app.$fitContent(app.paper);
-};
-
-/**
- * get elements in order, from source to target
- * if a loop is found, it still orders the element
- * and return isLoop set to true
- */
-export const getOrderedElements = graph => {
-  const order = [];
-  let isLoop = false;
-
-  const addedBoxId = [];
-
-  let subgraph = new joint.dia.Graph();
-  subgraph.addCells(graph.getCells());
-
-  do {
-    let sources = subgraph.getSources();
-
-    // if no root is found, but there are still elements
-    // it means there is a loop
-    if (!sources.length) {
-      sources = [subgraph.getElements()[0]];
-      fireAlert("danger", MESSAGE_LOOP);
-      isLoop = true;
-    }
-
-    for (const source of sources) {
-      order.push(source);
-      addedBoxId.push(source.attributes.boxId);
-    }
-
-    let remainingEls = subgraph
-      .getElements()
-      .filter(el => !sources.includes(el));
-    let remainingCells = subgraph.getSubgraph(remainingEls);
-
-    // if already added elements are in the graph again, there is a loop
-    if (
-      remainingCells.filter(el => addedBoxId.includes(el.attributes.boxId))
-        .length
-    ) {
-      fireAlert("danger", MESSAGE_LOOP);
-      isLoop = true;
-    }
-
-    remainingCells = remainingCells.filter(
-      el => !addedBoxId.includes(el.attributes.boxId)
-    );
-    subgraph = new joint.dia.Graph();
-    subgraph.addCells(remainingCells);
-  } while (subgraph.getElements().length);
-
-  return { elements: order, isLoop };
 };

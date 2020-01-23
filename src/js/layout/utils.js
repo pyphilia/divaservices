@@ -114,13 +114,13 @@ export const computeTitleLength = (el, fromSVG = false) => {
   };
 };
 
-export const computeBoxWidth = (el, showParameters, fromSVG = false) => {
+export const computeBoxWidth = (el, fromSVG = false) => {
   const nameLength = computeTitleLength(el, fromSVG).value;
 
   return Math.max(Math.max(nameLength) + 100, minWidth); // 200 = button and stuff width
 };
 
-export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
+export const computeBoxHeight = (el, fromSVG = false) => {
   const { attributes, params, ports } = el;
 
   let nbParam;
@@ -134,7 +134,7 @@ export const computeBoxHeight = (el, showParameters, fromSVG = false) => {
     nbParam = params.filter(x => isParamInput(x)).length;
     portsItems = ports.items;
   }
-  const inputsHeight = showParameters ? nbParam * paramHeight : 0;
+  const inputsHeight = nbParam * paramHeight;
 
   const inPorts = portsItems.length
     ? portsItems.filter(x => x.group === IN_PORT_CLASS)

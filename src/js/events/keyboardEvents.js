@@ -3,7 +3,6 @@
  * handles shortcuts
  */
 
-import { app } from "../app";
 import UndoRedoHistory from "../store/plugins/UndoRedoHistory";
 
 export let ctrlDown;
@@ -14,7 +13,7 @@ export let shiftDown;
  * Initialize keyboard events
  * */
 
-export const initKeyboardEvents = async () => {
+export const initKeyboardEvents = async app => {
   document.addEventListener(
     "keydown",
     event => {

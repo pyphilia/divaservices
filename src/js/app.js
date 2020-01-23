@@ -15,11 +15,6 @@ import { addElementFromName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
 import { resizeElements } from "./elements/resizeElement";
 import {
-  setInputValueInElement,
-  setSelectValueInElement,
-  closeSelects
-} from "./layout/inputs";
-import {
   equalObjects,
   findDifferenceBy,
   getDeletedElements
@@ -88,11 +83,6 @@ export let app;
       deletedElements() {
         return deletedElements(this.elementsData);
       },
-      defaultParamsElements() {
-        return this.elements.map(({ boxId, defaultParams }) => {
-          return { boxId, defaultParams };
-        });
-      },
       movedElements() {
         return this.elements.map(({ boxId, position }) => {
           return { boxId, position };
@@ -110,16 +100,6 @@ export let app;
       ...mapState("Keyboard", ["ctrl", "space"])
     },
     methods: {
-      /**
-       * Utility function to clear interactions on the paper
-       */
-      clearInteractions() {
-        // close select manually
-        closeSelects();
-
-        // remove resizer
-        this.$removeResizer();
-      },
       copy() {
         if (selectedElements.length) {
           this.$copySelectedElements();
@@ -136,6 +116,7 @@ export let app;
             links: this.links,
             workflowId: this.workflowId
           },
+          this.$refs.log.messages,
           installation
         ); // WARNING: promise
 
@@ -243,25 +224,6 @@ export let app;
         }
       },
       /**
-       * watch parameters of elements
-       * on direct changes, nothing changes (mechanic operation)
-       * only apply changes on undo-redo
-       */
-      defaultParamsElements: {
-        deep: true,
-        handler(newValue, oldValue) {
-          const difference = findDifferenceBy(
-            newValue,
-            oldValue,
-            "defaultParams"
-          );
-          for (const box of difference) {
-            setSelectValueInElement(box);
-            setInputValueInElement(box);
-          }
-        }
-      },
-      /**
        * watch moved elements
        * on direct move operation, nothing changes (mechanic operation)
        * only apply changes on undo-redo
@@ -344,16 +306,17 @@ export let app;
         Paper.changeScale(nextScale, currentScale);
       }
     },
-    mounted() {
+    async mounted() {
       Paper.initPaper(this, Graph.graph);
 
-      initKeyboardEvents(); // WARNiNG promise
+      initKeyboardEvents(this); // WARNiNG promise
 
       // retrieve workflow id
       const id = DivaServices.getUrlParameters().id;
       if (!isNaN(id)) {
         this.workflowId = id;
-        openWorkflow(id);
+        const workflow = await openWorkflow(id);
+        this.$openWorkflow(workflow);
       } else {
         throw "Error with id " + id;
       }

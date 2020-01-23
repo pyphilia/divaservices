@@ -43,8 +43,8 @@ import { moveAllElements } from "./moveElement";
 const graph = Graph.graph;
 
 export const buildPortAttrs = (name, type, typeAllowed) => {
-  const showPortDetails = app.$refs.layoutSettings.isShowPortsDetailsChecked();
-  const showPorts = app.$refs.layoutSettings.isShowPortsChecked();
+  // const showPortDetails = app.$refs.layoutSettings.isShowPortsDetailsChecked();
+  // const showPorts = app.$refs.layoutSettings.isShowPortsChecked();
   const typeAllowedShort = shortenString(typeAllowed.join(", "), 25);
 
   return {
@@ -53,12 +53,12 @@ export const buildPortAttrs = (name, type, typeAllowed) => {
       type,
       typeAllowed
     },
-    circle: {
-      display: showPorts ? "block" : "none"
-    },
+    // circle: {
+    //   display: showPorts ? "block" : "none"
+    // },
     mainText: {
-      text: `${name}\n${typeAllowedShort}`,
-      display: showPortDetails ? "block" : "none"
+      text: `${name}\n${typeAllowedShort}`
+      // display: showPortDetails ? "block" : "none"
     }
   };
 };
@@ -272,7 +272,15 @@ export const addElementFromServiceObject = (e, parameters = {}) => {
 
   const element = createBox(e, { ...parameters, boxId });
 
-  createParametersInForeignObject(element, parameters.defaultParams);
+  createParametersInForeignObject(
+    element,
+    {
+      inputCommit: app.$setInputValueInElement,
+      selectCommit: app.$setSelectValueInElement,
+      textCommit: app.$setTextValueInElement
+    },
+    parameters.defaultParams
+  );
 
   // ELEMENT EVENTS
   element.on("change:position", elementOnChangePosition);
@@ -324,10 +332,9 @@ export const createElementObjectFromName = name => {
   const boxId = generateUniqueId();
   const { defaultParams } = el;
 
-  const showParameter = app.$refs.layoutSettings.isShowParametersChecked();
   const size = {
-    width: computeBoxWidth(el, showParameter),
-    height: computeBoxHeight(el, showParameter)
+    width: computeBoxWidth(el),
+    height: computeBoxHeight(el)
   };
 
   const position = position ? position : Paper.findEmptyPosition(size);

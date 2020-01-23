@@ -3,11 +3,11 @@ import {
   createElementObjectFromName,
   buildDefaultParameters
 } from "../elements/addElement";
-import { app } from "../app";
 import { isParamInput, generateUniqueId } from "../layout/utils";
 import { getWorkflowById } from "../api/requests";
 import { buildDataElement } from "../elements/addDataElement";
 import { API, Constants } from "divaservices-utils";
+import { webservices } from "../constants/globals";
 
 /**
  * Read a workflow from a xml file and display it
@@ -16,7 +16,7 @@ import { API, Constants } from "divaservices-utils";
  * @param {number} id workflow id to read
  */
 export const openWorkflow = async id => {
-  const workflow = await getWorkflowById(id);
+  const workflow = await getWorkflowById(id, webservices);
 
   const elements = [];
   const links = [];
@@ -113,5 +113,5 @@ export const openWorkflow = async id => {
   console.log(elements);
   console.log(links);
 
-  app.$openWorkflow({ elements, links });
+  return { elements, links };
 };

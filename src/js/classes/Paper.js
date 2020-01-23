@@ -19,6 +19,7 @@ import { validateConnection } from "../layout/utils";
 import { spaceDown, ctrlDown } from "../events/keyboardEvents";
 
 import Graph from "./Graph";
+import { closeSelects } from "../layout/inputs";
 
 class Paper {
   constructor() {
@@ -98,9 +99,17 @@ class Paper {
       this.dragStartPosition = { x: x, y: y };
       this.isPanning = spaceDown;
 
+      if (!app.$resizing) {
+        // remove resizer if exists
+        app.$removeResizer();
+      }
+
       if (!ctrlDown) {
         app.$unSelectAllElements();
       }
+      // close select manually
+      closeSelects();
+
       // unfocus inputs when clicks
       const focusedInput = document.querySelector("input:focus");
       if (focusedInput) {
@@ -110,11 +119,6 @@ class Paper {
       // init area selection
       if (!spaceDown && !app.$resizing) {
         app.$initAreaSelection(event);
-      }
-
-      if (!app.$resizing) {
-        // remove resizer if exists
-        app.$removeResizer();
       }
     });
 
@@ -202,6 +206,10 @@ class Paper {
     /**SELECTION*/
 
     this._paper.on("element:pointerdown", (cellView, e) => {
+      if (!app.$resizing) {
+        // remove resizer if exists
+        app.$removeResizer();
+      }
       if (cellView.model.attributes.class != "resizer") {
         // if control key is not hold, a different
         // the current selection is reset
@@ -268,7 +276,7 @@ class Paper {
     );
 
     // highlight element
-    this.$addUniqueElementToSelection(el.findView(this._paper));
+    //this.$addUniqueElementToSelection(el.findView(this._paper));
   }
 
   translate(newX, newY) {
