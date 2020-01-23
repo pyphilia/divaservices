@@ -11,13 +11,8 @@ import { DivaServices } from "divaservices-utils";
 import { initWebservices } from "./constants/globals";
 import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "./constants/constants";
 import { addElementFromName, addLinkFromLink } from "./elements/addElement";
-import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
-import { resizeElements } from "./elements/resizeElement";
-import {
-  equalObjects,
-  findDifferenceBy,
-  getDeletedElements
-} from "./utils/utils";
+import { deleteElementByBoxId } from "./elements/deleteElement";
+import { findDifferenceBy } from "./utils/utils";
 import {
   selectedElements,
   copiedElements,
@@ -25,7 +20,6 @@ import {
   currentElements,
   currentDataElements
 } from "./store/modules/utils";
-import { moveElements } from "./elements/moveElement";
 import { addDataBox } from "./elements/addDataElement";
 import { initSplit } from "./layout/split";
 import { initKeyboardEvents } from "./events/keyboardEvents";
@@ -39,7 +33,6 @@ import {
   MESSAGE_COPY_ERROR
 } from "./constants/messages";
 import { saveWorkflow } from "./workflows/saveWorkflow";
-import {setInputValueInElement, setSelectValueInElement} from "./layout/inputs"
 
 export let app;
 
@@ -86,16 +79,6 @@ export let app;
       movedElements() {
         return this.elements.map(({ boxId, position }) => {
           return { boxId, position };
-        });
-      },
-      resizedElements() {
-        return this.elements.map(({ boxId, size }) => {
-          return { boxId, size };
-        });
-      },
-      defaultParamsElements() {
-        return this.elements.map(({ boxId, defaultParams }) => {
-          return { boxId, defaultParams };
         });
       },
       dataElements() {
@@ -146,14 +129,10 @@ export let app;
       undo() {
         UndoRedoHistory.undo();
       },
-
-      addElementToSelection(cellView) {
-        this.$addElementToSelection(cellView);
-      },
-      addLinkFromApp(payload) {
+      addLink(payload) {
         this.$addLink({ ...payload });
       },
-      deleteLinkFromApp(payload) {
+      deleteLink(payload) {
         this.$deleteLink({ ...payload });
       },
       deleteElementByCellView(cellView) {
@@ -162,7 +141,6 @@ export let app;
           elements: [this.elements.find(el => el.boxId === boxId)]
         });
       },
-
       resizeElementByBoxId(boxId, size) {
         const element = this.elements.find(el => el.boxId === boxId);
         this.$resizeElement({ element, size });
@@ -194,7 +172,7 @@ export let app;
        * add new elements, remove deleted elements
        */
       currentElements: {
-        handler(newValue, oldValue) {
+        handler(newValue) {
           // if boxId element does not exist in the graph, we add it
           for (const el of Graph.getNewElements(newValue)) {
             const { type, category } = el;
@@ -208,12 +186,6 @@ export let app;
               default:
                 console.log("ERROR ADDING EL");
             }
-          }
-
-          // remove element removed from arr
-          // cannot use arr.includes because states are deep cloned
-          for (const el of getDeletedElements(oldValue, newValue)) {
-            deleteElementByBoxId(el.boxId);
           }
         }
       },
@@ -235,69 +207,16 @@ export let app;
           }
         }
       },
-      
-      /**
-       * watch parameters of elements
-       * on direct changes, nothing changes (mechanic operation)
-       * only apply changes on undo-redo
-       */
-      defaultParamsElements: {
-        deep: true,
-        handler(newValue, oldValue) {
-          const difference = findDifferenceBy(
-            newValue,
-            oldValue,
-            "defaultParams"
-          );
-          for (const box of difference) {
-            setSelectValueInElement(box);
-            setInputValueInElement(box);
-          }
-        }
-      },
 
-      /**
-       * watch moved elements
-       * on direct move operation, nothing changes (mechanic operation)
-       * only apply changes on undo-redo
-       */
-      movedElements: {
-        deep: true,
-        handler(newValue, oldValue) {
-          const difference = findDifferenceBy(newValue, oldValue, "position");
-          moveElements(difference);
-        }
-      },
-      /**
-       * watch moved elements
-       * on direct resize operation, nothing changes (mechanic operation)
-       * only apply changes on undo-redo
-       */
-      resizedElements: {
-        deep: true,
-        handler(newValue, oldValue) {
-          const difference = findDifferenceBy(newValue, oldValue, "size");
-          resizeElements(difference);
-        }
-      },
       /**
        * watch links
        * on direct operation, nothing changes (mechanic operation)
        * on start, add parsed links
        * apply changes on undo-redo
        */
-      links(newValue, oldValue) {
+      links(newValue) {
         for (const l of Graph.getNewLinks(newValue)) {
           addLinkFromLink(l);
-        }
-
-        // remove links removed from arr
-        // cannot use arr.includes because states are deep cloned
-        for (const el of oldValue.filter(
-          el => newValue.filter(v => equalObjects(v, el)).length === 0
-        )) {
-          const link = Graph.getLinkBySourceTarget(el.source, el.target);
-          deleteLink(link);
         }
       },
       /**

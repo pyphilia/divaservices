@@ -174,7 +174,7 @@ class Paper {
             distance: -30,
             action: function() {
               this.model.remove({ ui: true, tool: this.cid });
-              app.deleteLinkFromApp({ link: this.model });
+              app.deleteLink({ link: this.model });
             }
           })
         ]
@@ -187,7 +187,7 @@ class Paper {
     });
 
     this._paper.on("link:connect", linkView => {
-      app.addLinkFromApp({ link: linkView.model.attributes });
+      app.addLink({ link: linkView.model.attributes });
     });
 
     this._paper.on(
@@ -206,18 +206,18 @@ class Paper {
     /**SELECTION*/
 
     this._paper.on("element:pointerdown", (cellView, e) => {
-      if (!app.$resizing) {
-        // remove resizer if exists
-        app.$removeResizer();
-      }
       if (cellView.model.attributes.class != "resizer") {
+        if (!app.$resizing) {
+          // remove resizer if exists
+          app.$removeResizer();
+        }
+
         // if control key is not hold, a different
         // the current selection is reset
-
         if (!ctrlDown) {
           app.$addUniqueElementToSelection(cellView);
         } else {
-          app.addElementToSelection(cellView);
+          app.$addElementToSelection(cellView);
         }
       } else {
         app.$initResize(e);
@@ -242,7 +242,7 @@ class Paper {
         app.$unSelectAllElements();
       }
 
-      app.addElementToSelection(cellView);
+      app.$addElementToSelection(cellView);
       contextMenu.setPositionToContextMenu(CONTEXT_MENU_ELEMENT, { x, y });
       return false;
     });

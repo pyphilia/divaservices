@@ -82,8 +82,7 @@ export const deleteLink = (links, link) => {
  * @param {graph} graph
  */
 export const addLinktoLinks = (links, link) => {
-  const l = buildLinkForStore(link);
-  links.push(l);
+  links.push(link);
 };
 
 /**

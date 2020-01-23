@@ -31,6 +31,10 @@ class Graph {
     return arr.filter(({ boxId }) => !this.getElementByBoxId(boxId));
   }
 
+  getLinkById(id) {
+    return this._graph.getCell(id);
+  }
+
   /**
    * return links which exist in links, but not in the graph
    *

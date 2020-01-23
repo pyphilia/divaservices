@@ -28,3 +28,8 @@ export const deleteLink = link => {
     link.remove();
   }
 };
+
+export const deleteLinkById = id => {
+  const link = Graph.getLinkById(id);
+  deleteLink(link);
+};

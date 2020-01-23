@@ -18,7 +18,8 @@ import {
   addLinktoLinks,
   removeLinksWithDeletedElements,
   unSelectAllElements,
-  findElementByBoxId
+  findElementByBoxId,
+  buildLinkForStore
 } from "./utils";
 import {
   ADD_ELEMENT,
@@ -187,8 +188,9 @@ const Interface = {
     $setTextValueInElement({ commit }, payload) {
       commit(SET_INPUT_VALUE, { type: Types.TEXT.type, ...payload });
     },
-    $addLink({ commit }, payload) {
-      commit(ADD_LINK, payload);
+    $addLink({ commit }, { link }) {
+      const l = buildLinkForStore(link);
+      commit(ADD_LINK, { link: l });
     },
     $deleteLink({ commit }, payload) {
       commit(DELETE_LINK, payload);
