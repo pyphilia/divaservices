@@ -23,7 +23,6 @@ import {
 import { mapState, mapActions } from "vuex";
 import { TOOLSBAR } from "../../constants/selectors";
 import { shortcutToString } from "../../utils/utils";
-import Graph from "../../classes/Graph";
 import Paper from "../../classes/Paper";
 
 const Toolsbar = Vue.component("Toolsbar", {
@@ -131,8 +130,8 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           resize: {
             action: () => {
-              const cellView = Paper.findViewInPaper(
-                Graph.getElementByBoxId(this.selectedElements[0].boxId)
+              const cellView = Paper.getViewFromBoxId(
+                this.selectedElements[0].boxId
               );
               this.$createResizer(this.elements, cellView);
             },

@@ -9,7 +9,6 @@ import components from "./layout/components";
 import store from "./store/store";
 import { DivaServices } from "divaservices-utils";
 import { initWebservices } from "./constants/globals";
-import { highlightSelection, unHighlight } from "./store/modules/highlight";
 import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "./constants/constants";
 import { addElementFromName, addLinkFromLink } from "./elements/addElement";
 import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
@@ -275,28 +274,6 @@ export let app;
         // @TODO: optimize ?
         for (const element of Graph.getElementsInGraph(newValue)) {
           deleteElementByBoxId(element.boxId);
-        }
-      },
-      /**
-       * watches selected elements
-       */
-      selectedElements(newValue, oldValue) {
-        // highlight current selection
-        for (const { boxId } of newValue) {
-          const cellView = Paper.findViewInPaper(
-            Graph.getElementByBoxId(boxId)
-          );
-          highlightSelection(cellView);
-        }
-        // remove unselected element if not deleted
-        for (const { boxId } of oldValue.filter(el => !newValue.includes(el))) {
-          const el = Graph.getElementByBoxId(boxId);
-
-          // on delete, these might be still be selected
-          if (el) {
-            const cellView = Paper.findViewInPaper(el);
-            unHighlight(cellView);
-          }
         }
       },
       /**

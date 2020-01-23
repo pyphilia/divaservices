@@ -2,6 +2,10 @@ import { app } from "../../app";
 const HIGHLIGHT_TOOLSBAR = "highlight-toolsbar";
 const MARGIN = 15;
 
+// const removeHighlightToolsbar = (cellView) => {
+//   cellView.el.querySelector(`.${HIGHLIGHT_TOOLSBAR}`).remove();
+// }
+
 /**
  * Append a highlight toolbar
  * state: on development

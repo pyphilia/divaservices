@@ -133,7 +133,7 @@ class Paper {
           app.elements
         );
 
-        if (selectedElements) {
+        if (selectedElements.length) {
           app.$selectElements({ elements: selectedElements });
         }
       }
@@ -215,10 +215,10 @@ class Paper {
         // the current selection is reset
 
         if (!ctrlDown) {
-          app.$unSelectAllElements();
+          app.$addUniqueElementToSelection(cellView);
+        } else {
+          app.addElementToSelection(cellView);
         }
-
-        app.addElementToSelection(cellView);
       } else {
         app.$initResize(e);
       }
@@ -274,9 +274,6 @@ class Paper {
       -bbox.x + canvasDimensions.width / 2 - bbox.width / 2,
       -bbox.y + canvasDimensions.height / 2 - bbox.height / 2
     );
-
-    // highlight element
-    //this.$addUniqueElementToSelection(el.findView(this._paper));
   }
 
   translate(newX, newY) {
@@ -286,6 +283,10 @@ class Paper {
 
   findViewInPaper(el) {
     return el.findView(this._paper);
+  }
+
+  getViewFromBoxId(boxId) {
+    return this.findViewInPaper(Graph.getElementByBoxId(boxId));
   }
 
   // helper function to find an empty position to add

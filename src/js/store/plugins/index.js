@@ -1,3 +1,4 @@
-import undoRedoPlugin from "./UndoRedoPlugin";
+import UndoRedoPlugin from "./UndoRedoPlugin";
+import HighlightPlugin from "./HighlightPlugin";
 
-export default [undoRedoPlugin];
+export default [UndoRedoPlugin, HighlightPlugin];

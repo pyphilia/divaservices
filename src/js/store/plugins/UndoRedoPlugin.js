@@ -6,6 +6,7 @@ import { cloneDeep } from "lodash";
 import UndoRedoHistory from "./UndoRedoHistory";
 
 // operations which can be undo/redo
+// @TODO messages constants
 const savedOperations = [
   "Interface/INIT_GRAPH",
   "Interface/INIT_PAPER",
