@@ -6,18 +6,18 @@
 
 import Vue from "vue";
 import Paper from "../../classes/Paper";
-import { mapState } from "vuex";
 import { Constants, Validation } from "divaservices-utils";
 const { Types } = Constants;
 
 const Log = Vue.component("Log", {
+  props: ["elements"],
   data() {
     return {
       activated: false // hacky variable to activate openWorkflow initial push
     };
   },
   computed: {
-    ...mapState("Interface", ["elements"]),
+    //@TODO watch for differences
     messages() {
       const tmp = [];
       for (const { boxId, type: name, defaultParams } of this.elements) {
@@ -30,7 +30,6 @@ const Log = Vue.component("Log", {
                 tmp.push({ value, paramName, paramType, name, boxId });
               }
             } catch (e) {
-              console.log(e);
               tmp.push({ value, paramName, paramType, name, boxId });
             }
           });

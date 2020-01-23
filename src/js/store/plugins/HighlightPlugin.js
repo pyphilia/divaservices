@@ -14,7 +14,6 @@ const HighlightPlugin = store => {
       case "Interface/UNSELECT_ALL_ELEMENTS":
       case "Interface/ADD_UNIQUE_ELEMENT_TO_SELECTION":
       case "Interface/ADD_ELEMENTS_TO_SELECTION": {
-        console.log(type, Interface);
         for (const element of Interface.elements) {
           const cellView = Paper.getViewFromBoxId(element.boxId);
           if (element.selected) {

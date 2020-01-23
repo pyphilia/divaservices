@@ -179,7 +179,6 @@ const Toolsbar = Vue.component("Toolsbar", {
       return Math.ceil(this.scale * 100);
     }
   },
-  // @TODO search done twice because of a
   template: `
   <div id="${TOOLSBAR}">
     <div v-for="group in toolsbarIcons" class="group">

@@ -95,6 +95,13 @@ export let app;
       dataElements() {
         return this.dataTest;
       },
+      logElements() {
+        return this.elements.map(({ boxId, type, defaultParams }) => ({
+          boxId,
+          type,
+          defaultParams
+        }));
+      },
       ...mapState("Interface", ["elements", "links"]),
       ...mapState("Keyboard", ["ctrl", "space"])
     },

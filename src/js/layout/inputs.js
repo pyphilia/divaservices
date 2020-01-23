@@ -355,7 +355,7 @@ export const checkInputValue = input => {
   const currentVal = input.val();
   const { min, max, step } = input.data();
 
-  let isValid = true;
+  let isValid = false;
   try {
     isValid = Validation.checkValue(currentVal, Types.NUMBER.type, {
       min,
