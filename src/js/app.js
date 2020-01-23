@@ -39,6 +39,7 @@ import {
   MESSAGE_COPY_ERROR
 } from "./constants/messages";
 import { saveWorkflow } from "./workflows/saveWorkflow";
+import {setInputValueInElement, setSelectValueInElement} from "./layout/inputs"
 
 export let app;
 
@@ -90,6 +91,11 @@ export let app;
       resizedElements() {
         return this.elements.map(({ boxId, size }) => {
           return { boxId, size };
+        });
+      },
+      defaultParamsElements() {
+        return this.elements.map(({ boxId, defaultParams }) => {
+          return { boxId, defaultParams };
         });
       },
       dataElements() {
@@ -229,6 +235,27 @@ export let app;
           }
         }
       },
+      
+      /**
+       * watch parameters of elements
+       * on direct changes, nothing changes (mechanic operation)
+       * only apply changes on undo-redo
+       */
+      defaultParamsElements: {
+        deep: true,
+        handler(newValue, oldValue) {
+          const difference = findDifferenceBy(
+            newValue,
+            oldValue,
+            "defaultParams"
+          );
+          for (const box of difference) {
+            setSelectValueInElement(box);
+            setInputValueInElement(box);
+          }
+        }
+      },
+
       /**
        * watch moved elements
        * on direct move operation, nothing changes (mechanic operation)

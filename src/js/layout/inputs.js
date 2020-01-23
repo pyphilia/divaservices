@@ -45,21 +45,21 @@ export const closeSelects = () => {
  * @param {string} boxId
  * @param {object} defaultParams
  */
-// export const setSelectValueInElement = ({ boxId, defaultParams }) => {
-//   for (const [key, { value }] of Object.entries(
-//     defaultParams[Types.SELECT.type]
-//   )) {
-//     // we need to precise paper root because of the minimap duplicate elements
-//     const el = $(
-//       `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] .select[name="${key}"] ${Types.SELECT.tag}`
-//     );
-//     if (el.find(":selected").val() != value) {
-//       $(el)
-//         .val(value)
-//         .trigger("change.select2");
-//     }
-//   }
-// };
+export const setSelectValueInElement = ({ boxId, defaultParams }) => {
+  for (const [key, { value }] of Object.entries(
+    defaultParams[Types.SELECT.type]
+  )) {
+    // we need to precise paper root because of the minimap duplicate elements
+    const el = $(
+      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] .select[name="${key}"] ${Types.SELECT.tag}`
+    );
+    if (el.find(":selected").val() != value) {
+      $(el)
+        .val(value)
+        .trigger("change.select2");
+    }
+  }
+};
 
 /**
  * set input value in DOM
@@ -68,22 +68,22 @@ export const closeSelects = () => {
  * @param {string} type
  * @param {object} defaultParams
  */
-// export const setInputValueInElement = ({
-//   boxId,
-//   type: boxName,
-//   defaultParams
-// }) => {
-//   for (const [key, { value }] of Object.entries(
-//     defaultParams[Types.NUMBER.type]
-//   )) {
-//     // we need to precise paper root because of the minimap duplicate elements
-//     const el = $(
-//       `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Types.NUMBER.tag}[name="${key}"]`
-//     );
-//     el.val(value);
-//     checkInputValue(el, { boxId, boxName });
-//   }
-// };
+export const setInputValueInElement = ({
+  boxId,
+  type: boxName,
+  defaultParams
+}) => {
+  for (const [key, { value }] of Object.entries(
+    defaultParams[Types.NUMBER.type]
+  )) {
+    // we need to precise paper root because of the minimap duplicate elements
+    const el = $(
+      `${INTERFACE_ROOT} foreignObject[boxId="${boxId}"] ${Types.NUMBER.tag}[name="${key}"]`
+    );
+    el.val(value);
+    checkInputValue(el, { boxId, boxName });
+  }
+};
 
 /**
  * reset value of input or select element
