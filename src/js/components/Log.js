@@ -5,7 +5,7 @@
  */
 
 import Vue from "vue";
-import Paper from "../../classes/Paper";
+import Paper from "../classes/Paper";
 import { Constants, Validation } from "divaservices-utils";
 const { Types } = Constants;
 

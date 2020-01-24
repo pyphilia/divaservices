@@ -6,7 +6,7 @@
  */
 import * as joint from "jointjs";
 import { app } from "../app";
-import { getWebserviceByName } from "../constants/globals";
+import { getWebserviceByName } from "../utils/globals";
 import { Constants } from "divaservices-utils";
 const { Types } = Constants;
 import {
@@ -18,8 +18,9 @@ import {
   PORT_MARKUP,
   PORT_LABEL_MARKUP,
   DEFAULT_BOX_SIZE,
-  MimeTypes
-} from "../constants/constants";
+  MimeTypes,
+  CATEGORY_DATATEST
+} from "../utils/constants";
 import {
   isParamInput,
   isPortUserdefined,
@@ -27,8 +28,8 @@ import {
   computeBoxHeight,
   generateUniqueId,
   shortenString
-} from "../layout/utils";
-import { createParametersInForeignObject } from "../layout/inputs";
+} from "../utils/utils";
+import { createParametersInForeignObject } from "./inputs";
 import {
   TITLE_ROW_CLASS,
   BOX_CONTAINER_CLASS,
@@ -36,10 +37,11 @@ import {
   IN_PORT_CLASS,
   OUT_PORT_CLASS,
   PORT_SELECTOR
-} from "../constants/selectors";
+} from "../utils/selectors";
 import Paper from "../classes/Paper";
 import Graph from "../classes/Graph";
 import { moveAllElements } from "./moveElement";
+import { addDataBox } from "./addDataElement";
 const graph = Graph.graph;
 
 export const buildPortAttrs = (name, type, typeAllowed) => {
@@ -415,4 +417,18 @@ export const addLinkFromLink = link => {
   };
 
   return addLinkFromJSON(newLink);
+};
+
+export const addElement = el => {
+  const { type, category } = el;
+  switch (category) {
+    case CATEGORY_SERVICE:
+      addElementFromName(type, el);
+      break;
+    case CATEGORY_DATATEST:
+      addDataBox(el);
+      break;
+    default:
+      console.log("ERROR ADDING EL");
+  }
 };

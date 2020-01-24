@@ -3,11 +3,11 @@ import {
   createElementObjectFromName,
   buildDefaultParameters
 } from "../elements/addElement";
-import { isParamInput, generateUniqueId } from "../layout/utils";
+import { isParamInput, generateUniqueId } from "../utils/utils";
 import { getWorkflowById } from "../api/requests";
 import { buildDataElement } from "../elements/addDataElement";
 import { API, Constants } from "divaservices-utils";
-import { webservices } from "../constants/globals";
+import { webservices } from "../utils/globals";
 
 /**
  * Read a workflow from a xml file and display it

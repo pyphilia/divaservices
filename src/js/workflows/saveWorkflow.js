@@ -1,13 +1,13 @@
 import xml2js from "xml2js";
-import { getWebserviceByName } from "../constants/globals";
-import { CATEGORY_SERVICE } from "../constants/constants";
+import { getWebserviceByName } from "../utils/globals";
+import { CATEGORY_SERVICE } from "../utils/constants";
 import { XMLBuilders, DivaServices, API } from "divaservices-utils";
 import { currentDataElements } from "../store/modules/utils";
 import Graph from "../classes/Graph";
 
 import * as joint from "jointjs";
 import { fireAlert } from "../utils/alerts";
-import { MESSAGE_LOOP } from "../constants/messages";
+import { MESSAGE_LOOP } from "../utils/messages";
 
 /**
  * get elements in order, from source to target

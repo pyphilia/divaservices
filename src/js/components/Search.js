@@ -2,10 +2,10 @@
  * Elements search component
  */
 import Vue from "vue";
-import { buildSearchRegex } from "../../utils/utils";
-import { SEARCH_ELEMENTS_ID } from "../../constants/selectors";
+import { buildSearchRegex } from "../utils/utils";
+import { SEARCH_ELEMENTS_ID } from "../utils/selectors";
 
-import Paper from "../../classes/Paper";
+import Paper from "../classes/Paper";
 import { mapState } from "vuex";
 
 const Search = Vue.component("SearchElements", {

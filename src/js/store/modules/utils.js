@@ -1,4 +1,4 @@
-import { CATEGORY_DATATEST } from "../../constants/constants";
+import { CATEGORY_DATATEST, CATEGORY_SERVICE } from "../../utils/constants";
 import Graph from "../../classes/Graph";
 
 /**
@@ -137,7 +137,7 @@ export const removeLinksWithDeletedElements = (elements, links) => {
  * @param {array} elements
  */
 export const currentElements = elements => {
-  return elements.filter(el => !el.deleted);
+  return elements.filter(el => el.category === CATEGORY_SERVICE && !el.deleted);
 };
 
 /**

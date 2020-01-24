@@ -19,11 +19,11 @@ import {
   ICON_SEARCH,
   ICON_INSTALL,
   ICON_SAVE
-} from "../../constants/constants";
+} from "../utils/constants";
 import { mapState, mapActions } from "vuex";
-import { TOOLSBAR } from "../../constants/selectors";
-import { shortcutToString } from "../../utils/utils";
-import Paper from "../../classes/Paper";
+import { TOOLSBAR } from "../utils/selectors";
+import { shortcutToString } from "../utils/utils";
+import Paper from "../classes/Paper";
 
 const Toolsbar = Vue.component("Toolsbar", {
   props: [
@@ -33,7 +33,8 @@ const Toolsbar = Vue.component("Toolsbar", {
     "redo",
     "canUndo",
     "canRedo",
-    "saveWorkflow"
+    "saveWorkflow",
+    "resizeCommit"
   ],
   methods: {
     shortcutToString(shortcut) {
@@ -130,10 +131,13 @@ const Toolsbar = Vue.component("Toolsbar", {
         {
           resize: {
             action: () => {
-              const cellView = Paper.getViewFromBoxId(
-                this.selectedElements[0].boxId
+              const thisBoxId = this.selectedElements[0].boxId;
+              const cellView = Paper.getViewFromBoxId(thisBoxId);
+              Paper.createResizer(
+                this.elements.find(({ boxId }) => boxId == thisBoxId),
+                cellView,
+                this.resizeCommit
               );
-              this.$createResizer(this.elements, cellView);
             },
             icon: ICON_RESIZE,
             enabledCondition: this.selectedElements.length === 1

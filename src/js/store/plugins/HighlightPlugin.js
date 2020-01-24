@@ -3,7 +3,7 @@
  * Highlights appear when a box is selected
  */
 
-import { BOX_HIGHLIGHTERS } from "../../constants/constants";
+import { BOX_HIGHLIGHTERS } from "../../utils/constants";
 import Paper from "../../classes/Paper";
 
 const HighlightPlugin = store => {

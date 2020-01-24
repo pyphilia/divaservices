@@ -10,7 +10,7 @@ import {
   FILE_MENU,
   MINIMAP_PAPER_ID,
   ALGO_ITEM_CLASS
-} from "../constants/selectors";
+} from "./selectors";
 
 export const initTour = () => {
   const tour = new Shepherd.Tour({

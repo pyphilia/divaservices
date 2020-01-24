@@ -6,7 +6,7 @@
 import Vue from "vue";
 import { cloneDeep } from "lodash";
 import { createElementObjectFromName } from "../../elements/addElement";
-import { generateUniqueId } from "../../layout/utils";
+import { generateUniqueId } from "../../utils/utils";
 import { Constants } from "divaservices-utils";
 const { Types } = Constants;
 import {
@@ -38,9 +38,9 @@ import {
   OPEN_WORKFLOW,
   UPDATE_DATA_IN_DATA_ELEMENT,
   ADD_UNIQUE_ELEMENT_TO_SELECTION
-} from "../mutationsTypes";
+} from "../../utils/mutationsTypes";
 import { fireAlert } from "../../utils/alerts";
-import { MESSAGE_PASTE_SUCCESS } from "../../constants/messages";
+import { MESSAGE_PASTE_SUCCESS } from "../../utils/messages";
 import { buildDataElement } from "../../elements/addDataElement";
 import Paper from "../../classes/Paper";
 import Graph from "../../classes/Graph";

@@ -3,7 +3,7 @@
  */
 
 import Split from "split.js";
-import { LEFT_SIDEBAR, MAIN_INTERFACE } from "../constants/selectors";
+import { LEFT_SIDEBAR, MAIN_INTERFACE } from "./selectors";
 
 const DEFAUL_SPLIT_SIZES = [25, 75];
 let split;

@@ -4,21 +4,21 @@
 
 import * as joint from "jointjs";
 import { app } from "../app";
-import { getDataInputByName } from "../constants/globals";
+import { getDataInputByName } from "../utils/globals";
 import {
   THEME,
   CATEGORY_DATATEST,
   MimeTypes,
   PORT_MARKUP,
   PORT_LABEL_MARKUP
-} from "../constants/constants";
-import { generateUniqueId } from "../layout/utils";
+} from "../utils/constants";
+import { generateUniqueId } from "../utils/utils";
 import {
   OUT_PORT_CLASS,
   DATA_BOX_FOREIGNOBJECT_CLASS,
   INTERFACE_ROOT,
   DATA_INPUT_CONTENT_CLASS
-} from "../constants/selectors";
+} from "../utils/selectors";
 import { buildPortAttrs } from "./addElement";
 import Paper from "../classes/Paper";
 import Graph from "../classes/Graph";

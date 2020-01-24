@@ -8,11 +8,11 @@ import {
   MINIMAP_NAVIGATOR_SELECTOR,
   MINIMAP_PAPER_ID,
   MINIMAP_CONTAINER
-} from "../../constants/selectors";
-import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../../constants/constants";
+} from "../utils/selectors";
+import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../utils/constants";
 import { mapState } from "vuex";
-import Graph from "../../classes/Graph";
-import Paper from "../../classes/Paper";
+import Graph from "../classes/Graph";
+import Paper from "../classes/Paper";
 
 const SCALE_CONTENT_PADDING = 10;
 

@@ -1,6 +1,4 @@
-import { addElementFromName, addLinkFromLink } from "../../elements/addElement";
-import { addDataBox } from "../../elements/addDataElement";
-import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "../../constants/constants";
+import { addLinkFromLink, addElement } from "../../elements/addElement";
 import { deleteLinkById } from "../../elements/deleteElement";
 
 const ElementPlugin = store => {
@@ -26,7 +24,6 @@ const ElementPlugin = store => {
         break;
       }
       case "Interface/OPEN_WORKFLOW": {
-        console.log(payload);
         const { elements, links } = payload;
         for (const el of elements) {
           addElement(el);
@@ -40,20 +37,6 @@ const ElementPlugin = store => {
         break;
     }
   });
-};
-
-const addElement = el => {
-  const { type, category } = el;
-  switch (category) {
-    case CATEGORY_SERVICE:
-      addElementFromName(type, el);
-      break;
-    case CATEGORY_DATATEST:
-      addDataBox(el);
-      break;
-    default:
-      console.log("ERROR ADDING EL");
-  }
 };
 
 export default ElementPlugin;

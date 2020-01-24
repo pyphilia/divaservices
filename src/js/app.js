@@ -1,18 +1,13 @@
 import Vue from "vue";
 import { mapActions, mapState } from "vuex";
-import plugins from "./plugins";
 
 import Graph from "./classes/Graph";
 import Paper from "./classes/Paper";
 
-import components from "./layout/components";
+import components from "./components";
 import store from "./store/store";
 import { DivaServices } from "divaservices-utils";
-import { initWebservices } from "./constants/globals";
-import { CATEGORY_SERVICE, CATEGORY_DATATEST } from "./constants/constants";
-import { addElementFromName, addLinkFromLink } from "./elements/addElement";
-import { deleteElementByBoxId } from "./elements/deleteElement";
-import { findDifferenceBy } from "./utils/utils";
+import { initWebservices } from "./utils/globals";
 import {
   selectedElements,
   copiedElements,
@@ -20,9 +15,7 @@ import {
   currentElements,
   currentDataElements
 } from "./store/modules/utils";
-import { addDataBox } from "./elements/addDataElement";
-import { initSplit } from "./layout/split";
-import { initKeyboardEvents } from "./events/keyboardEvents";
+import { initSplit } from "./utils/split";
 import { initTour } from "./utils/walkthrough";
 import { openWorkflow } from "./workflows/openWorkflow";
 import UndoRedoHistory from "./store/plugins/UndoRedoHistory";
@@ -31,15 +24,14 @@ import {
   MESSAGE_SAVE_SUCCESS,
   MESSAGE_COPY_SUCCESS,
   MESSAGE_COPY_ERROR
-} from "./constants/messages";
+} from "./utils/messages";
 import { saveWorkflow } from "./workflows/saveWorkflow";
+import { initKeyboardEvents } from "./events/keyboardEvents";
 
 export let app;
 
 (async () => {
   await initWebservices();
-
-  plugins.forEach(x => Vue.use(x));
 
   app = new Vue({
     el: "#app",
@@ -77,7 +69,7 @@ export let app;
         return deletedElements(this.elementsData);
       },
       movedElements() {
-        return this.elements.map(({ boxId, position }) => {
+        return this.currentElements.map(({ boxId, position }) => {
           return { boxId, position };
         });
       },
@@ -85,7 +77,7 @@ export let app;
         return this.dataTest;
       },
       logElements() {
-        return this.elements.map(({ boxId, type, defaultParams }) => ({
+        return this.currentElements.map(({ boxId, type, defaultParams }) => ({
           boxId,
           type,
           defaultParams
@@ -167,68 +159,6 @@ export let app;
       ])
     },
     watch: {
-      /**
-       * watches current elements
-       * add new elements, remove deleted elements
-       */
-      currentElements: {
-        handler(newValue) {
-          // if boxId element does not exist in the graph, we add it
-          for (const el of Graph.getNewElements(newValue)) {
-            const { type, category } = el;
-            switch (category) {
-              case CATEGORY_SERVICE:
-                addElementFromName(type, el);
-                break;
-              case CATEGORY_DATATEST:
-                addDataBox(el);
-                break;
-              default:
-                console.log("ERROR ADDING EL");
-            }
-          }
-        }
-      },
-
-      /**
-       * watches current data elements
-       * current state: debug
-       */
-      currentDataElements: {
-        deep: true,
-        handler(newValue, oldValue) {
-          const difference = findDifferenceBy(newValue, oldValue, "boxId");
-          console.log("TCL: handler -> difference", difference);
-          for (const el of difference) {
-            console.log(el);
-            // const { boxId, defaultParams } = el;
-            // @TODO: suppose one image
-            // updateImgPreview(this.id, data);
-          }
-        }
-      },
-
-      /**
-       * watch links
-       * on direct operation, nothing changes (mechanic operation)
-       * on start, add parsed links
-       * apply changes on undo-redo
-       */
-      links(newValue) {
-        for (const l of Graph.getNewLinks(newValue)) {
-          addLinkFromLink(l);
-        }
-      },
-      /**
-       * watches deleted elements
-       */
-      deletedElements(newValue) {
-        // if element is not in elements but exist in graph, delete it
-        // @TODO: optimize ?
-        for (const element of Graph.getElementsInGraph(newValue)) {
-          deleteElementByBoxId(element.boxId);
-        }
-      },
       /**
        * watches paper scale
        */

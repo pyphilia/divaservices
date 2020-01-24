@@ -13,9 +13,9 @@ import {
   DUPLICATE_CLASS,
   PASTE_CLASS,
   CLEAR_CLASS
-} from "../../constants/selectors";
+} from "../utils/selectors";
 import { mapActions } from "vuex";
-import Paper from "../../classes/Paper";
+import Paper from "../classes/Paper";
 
 const ContextMenus = Vue.component("ContextMenus", {
   props: ["selectedElements", "copiedElements", "currentElements", "copy"],

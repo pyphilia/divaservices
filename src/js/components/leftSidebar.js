@@ -3,18 +3,18 @@
  */
 import Vue from "vue";
 import { groupBy } from "lodash"; // we use lodash since it is a dependency of jointjs
-import { categoryName, DATATEST_TYPE } from "../../constants/constants";
-import { webservices, dataInputs } from "../../constants/globals";
+import { categoryName, DATATEST_TYPE } from "../utils/constants";
+import { webservices, dataInputs } from "../utils/globals";
 import {
   ALGO_ITEM_CLASS,
   ALGO_ITEM_WRAPPER,
   ALGO_SEARCH_CONTAINER,
   LEFT_SIDEBAR,
   ALGO_ITEMS
-} from "../../constants/selectors";
+} from "../utils/selectors";
 import { mapActions } from "vuex";
-import { toggleSplit } from "../split";
-import { buildSearchRegex } from "../../utils/utils";
+import { toggleSplit } from "../utils/split";
+import { buildSearchRegex } from "../utils/utils";
 
 /**
  * utility function to order alphabetically

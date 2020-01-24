@@ -5,7 +5,7 @@
 
 import { Decorators, API } from "divaservices-utils";
 import { WEBSERVICES_XML_FILEPATH } from "../../config";
-import { PRODUCTION_MODE } from "../constants/constants";
+import { PRODUCTION_MODE } from "../utils/constants";
 
 export const getServices = async () => {
   if (process.env.NODE_ENV === PRODUCTION_MODE) {

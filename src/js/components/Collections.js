@@ -6,8 +6,8 @@
 import Vue from "vue";
 import * as $ from "jquery";
 import draggable from "vuedraggable";
-import { getCollections } from "../../api/requests";
-import { DRAGGABLE_GROUP_NAME } from "../../constants/constants";
+import { getCollections } from "../api/requests";
+import { DRAGGABLE_GROUP_NAME } from "../utils/constants";
 import { mapState, mapActions } from "vuex";
 
 const Collections = Vue.component("Collections", {

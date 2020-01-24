@@ -11,11 +11,12 @@ import {
 import {
   setSelectValueInElement,
   setInputValueInElement
-} from "../../layout/inputs";
+} from "../../elements/inputs";
 import { moveElements } from "../../elements/moveElement";
 import { resizeElements } from "../../elements/resizeElement";
 import { deleteElementByBoxId, deleteLink } from "../../elements/deleteElement";
 import Graph from "../../classes/Graph";
+import { addElement, addLinkFromLink } from "../../elements/addElement";
 
 class UndoRedoHistory {
   constructor() {
@@ -82,6 +83,35 @@ class UndoRedoHistory {
     const { elements: prevElements, links: prevLinks } = prevState.Interface;
     const { elements: nextElements, links: nextLinks } = nextState.Interface;
 
+    for (const el of Graph.getNewElements(nextElements)) {
+      addElement(el);
+    }
+
+    // remove element removed from arr
+    // cannot use arr.includes because states are deep cloned
+    for (const el of getDeletedElements(prevElements, nextElements)) {
+      deleteElementByBoxId(el.boxId);
+    }
+
+    /**
+     * watch links
+     * on direct operation, nothing changes (mechanic operation)
+     * on start, add parsed links
+     * apply changes on undo-redo
+     */
+    for (const l of Graph.getNewLinks(nextLinks)) {
+      addLinkFromLink(l);
+    }
+
+    // remove links removed from arr
+    // cannot use arr.includes because states are deep cloned
+    for (const el of prevLinks.filter(
+      el => nextLinks.filter(v => equalObjects(v, el)).length === 0
+    )) {
+      const link = Graph.getLinkBySourceTarget(el.source, el.target);
+      deleteLink(link);
+    }
+
     /**
      * watch parameters of elements
      * on direct changes, nothing changes (mechanic operation)
@@ -122,21 +152,6 @@ class UndoRedoHistory {
       "size"
     );
     resizeElements(resizeDifference);
-
-    // remove links removed from arr
-    // cannot use arr.includes because states are deep cloned
-    for (const el of prevLinks.filter(
-      el => nextLinks.filter(v => equalObjects(v, el)).length === 0
-    )) {
-      const link = Graph.getLinkBySourceTarget(el.source, el.target);
-      deleteLink(link);
-    }
-
-    // remove element removed from arr
-    // cannot use arr.includes because states are deep cloned
-    for (const el of getDeletedElements(prevElements, nextElements)) {
-      deleteElementByBoxId(el.boxId);
-    }
   }
 }
 

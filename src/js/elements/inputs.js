@@ -15,7 +15,7 @@ import {
   TOOLTIP_HTML,
   RESET_COL,
   TOOLTIP_OPTIONS
-} from "../constants/constants";
+} from "../utils/constants";
 import {
   PARAM_NAME_CLASS,
   INFO_TOOLTIP_CLASS,
@@ -28,10 +28,10 @@ import {
   PARAMETER_INPUTS,
   INTERFACE_ROOT,
   PARAMETER_TEXTS
-} from "../constants/selectors";
-import { objectToString } from "./utils";
+} from "../utils/selectors";
+import { objectToString } from "../utils/utils";
 import { Validation, Constants, API } from "divaservices-utils";
-import { NO_PARAMETER_TEXT } from "../constants/messages";
+import { NO_PARAMETER_TEXT } from "../utils/messages";
 const { Types } = Constants;
 
 export const closeSelects = () => {

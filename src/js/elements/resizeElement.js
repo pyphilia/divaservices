@@ -1,4 +1,4 @@
-import { FOREIGN_CLASS } from "../constants/selectors";
+import { FOREIGN_CLASS } from "../utils/selectors";
 import Graph from "../classes/Graph";
 
 /**

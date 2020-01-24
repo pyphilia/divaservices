@@ -1,5 +1,4 @@
 import * as joint from "jointjs";
-import Vue from "vue";
 import {
   THEME,
   BOX_MARGIN,
@@ -7,19 +6,22 @@ import {
   MIN_SCALE,
   MAX_SCALE,
   ZOOM_STEP
-} from "../constants/constants";
+} from "../utils/constants";
 import {
   INTERFACE_ROOT,
   PORT_SELECTOR,
   CONTEXT_MENU_ELEMENT,
   CONTEXT_MENU_PAPER
-} from "../constants/selectors";
-import { validateConnection } from "../layout/utils";
+} from "../utils/selectors";
 
 import { spaceDown, ctrlDown } from "../events/keyboardEvents";
 
 import Graph from "./Graph";
-import { closeSelects } from "../layout/inputs";
+import { closeSelects } from "../elements/inputs";
+import { validateConnection } from "../utils/utils";
+
+import AreaSelection from "./AreaSelection";
+import Resizer from "./Resizer";
 
 class Paper {
   constructor() {
@@ -33,6 +35,9 @@ class Paper {
 
     this.mouseX = 0;
     this.mouseY = 0;
+
+    this.resizer = undefined;
+    this.areaSelection = undefined;
   }
 
   get paper() {
@@ -49,6 +54,14 @@ class Paper {
 
   set isElementchangePosition(value) {
     this._isElementchangePosition = value;
+  }
+
+  _removeResizer() {
+    if (this.resizer && !this.resizer.isResizing) {
+      // remove resizer if exists
+      this.resizer.remove();
+      this.resizer = undefined;
+    }
   }
 
   initPaper(app) {
@@ -72,6 +85,8 @@ class Paper {
 
     this._paper.options.highlighting.magnetAvailability =
       THEME.magnetAvailabilityHighlighter;
+
+    this.areaSelection = new AreaSelection(app.$selectElements);
 
     this.initPaperEvents(app);
   }
@@ -99,10 +114,7 @@ class Paper {
       this.dragStartPosition = { x: x, y: y };
       this.isPanning = spaceDown;
 
-      if (!app.$resizing) {
-        // remove resizer if exists
-        app.$removeResizer();
-      }
+      this._removeResizer();
 
       if (!ctrlDown) {
         app.$unSelectAllElements();
@@ -118,7 +130,7 @@ class Paper {
 
       // init area selection
       if (!spaceDown && !app.$resizing) {
-        app.$initAreaSelection(event);
+        this.areaSelection.init(event);
       }
     });
 
@@ -126,21 +138,16 @@ class Paper {
       this.isPanning = false;
 
       if (!spaceDown) {
-        const selectedElements = app.$endAreaSelection(
+        this.areaSelection.end(
           this._paper.clientOffset(),
           this._translation,
           this._scale,
           app.elements
         );
-
-        if (selectedElements.length) {
-          app.$selectElements({ elements: selectedElements });
-        }
       }
 
-      if (app.$resizing) {
-        const { boxId, size } = Vue.prototype.$endResize(this._paper);
-        app.resizeElementByBoxId(boxId, size);
+      if (this.resizer && this.resizer.isResizing) {
+        this.resizer.end();
       }
     });
 
@@ -159,8 +166,8 @@ class Paper {
         }
 
         // area selection
-        if (!spaceDown && app.$areaSelection.active) {
-          app.$computeAreaSelection();
+        if (!spaceDown && this.areaSelection.isActive) {
+          this.areaSelection.compute();
         }
       });
 
@@ -205,13 +212,9 @@ class Paper {
 
     /**SELECTION*/
 
-    this._paper.on("element:pointerdown", (cellView, e) => {
+    this._paper.on("element:pointerdown", cellView => {
       if (cellView.model.attributes.class != "resizer") {
-        if (!app.$resizing) {
-          // remove resizer if exists
-          app.$removeResizer();
-        }
-
+        this._removeResizer();
         // if control key is not hold, a different
         // the current selection is reset
         if (!ctrlDown) {
@@ -220,7 +223,7 @@ class Paper {
           app.$addElementToSelection(cellView);
         }
       } else {
-        app.$initResize(e);
+        this.resizer.init();
       }
     });
 
@@ -274,6 +277,10 @@ class Paper {
       -bbox.x + canvasDimensions.width / 2 - bbox.width / 2,
       -bbox.y + canvasDimensions.height / 2 - bbox.height / 2
     );
+  }
+
+  createResizer(element, cellView, resizeCommit) {
+    this.resizer = new Resizer(element, cellView, Graph.graph, resizeCommit);
   }
 
   translate(newX, newY) {

@@ -6,8 +6,8 @@ import {
   NO_PARAMETER_CLASS,
   DATA_BOX_FOREIGNOBJECT_CLASS,
   DATA_INPUT_CONTENT_CLASS
-} from "../../constants/selectors";
-import Graph from "../../classes/Graph";
+} from "../utils/selectors";
+import Graph from "../classes/Graph";
 
 const changePortDetails = event => {
   const prop = event.target.checked ? "block" : "none";
