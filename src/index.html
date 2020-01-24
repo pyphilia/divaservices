@@ -8,67 +8,79 @@
 </head>
 <body>
     
-    
     <!-- area selection highlight element  -->
     <div id="areaSelectionHighlight"></div>
     
     <!-- tooltip -->
     <div id="tooltip"></div>
     
-    <!-- Modal for settings -->
-    <div id="layoutSettings"></div>
     
     
     <div id="app" class="container-fluid no-gutters h-100">
         
-        <div id="header" class="row">
-            <h1 class="col-3">Name</h1> 
-            
-            <div class="col">
-                
-                <file-menu 
-                :scale="scale"
-                :graph="graph"
-                :copied-elements="copiedElements"
-                :selected-elements="selectedElements"
-                >
-            </file-menu>
-
-        </div>
+        <!-- Modal for settings -->
+        <layout-settings
+        ref="layoutSettings"
+        >
+        </layout-settings>
         
-        <img class="col-2" id="logo" src="http://wuersch.pillo-srv.ch/images/logo.png" alt="divaspotlight logo">
-    </div>
-    <div id="content-wrapper" class="row">
-        <left-sidebar ref="leftsidebar"></left-sidebar>
-        <div id="main" class="col p-0 h-100">
 
+        <collections ref="collections"></collections>
+
+        <div id="content-wrapper" class="row">
+
+            <left-sidebar ref="leftsidebar"></left-sidebar>
+
+            <div id="main" class="col p-0 h-100">
+                
                 <context-menus
                 ref="contextmenu"
-                :paper="paper"
+                :copy="copy"
                 :current-elements="currentElements"
                 :copied-elements="copiedElements"
-                :selected-elements="selectedElements"></context-menus>
-        
-                
+                :selected-elements="selectedElements">
+                </context-menus>
             
-            <!-- minimap -->
-            <minimap :scale="scale" :moved-elements="movedElements" :translation="translation" :paper="paper" :graph="graph"></minimap>
+                <!-- minimap -->
+                <minimap
+                :scale="scale"
+                :moved-elements="movedElements"
+                :translation="translation"
+                >
+                </minimap>
             
-            <!-- trash    -->
-            <!-- <div id="trash"><i class="fas fa-trash"></i></div> -->
+                <log
+                ref="log"
+                :elements="logElements"
+                >
+                </log>
             
-            <!-- content -->
-            <div id="paper-html-elements" class="h-100"></div>
+                <!-- content -->
+                <div id="paper-html-elements" class="h-100"></div>
             
-            <div id="message"></div>
+                <div id="message"></div>
             
-            <toolsbar :scale="scale"  :paper="paper" :selected-elements="selectedElements"></toolsbar>
+                <toolsbar
+                :scale="scale"
+                :selected-elements="selectedElements"
+                :save-workflow="saveWorkflow"
+                :undo="undo"
+                :redo="redo"
+                :can-undo="canUndo"
+                :can-redo="canRedo"
+                :resize-commit="resizeElementByBoxId"
+                >
+                </toolsbar>
             
-            
+                <search-elements
+                ref="searchElements"
+                >
+                </search-elements>
+            </div>
         </div>
     </div>
-</div>
-<script src="main.js"></script>
-<script src="css.js"></script>
+
+    <script src="main.js"></script>
+    <script src="css.js"></script>
 </body>
 </html>

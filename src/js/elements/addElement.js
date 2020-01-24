@@ -1,61 +1,130 @@
 /**
  * Add an element
- * note: jointjs is its own id to track the element
+ * note: jointjs uses its own id to track the element
  * for undo/redo purpose, we need to keep track of added-deleted item with a boxId
  * (in jointjs a deleted-recreated element is not the same)
  */
 import * as joint from "jointjs";
 import { app } from "../app";
-import { webservices } from "../constants/globals";
+import { getWebserviceByName } from "../utils/globals";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 import {
   THEME,
   BOX_TITLE_HTML_TAG,
   ICON_COL,
   TITLE_COL,
-  BOX_MARGIN,
-  Inputs
-} from "../constants/constants";
+  CATEGORY_SERVICE,
+  PORT_MARKUP,
+  PORT_LABEL_MARKUP,
+  DEFAULT_BOX_SIZE,
+  MimeTypes,
+  CATEGORY_DATATEST
+} from "../utils/constants";
 import {
   isParamInput,
   isPortUserdefined,
   computeBoxWidth,
   computeBoxHeight,
-  computeTitleLength,
   generateUniqueId,
-  getElementByBoxId
-} from "../layout/utils";
-import { setParametersInForeignObject, createPort } from "../layout/inputs";
+  shortenString
+} from "../utils/utils";
+import { createParametersInForeignObject } from "./inputs";
 import {
-  PORT_SELECTOR,
   TITLE_ROW_CLASS,
   BOX_CONTAINER_CLASS,
   FOREIGN_CLASS,
   IN_PORT_CLASS,
-  OUT_PORT_CLASS
-} from "../constants/selectors";
-import { layoutSettingsApp } from "../layoutSettings";
+  OUT_PORT_CLASS,
+  PORT_SELECTOR
+} from "../utils/selectors";
+import Paper from "../classes/Paper";
+import Graph from "../classes/Graph";
+import { moveAllElements } from "./moveElement";
+import { addDataBox } from "./addDataElement";
+const graph = Graph.graph;
 
+export const buildPortAttrs = (name, type, typeAllowed) => {
+  // const showPortDetails = app.$refs.layoutSettings.isShowPortsDetailsChecked();
+  // const showPorts = app.$refs.layoutSettings.isShowPortsChecked();
+  const typeAllowedShort = shortenString(typeAllowed.join(", "), 25);
+
+  return {
+    [PORT_SELECTOR]: {
+      fill: MimeTypes[type].color,
+      type,
+      typeAllowed
+    },
+    // circle: {
+    //   display: showPorts ? "block" : "none"
+    // },
+    mainText: {
+      text: `${name}\n${typeAllowedShort}`
+      // display: showPortDetails ? "block" : "none"
+    }
+  };
+};
+
+export const createPort = (param, group) => {
+  let port = {};
+  const { name, mimeTypes } = param;
+  if (group) {
+    //group == OUT_PORT_CLASS || userdefined) {
+    // always create out port, check userdefined for inputs
+
+    let typeAllowed;
+    let type;
+
+    // folder case
+    if (param.type == Types.FOLDER.type) {
+      typeAllowed = [Types.FOLDER.type]; // use options allowed types, otherwise it is a folder
+      type = Types.FOLDER.type;
+    } else {
+      // @TODO display !userdefined ports ?
+      typeAllowed = mimeTypes.allowed;
+      const typeEnd =
+        typeAllowed[0].indexOf("/") < 0
+          ? typeAllowed[0].length
+          : typeAllowed[0].indexOf("/");
+      type = typeAllowed[0].substr(
+        //@TODO diff types ?
+        0,
+        typeEnd
+      );
+    }
+
+    port = {
+      group,
+      name,
+      attrs: buildPortAttrs(name, type, typeAllowed)
+    };
+  }
+  return port;
+};
+
+/**
+ * create graphical and element object with given parameters
+ */
 const createBox = (
   e,
-  { position, size, boxId, defaultParams = {}, ports: { items } }
+  { position, size, boxId, defaultParams = {}, ports: { items }, serviceId }
 ) => {
-  const { graph } = app;
   const { category, label, description, params = {} } = e;
-  const { titleHeight } = computeTitleLength(e);
 
   if (!size) {
-    size = { width: 100, height: 100 };
+    size = DEFAULT_BOX_SIZE;
   }
 
+  // we do not add inputs and select in the markup because of the
+  // missing input declaration '/' (valid for HTML but not XML/SVG)
   const template = `<g class="scalable"><rect></rect></g>
-  <foreignObject class="${FOREIGN_CLASS}" x="0" boxId="${boxId}"
-  y="-${titleHeight}" width="${size.width}" height="${size.height +
-    titleHeight}">
-    <body xmlns="http://www.w3.org/1999/xhtml">
+    <foreignObject class="${FOREIGN_CLASS}" x="0" y="0" boxId="${boxId}" 
+    width="${size.width}" height="${size.height}" style="">
+    <body xmlns="http://www.w3.org/1999/xhtml" class="${category}">
     <div class="${BOX_CONTAINER_CLASS} no-gutters p-0">
-    <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start" style="height:${titleHeight}px">
+    <div class="${TITLE_ROW_CLASS} ${category} row justify-content-start"> 
     <div class="${ICON_COL} icon"></div>
-    <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle">${label}</${BOX_TITLE_HTML_TAG}>
+    <${BOX_TITLE_HTML_TAG} class="${TITLE_COL} align-middle" title="${label}">${label}</${BOX_TITLE_HTML_TAG}>
     </div>
     </div>
     </body>
@@ -71,6 +140,8 @@ const createBox = (
       rect: { ...THEME.rect, ...size }
     },
     boxId,
+    serviceId,
+    category: CATEGORY_SERVICE,
     position,
     size,
     ports: {
@@ -80,7 +151,8 @@ const createBox = (
     description,
     originalParams: params,
     defaultParams,
-    portMarkup: [{ tagName: "circle", selector: PORT_SELECTOR }],
+    portMarkup: PORT_MARKUP,
+    portLabelMarkup: PORT_LABEL_MARKUP,
 
     getGroupPorts: function(model, group) {
       return model.getPorts().filter(port => {
@@ -107,30 +179,38 @@ const createBox = (
   return element;
 };
 
-const buildDefaultParameters = params => {
-  const defaultParams = { select: {}, number: {} };
+/**
+ * build default parameters for an element
+ *
+ * @param {object} params
+ */
+export const buildDefaultParameters = params => {
+  const defaultParams = { select: {}, number: {}, text: {} };
   for (const p of params) {
-    let { type, name, defaultValue, values } = p;
-    if (type == Inputs.SELECT.type) {
+    let { type, name, defaultValue, definedValue, values } = p;
+    if (type === Types.SELECT.type) {
       defaultValue = values[defaultValue];
     }
-    defaultParams[type][name] = { value: defaultValue, defaultValue };
+    defaultParams[type][name] = {
+      value: definedValue ? definedValue : defaultValue,
+      defaultValue,
+      values
+    };
   }
   return defaultParams;
 };
 
-export const transformWebserviceForGraph = webservice => {
+/**
+ * construct corresponding object for webservice
+ * compute all necessary data to create a graphical box
+ *
+ * @param {object} webservice
+ */
+export const constructServiceObject = webservice => {
   if (!webservice.name) {
-    alert("problem with ", webservice);
-    return {};
+    throw "webservice " + webservice + " has name '" + name + "'";
   }
-  const {
-    name: label,
-    description,
-    inputs = [],
-    type: category,
-    ports
-  } = webservice;
+  const { name: label, description, inputs = [], category, ports } = webservice;
 
   // handle params
   const params = inputs.filter(inp => isParamInput(inp));
@@ -150,9 +230,41 @@ export const transformWebserviceForGraph = webservice => {
   return ret;
 };
 
-// Create a custom element.
-// ------------------------
-export const addElementFromTransformedJSON = (e, parameters = {}) => {
+/**
+ * move operation callback
+ * support multiple elements moving
+ *
+ * @param {*} stopPropagation if true, avoid movements propagation callback (avoid infinite loop)
+ */
+const elementOnChangePosition = (el, newPosition, { stopPropagation }) => {
+  Paper.isElementchangePosition = true;
+
+  const { selectedElements } = app;
+  // need to move all elements at the same time
+  if (!stopPropagation && selectedElements.length) {
+    // move all elements except current moved element
+    const { boxId: currentBoxId } = el.attributes;
+    const { position: oldPosition } = selectedElements.find(
+      el => el.boxId === currentBoxId
+    );
+    const deltaPosition = {
+      x: newPosition.x - oldPosition.x,
+      y: newPosition.y - oldPosition.y
+    };
+    moveAllElements(
+      selectedElements.filter(el => el.boxId != currentBoxId),
+      deltaPosition
+    );
+  }
+};
+
+/**
+ * create a custom element from an object element
+ *
+ * @param {object} e element as object
+ * @param {object} parameters default parameters
+ */
+export const addElementFromServiceObject = (e, parameters = {}) => {
   const { label } = e;
 
   if (!label) {
@@ -163,11 +275,28 @@ export const addElementFromTransformedJSON = (e, parameters = {}) => {
 
   const element = createBox(e, { ...parameters, boxId });
 
-  setParametersInForeignObject(element, parameters.defaultParams);
+  createParametersInForeignObject(
+    element,
+    {
+      inputCommit: app.$setInputValueInElement,
+      selectCommit: app.$setSelectValueInElement,
+      textCommit: app.$setTextValueInElement
+    },
+    parameters.defaultParams
+  );
+
+  // ELEMENT EVENTS
+  element.on("change:position", elementOnChangePosition);
 
   return element;
 };
 
+/**
+ * create ports description from inputs and outputs
+ *
+ * @param {array} inputs
+ * @param {array} outputs
+ */
 const createPortsFromInputOutput = (inputs, outputs) => {
   const ports = { items: [] };
   inputs
@@ -187,12 +316,17 @@ const createPortsFromInputOutput = (inputs, outputs) => {
   return ports;
 };
 
-export const buildElementFromName = name => {
+/**
+ * create element object from service name
+ *
+ * @param {string} name
+ */
+export const createElementObjectFromName = name => {
   // find webservice given name
-  const webservice = webservices.find(service => service.name == name);
-  const { outputs = [], inputs = [] } = webservice;
+  const webservice = getWebserviceByName(name);
+  const { outputs = [], inputs = [], id } = webservice;
 
-  const el = transformWebserviceForGraph(webservice);
+  const el = constructServiceObject(webservice);
 
   // handle ports
   const ports = createPortsFromInputOutput(inputs, outputs);
@@ -201,69 +335,36 @@ export const buildElementFromName = name => {
   const boxId = generateUniqueId();
   const { defaultParams } = el;
 
-  const showParameter =
-    layoutSettingsApp.checkedOptions.indexOf("showParameters") != -1;
   const size = {
-    width: computeBoxWidth(el, showParameter),
-    height: computeBoxHeight(el, showParameter)
+    width: computeBoxWidth(el),
+    height: computeBoxHeight(el)
   };
 
-  const position = position ? position : findEmptyPosition(size);
+  const position = position ? position : Paper.findEmptyPosition(size);
 
-  return { boxId, defaultParams, size, position, type: name, ports };
-};
-
-// helper function to find an empty position to add
-// an element without overlapping other ones
-// it tries to fill the canvas view first horizontally
-// then vertically
-export const findEmptyPosition = (size, startingPoint) => {
-  const { paper, graph } = app;
-  const { left, top, width, height } = paper.svg.getBoundingClientRect();
-  const canvasDimensions = paper.clientToLocalRect({
-    x: left,
-    y: top,
-    width,
-    height
-  });
-
-  const { x: canvasX, y: canvasY, width: canvasW } = canvasDimensions;
-  const position = startingPoint
-    ? startingPoint
-    : { x: canvasX + BOX_MARGIN, y: canvasY + BOX_MARGIN };
-  const { width: sizeWidth, height: sizeHeight } = size;
-
-  while (
-    graph.findModelsInArea({
-      ...position,
-      width: sizeWidth + BOX_MARGIN,
-      height: sizeHeight + BOX_MARGIN
-    }).length
-  ) {
-    position.x += sizeWidth + BOX_MARGIN;
-    if (canvasX + canvasW < position.x + sizeWidth) {
-      position.x = canvasX + BOX_MARGIN;
-      position.y += sizeHeight + BOX_MARGIN;
-    }
-  }
-
-  return position;
+  return {
+    serviceId: id,
+    category: CATEGORY_SERVICE,
+    boxId,
+    defaultParams,
+    size,
+    position,
+    type: name,
+    ports
+  };
 };
 
 /**
  * From a JSON description, add the webservice to the graph
  */
-export const addElementToGraphFromServiceDescription = (
-  webservice,
-  defaultParameters = {}
-) => {
-  const transformedWebservice = transformWebserviceForGraph(webservice);
+export const addElementFromService = (webservice, defaultParameters = {}) => {
+  const serviceObj = constructServiceObject(webservice);
 
   let { position, size } = defaultParameters;
   // avoid adding overlapping elements
-  defaultParameters.position = findEmptyPosition(size, position);
+  defaultParameters.position = Paper.findEmptyPosition(size, position);
 
-  const element = addElementFromTransformedJSON(transformedWebservice, {
+  const element = addElementFromServiceObject(serviceObj, {
     size,
     ...defaultParameters
   });
@@ -271,13 +372,13 @@ export const addElementToGraphFromServiceDescription = (
   return element;
 };
 
-// add element given a name. It will then retrieve the webservice
-// info from the services xml descriptions
-// returns boxId and position for undo-redo purpose
-export const addElementByName = (name, defaultParams = {}) => {
-  const algo = webservices.find(service => service.name == name);
+/**
+ * add element given a name
+ */
+export const addElementFromName = (name, defaultParams = {}) => {
+  const algo = getWebserviceByName(name);
   if (algo) {
-    addElementToGraphFromServiceDescription(algo, defaultParams);
+    addElementFromService(algo, defaultParams);
   } else {
     console.error(`${name} doesnt exist`);
   }
@@ -285,25 +386,49 @@ export const addElementByName = (name, defaultParams = {}) => {
 
 /*ADD LINKS*/
 
+/**
+ * add link from link jointjs description object
+ *
+ * @param {link} link
+ */
 export const addLinkFromJSON = link => {
-  const { graph } = app;
   const linkEl = new joint.shapes.standard.Link(link);
   graph.addCell(linkEl);
 };
 
+/**
+ * add link from link description
+ *
+ * @param {link} link
+ */
 export const addLinkFromLink = link => {
-  const { source, target } = link;
+  const { source, target, id } = link;
 
-  const s = getElementByBoxId(source.boxId);
-  const t = getElementByBoxId(target.boxId);
+  const s = Graph.getElementByBoxId(source.boxId);
+  const t = Graph.getElementByBoxId(target.boxId);
 
-  const sPort = s.getPorts().find(p => p.name == source.portname).id;
-  const tPort = t.getPorts().find(p => p.name == target.portname).id;
+  const sPort = s.getPorts().find(p => p.name === source.portName).id;
+  const tPort = t.getPorts().find(p => p.name === target.portName).id;
 
   const newLink = {
+    id,
     source: { id: s.id, port: sPort },
     target: { id: t.id, port: tPort }
   };
 
   return addLinkFromJSON(newLink);
+};
+
+export const addElement = el => {
+  const { type, category } = el;
+  switch (category) {
+    case CATEGORY_SERVICE:
+      addElementFromName(type, el);
+      break;
+    case CATEGORY_DATATEST:
+      addDataBox(el);
+      break;
+    default:
+      console.log("ERROR ADDING EL");
+  }
 };

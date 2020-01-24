@@ -8,6 +8,7 @@
     "dist": "yarn eslint && yarn webpack:p",
     "dev": "webpack-dev-server --open",
     "eslint": "eslint src/**/*.js",
+    "graph": "madge  --circular --extensions js src/js/layout/components",
     "prettier:check": "prettier --check \"src/**/*.js\" \"src/**/*.scss\" \"test/*.js\"",
     "prettier:write": "prettier --write \"src/**/*.js\" \"src/**/*.scss\" \"test/*.js\"",
     "pre-commit": "yarn prettier:check && yarn eslint && yarn test",
@@ -21,23 +22,25 @@
     "@fortawesome/free-solid-svg-icons": "^5.10.2",
     "ajv": "^6.10.2",
     "bootstrap": "^4.3.1",
+    "divaservices-utils": "https://github.com/pyphilia/divaservices-utils",
     "dotenv": "^8.1.0",
     "file-saver": "^2.0.2",
     "jointjs": "^3.0.4",
     "jquery": "^3.4.1",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.groupby": "^4.6.0",
+    "mime-types": "^2.1.25",
     "node-fetch": "^2.6.0",
     "path": "^0.12.7",
     "select2": "^4.0.9",
     "shepherd.js": "^5.0.1",
     "split.js": "^1.5.11",
     "vue": "^2.6.10",
+    "vuedraggable": "^2.23.2",
     "vuex": "^3.1.1",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
     "@babel/polyfill": "^7.4.4",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
@@ -52,12 +55,14 @@
     "html-loader": "^0.5.5",
     "husky": "^3.0.3",
     "jest": "^24.9.0",
+    "madge": "^3.6.0",
     "node-sass": "^4.12.0",
     "prettier": "^1.18.2",
     "raw-loader": "^3.1.0",
     "sass-loader": "^7.2.0",
     "style-loader": "^1.0.0",
     "webpack": "^4.39.2",
+    "webpack-bundle-analyzer": "^3.6.0",
     "webpack-cli": "^3.3.6",
     "webpack-dev-server": "^3.8.0"
   },
@@ -70,6 +75,23 @@
   "jest": {
     "setupFiles": [
       "./test/setup-jest.js"
-    ]
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "mjs"
+    ],
+    "transform": {
+      "^.+\\.(m?)js$": "babel-jest"
+    },
+    "moduleNameMapper": {
+      "^vue$": "<rootDir>/node_modules/vue",
+      "jquery$": "<rootDir>/node_modules/jquery/dist/jquery.min.js",
+      "^bootstrapjs$": "<rootDir>/node_modules/bootstrap/dist/js/bootstrap.min.js",
+      "^select2js$": "<rootDir>/node_modules/select2/dist/js/select2.min.js",
+      "^shepherd.js$": "<rootDir>/node_modules/shepherd.js/dist/js/shepherd.esm.min.js",
+      "^lodash$": "<rootDir>/node_modules/lodash/lodash.min.js",
+      "^backbone$": "<rootDir>/node_modules/backbone/backbone-min.js"
+    }
   }
 }

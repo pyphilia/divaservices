@@ -1,5 +1,6 @@
 $fontColor: white;
 $font-primary: arial;
+$box-background: #eeeeee;
 
 $binarizationIcon: "../images/binaryicon.png";
 
@@ -44,10 +45,20 @@ $category-properties: (
     type: "icon",
     icon: $fa-var-chart-pie
   ),
+  "filepicker": (
+    color: #9b7898,
+    type: "icon",
+    icon: $fa-var-folder
+  ),
   "graph": (
     color: #6f69a2,
     type: "icon",
     icon: $fa-var-bezier-curve
+  ),
+  "htk": (
+    color: #6f69a2,
+    type: "icon",
+    icon: $fa-var-comment
   ),
   "imageprocessing": (
     color: #76a6d6,
@@ -70,9 +81,24 @@ $category-properties: (
     icon: $fa-var-stream
   ),
   "segmentation": (
-    color: #e0e47c,
+    color: #e4cc7c,
     type: "icon",
     icon: $fa-var-cut
+  ),
+  "other": (
+    color: #e4cc7c,
+    type: "icon",
+    icon: $fa-var-otter
+  ),
+  "data": (
+    color: #000000,
+    type: "icon",
+    icon: $fa-var-cut
+  ),
+  "wordextraction": (
+    color: #e4cc7c,
+    type: "icon",
+    icon: $fa-var-font
   )
 );
 // @each $category, $color in $category-colors {

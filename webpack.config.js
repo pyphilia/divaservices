@@ -2,6 +2,7 @@
 const path = require('path');
 const dotenv = require('dotenv')
 const {DefinePlugin} = require('webpack');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const DIST = 'public';
 
@@ -19,13 +20,19 @@ module.exports = {
    resolve: {
       extensions: ['.js'],
       alias: {
-         'vue$': 'vue/dist/vue.esm.js'
+         'vue$': 'vue/dist/vue.esm.js',
+         'jquery': 'jquery/dist/jquery.min.js',
+         'bootstrapjs': 'bootstrap/dist/js/bootstrap.min.js',
+         'select2js': 'select2/dist/js/select2.min.js',
+         'shepherd.js': 'shepherd.js/dist/js/shepherd.esm.min.js',
+         'lodash': 'lodash/lodash.min.js',
+         'backbone': 'backbone/backbone-min.js',
       }
    },
    module: {
       rules: [
          {
-            test: /\.js(x*)/,
+            test: /\.js(x*)$/,
             use: {
                loader: 'babel-loader',
                options: {
@@ -84,14 +91,15 @@ module.exports = {
             test: /\.xml$/,
             exclude: /\.json$/,
             use: 'raw-loader',
-          },
+         },
       ]
    },
    plugins: [
       new DefinePlugin({
-        'process.env': JSON.stringify(dotenv.config().parsed)
-      })
-  ],
+         'process.env': JSON.stringify(dotenv.config().parsed)
+      }),
+      new BundleAnalyzerPlugin()
+   ],
    devServer: {
       contentBase: DIST,
       hot: true,

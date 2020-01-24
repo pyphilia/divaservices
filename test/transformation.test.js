@@ -1,6 +1,7 @@
 import { IN_PORT_CLASS, OUT_PORT_CLASS } from "../src/js/constants/selectors";
 import { transformWebserviceForGraph } from "../src/js/elements/addElement";
-import { Inputs } from "../src/js/constants/constants";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 
 // @TODO ---- le json a changé.......
 
@@ -13,7 +14,7 @@ const empty = {
 
 const correctFileInput = {
   name: "input",
-  type: Inputs.FILE.type,
+  type: Types.FILE.type,
   description: "desc",
   required: true,
   mimeTypes: {
@@ -24,7 +25,7 @@ const correctFileInput = {
 
 const correctFileOutput = {
   name: "output",
-  type: Inputs.FILE.type,
+  type: Types.FILE.type,
   description: "desc",
   mimeTypes: {
     allowed: ["image/png"]

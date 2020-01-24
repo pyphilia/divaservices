@@ -1,280 +1,181 @@
 import Vue from "vue";
-import Split from "split.js";
-import * as joint from "jointjs";
 import { mapActions, mapState } from "vuex";
-import Toolsbar from "./layout/components/Toolsbar";
-import FileMenu from "./layout/components/FileMenu";
-import LeftSidebar from "./layout/components/LeftSidebar";
-import ContextMenus from "./layout/components/ContextMenu";
-import Minimap from "./layout/components/Minimap";
+
+import Graph from "./classes/Graph";
+import Paper from "./classes/Paper";
+
+import components from "./components";
 import store from "./store/store";
-import { initWebservices } from "./constants/globals";
-import { initPaperEvents } from "./events/paperEvents";
-import { getElementByBoxId, getLinkBySourceTarget } from "./layout/utils";
-import { highlightSelection, unHighlight } from "./store/modules/highlight";
-import { MAX_SCALE, MIN_SCALE, Inputs, THEME } from "./constants/constants";
-import { addElementByName, addLinkFromLink } from "./elements/addElement";
-import { deleteElementByBoxId, deleteLink } from "./elements/deleteElement";
-import { initKeyboardEvents } from "./events/keyboardEvents";
-import {
-  INTERFACE_ROOT,
-  LEFT_SIDEBAR,
-  MAIN_INTERFACE
-} from "./constants/selectors";
-import {
-  setInputValueInElement,
-  setSelectValueInElement
-} from "./layout/inputs";
-import { equalObjects } from "./utils/utils";
-import { validateConnection } from "./layout/components/utils";
+import { DivaServices } from "divaservices-utils";
+import { initWebservices } from "./utils/globals";
 import {
   selectedElements,
   copiedElements,
-  deletedElements,
-  currentElements
+  currentElements,
+  currentDataElements
 } from "./store/modules/utils";
-import { moveElements } from "./elements/moveElement";
-import ZoomPlugin from "./plugins/ZoomPlugin";
-import AreaSelectionPlugin from "./plugins/AreaSelectionPlugin";
+import { initSplit } from "./utils/split";
+import { initTour } from "./utils/walkthrough";
+import { openWorkflow } from "./workflows/openWorkflow";
+import UndoRedoHistory from "./store/plugins/UndoRedoHistory";
+import { fireAlert } from "./utils/alerts";
+import {
+  MESSAGE_SAVE_SUCCESS,
+  MESSAGE_COPY_SUCCESS,
+  MESSAGE_COPY_ERROR
+} from "./utils/messages";
+import { saveWorkflow } from "./workflows/saveWorkflow";
+import { initKeyboardEvents } from "./events/keyboardEvents";
 
 export let app;
-export let split;
 
 (async () => {
   await initWebservices();
-  Vue.use(ZoomPlugin);
-  Vue.use(AreaSelectionPlugin);
+
   app = new Vue({
     el: "#app",
     store,
+    components,
     data: {
-      graph: new joint.dia.Graph(),
-      paper: null,
-      translation: { tx: 0, ty: 0 }
-    },
-    components: {
-      LeftSidebar,
-      Minimap,
-      Toolsbar,
-      FileMenu,
-      ContextMenus
+      paper: Paper, // necessary to watch translation and scale
+      workflowId: undefined
     },
     computed: {
+      translation() {
+        return this.paper.translation;
+      },
+      scale() {
+        return this.paper.scale;
+      },
       // this computed method is necessary since we shouldn't
       // listen to the store directly
-      // we should use getters but for some reason (namespace?) it is not working
+      elementsData() {
+        return this.elements;
+      },
+      currentDataElements() {
+        return currentDataElements(this.elementsData);
+      },
       currentElements() {
-        return currentElements(this.elements);
+        return currentElements(this.elementsData);
       },
       selectedElements() {
-        return selectedElements(this.elements);
+        return selectedElements(this.elementsData);
       },
       copiedElements() {
-        return copiedElements(this.elements);
-      },
-      deletedElements() {
-        return deletedElements(this.elements);
-      },
-      defaultParamsElements() {
-        return this.elements.map(({ boxId, defaultParams }) => {
-          return { boxId, defaultParams };
-        });
+        return copiedElements(this.elementsData);
       },
       movedElements() {
-        return this.elements.map(({ boxId, position }) => {
+        return this.currentElements.map(({ boxId, position }) => {
           return { boxId, position };
         });
       },
-      scale() {
-        return this.$zoom.scale;
+      dataElements() {
+        return this.dataTest;
+      },
+      logElements() {
+        return this.currentElements.map(({ boxId, type, defaultParams }) => ({
+          boxId,
+          type,
+          defaultParams
+        }));
       },
       ...mapState("Interface", ["elements", "links"]),
       ...mapState("Keyboard", ["ctrl", "space"])
     },
     methods: {
-      addElementToSelection(cellView) {
-        this.addElementToSelection(cellView);
+      copy() {
+        if (selectedElements.length) {
+          this.$copySelectedElements();
+          fireAlert("success", MESSAGE_COPY_SUCCESS);
+        } else {
+          fireAlert("danger", MESSAGE_COPY_ERROR);
+        }
       },
-      translate(newX, newY) {
-        this.paper.translate(newX * this.scale, newY * this.scale);
-        this.translation = this.paper.translate();
+      saveWorkflow(installation = true) {
+        // @TODO receive response and fire correct alert
+        saveWorkflow(
+          {
+            elements: this.currentElements,
+            links: this.links,
+            workflowId: this.workflowId
+          },
+          this.$refs.log.messages,
+          installation
+        ); // WARNING: promise
+
+        fireAlert("success", MESSAGE_SAVE_SUCCESS);
       },
-      addLinkFromApp(payload) {
-        this.addLink({ ...payload, graph: this.graph });
+      canUndo() {
+        return UndoRedoHistory.canUndo();
       },
-      deleteLinkFromApp(payload) {
-        this.deleteLink({ ...payload, graph: this.graph });
+      canRedo() {
+        return UndoRedoHistory.canRedo();
       },
-      zoomInFromApp() {
-        this.$zoomIn(this.paper);
+      redo() {
+        UndoRedoHistory.redo();
       },
-      zoomOutFromApp() {
-        this.$zoomOut(this.paper);
+      undo() {
+        UndoRedoHistory.undo();
+      },
+      deleteElementByCellView(cellView) {
+        const boxId = cellView.model.attributes.boxId;
+        this.$deleteElements({
+          elements: [this.elements.find(el => el.boxId === boxId)]
+        });
+      },
+      resizeElementByBoxId(boxId, size) {
+        const element = this.elements.find(el => el.boxId === boxId);
+        this.$resizeElement({ element, size });
       },
       ...mapActions("Interface", [
-        "unSelectAllElements",
-        "selectAllElements",
-        "addElementToSelection",
-        "copySelectedElements",
-        "duplicateElements",
-        "deleteElements",
-        "setSelectValueInElement",
-        "setInputValueInElement",
-        "addLink",
-        "deleteLink",
-        "moveSelectedElements"
+        "$unSelectAllElements",
+        "$clearElements",
+        "$selectAllElements",
+        "$addElementToSelection",
+        "$addUniqueElementToSelection",
+        "$copySelectedElements",
+        "$duplicateElements",
+        "$deleteElements",
+        "$setSelectValueInElement",
+        "$setInputValueInElement",
+        "$setTextValueInElement",
+        "$addLink",
+        "$deleteLink",
+        "$moveSelectedElements",
+        "$resizeElement",
+        "$openWorkflow",
+        "$updateDataInDataElement",
+        "$selectElements"
       ])
     },
     watch: {
-      currentElements: {
-        handler(newValue, oldValue) {
-          // if boxId element does not exist in the graph, we add it
-          for (const el of newValue.filter(
-            ({ boxId }) => !getElementByBoxId(boxId)
-          )) {
-            const { type } = el;
-            addElementByName(type, el);
-          }
-
-          // remove element removed from arr
-          // cannot use arr.includes because states are deep cloned
-          for (const el of oldValue.filter(
-            el => !newValue.find(v => v.boxId == el.boxId)
-          )) {
-            deleteElementByBoxId(el.boxId);
-          }
-        }
-      },
-      defaultParamsElements: {
-        deep: true,
-        handler(newValue, oldValue) {
-          const difference = newValue.filter(el => {
-            const v = oldValue.find(e => e.boxId == el.boxId);
-            return v && !equalObjects(v.defaultParams, el.defaultParams);
-          });
-          for (const param of difference) {
-            setSelectValueInElement(
-              param.boxId,
-              param.defaultParams[Inputs.SELECT.type]
-            );
-            setInputValueInElement(
-              param.boxId,
-              param.defaultParams[Inputs.NUMBER.type]
-            );
-          }
-        }
-      },
-      movedElements: {
-        deep: true,
-        handler(newValue, oldValue) {
-          const difference = newValue.filter(el => {
-            const v = oldValue.find(e => e.boxId == el.boxId);
-            return v && !equalObjects(v.position, el.position);
-          });
-          moveElements(difference);
-        }
-      },
-      links(newValue, oldValue) {
-        for (const l of newValue) {
-          const { source, target } = l;
-          const link = getLinkBySourceTarget(source, target);
-          if (!link) {
-            addLinkFromLink(l);
-          }
-        }
-
-        // remove links removed from arr
-        // cannot use arr.includes because states are deep cloned
-        for (const el of oldValue.filter(
-          el => newValue.filter(v => equalObjects(v, el)).length == 0
-        )) {
-          const link = getLinkBySourceTarget(el.source, el.target);
-          deleteLink(link);
-        }
-      },
-      deletedElements(newValue) {
-        // if element is not in elements but exist in graph, delete it
-        for (const element of newValue.filter(el =>
-          getElementByBoxId(el.boxId)
-        )) {
-          deleteElementByBoxId(element.boxId);
-        }
-      },
-      selectedElements(newValue, oldValue) {
-        // highlight current selection
-        for (const { boxId } of newValue) {
-          const cellView = getElementByBoxId(boxId).findView(this.paper);
-          highlightSelection(cellView);
-        }
-        // remove unselected element if not deleted
-        for (const { boxId } of oldValue.filter(el => !newValue.includes(el))) {
-          const el = getElementByBoxId(boxId);
-
-          // on delete, these might be still be selected
-          if (el) {
-            const cellView = el.findView(this.paper);
-            unHighlight(cellView);
-          }
-        }
-      },
+      /**
+       * watches paper scale
+       */
       scale(nextScale, currentScale) {
-        if (nextScale >= MIN_SCALE && nextScale <= MAX_SCALE) {
-          const beta = currentScale / nextScale;
-
-          const ax = this.$zoom.x - this.$zoom.x * beta;
-          const ay = this.$zoom.y - this.$zoom.y * beta;
-
-          const translate = this.paper.translate();
-
-          const nextTx = translate.tx - ax * nextScale;
-          const nextTy = translate.ty - ay * nextScale;
-
-          this.paper.translate(nextTx, nextTy);
-
-          const ctm = this.paper.matrix();
-
-          ctm.a = nextScale;
-          ctm.d = nextScale;
-
-          this.paper.matrix(ctm);
-        }
+        Paper.changeScale(nextScale, currentScale);
       }
     },
-    mounted() {
-      this.paper = new joint.dia.Paper({
-        el: document.querySelector(INTERFACE_ROOT),
-        model: this.graph,
-        width: "100%",
-        height: 800,
-        gridSize: 15,
-        drawGrid: {
-          name: "dot"
-        },
-        linkPinning: false,
-        snapLinks: true,
-        defaultLink: new joint.shapes.standard.Link({ z: 20 }),
-        defaultConnector: { name: "smooth" },
-        defaultConnectionPoint: { name: "boundary" },
-        markAvailable: true,
-        validateConnection
-      });
+    async mounted() {
+      Paper.initPaper(this, Graph.graph);
 
-      this.paper.options.highlighting.magnetAvailability =
-        THEME.magnetAvailabilityHighlighter;
+      initKeyboardEvents(this); // WARNiNG promise
 
-      this.$nextTick(() => {
-        initPaperEvents();
-        initKeyboardEvents();
-      });
+      // retrieve workflow id
+      const id = DivaServices.getUrlParameters().id;
+      if (!isNaN(id)) {
+        this.workflowId = id;
+        const workflow = await openWorkflow(id);
+        this.$openWorkflow(workflow);
+      } else {
+        throw "Error with id " + id;
+      }
 
-      split = Split([`#${LEFT_SIDEBAR}`, MAIN_INTERFACE], {
-        elementStyle: function(dimension, size, gutterSize) {
-          return { "flex-basis": "calc(" + size + "% - " + gutterSize + "px)" };
-        },
-        minSize: [10, 500],
-        sizes: [25, 75],
-        gutterSize: 6
-      });
+      // initialize rezisable split
+      initSplit();
+
+      // init tutorial tour
+      initTour();
     }
   });
 })();

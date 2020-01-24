@@ -1,18 +1,25 @@
+/**
+ * Interface store
+ * handles graph elements data
+ */
+
 import Vue from "vue";
-import cloneDeep from "lodash.clonedeep";
+import { cloneDeep } from "lodash";
+import { createElementObjectFromName } from "../../elements/addElement";
+import { generateUniqueId } from "../../utils/utils";
+import { Constants } from "divaservices-utils";
+const { Types } = Constants;
 import {
-  buildElementFromName,
-  findEmptyPosition
-} from "../../elements/addElement";
-import { generateUniqueId, getElementByBoxId } from "../../layout/utils";
-import { Inputs } from "../../constants/constants";
-import {
-  buildLinkForStore,
   addElementToElements,
   deleteElement,
   selectElementByBoxId,
   selectedElements,
-  selectElement
+  selectElement,
+  addLinktoLinks,
+  removeLinksWithDeletedElements,
+  unSelectAllElements,
+  findElementByBoxId,
+  buildLinkForStore
 } from "./utils";
 import {
   ADD_ELEMENT,
@@ -23,13 +30,20 @@ import {
   DELETE_LINK,
   ADD_LINK,
   SET_INPUT_VALUE,
-  SET_SELECT_VALUE,
   COPY_SELECTION,
   UNSELECT_ALL_ELEMENTS,
-  MOVE_ELEMENTS
-} from "../mutationsTypes";
+  MOVE_ELEMENTS,
+  CLEAR_ELEMENTS,
+  RESIZE_ELEMENT,
+  OPEN_WORKFLOW,
+  UPDATE_DATA_IN_DATA_ELEMENT,
+  ADD_UNIQUE_ELEMENT_TO_SELECTION
+} from "../../utils/mutationsTypes";
 import { fireAlert } from "../../utils/alerts";
-import { MESSAGE_PASTE_SUCCESS } from "../../constants/messages";
+import { MESSAGE_PASTE_SUCCESS } from "../../utils/messages";
+import { buildDataElement } from "../../elements/addDataElement";
+import Paper from "../../classes/Paper";
+import Graph from "../../classes/Graph";
 
 const Interface = {
   namespaced: true,
@@ -43,21 +57,25 @@ const Interface = {
     },
     [ADD_ELEMENTS](state, { elements }) {
       for (const el of elements) {
-        const fromId = el.boxId; // duplicate case, reference to another element
-        addElementToElements(state.elements, {
-          ...cloneDeep(el),
-          fromId,
-          position: findEmptyPosition(el.size, { ...el.position }),
-          boxId: generateUniqueId()
-        });
+        addElementToElements(state.elements, el);
       }
+    },
+    [CLEAR_ELEMENTS](state) {
+      state.elements = [];
     },
     [DELETE_ELEMENTS](state, { elements }) {
       for (const el of elements) {
         deleteElement(el);
       }
+      // remove links linked to deleted elements
+      state.links = removeLinksWithDeletedElements(state.elements, state.links);
     },
     [ADD_ELEMENT_TO_SELECTION](state, { model }) {
+      const { boxId } = model.attributes;
+      selectElementByBoxId(state.elements, boxId);
+    },
+    [ADD_UNIQUE_ELEMENT_TO_SELECTION](state, { model }) {
+      unSelectAllElements(state.elements);
       const { boxId } = model.attributes;
       selectElementByBoxId(state.elements, boxId);
     },
@@ -67,26 +85,17 @@ const Interface = {
       }
     },
     [UNSELECT_ALL_ELEMENTS](state) {
-      state.elements.map(el => (el.selected = false));
+      unSelectAllElements(state.elements);
     },
     [COPY_SELECTION](state) {
       state.elements.forEach(el => (el.copied = el.selected));
     },
-    [SET_SELECT_VALUE](state, { element, value, attr }) {
-      const el = state.elements.find(
-        el => el.boxId == element.attributes.boxId
-      );
-      Vue.set(el.defaultParams[Inputs.SELECT.type][attr], "value", value);
+    [SET_INPUT_VALUE](state, { type, element, value, attr }) {
+      const el = findElementByBoxId(state.elements, element.attributes.boxId);
+      Vue.set(el.defaultParams[type][attr], "value", value);
     },
-    [SET_INPUT_VALUE](state, { element, value, attr }) {
-      const el = state.elements.find(
-        el => el.boxId == element.attributes.boxId
-      );
-      Vue.set(el.defaultParams[Inputs.NUMBER.type][attr], "value", value);
-    },
-    [ADD_LINK](state, { link, graph }) {
-      const l = buildLinkForStore(graph, link);
-      state.links.push(l);
+    [ADD_LINK](state, { link }) {
+      addLinktoLinks(state.links, link);
     },
     [DELETE_LINK](state, { link }) {
       state.links = state.links.filter(thisL => thisL.id != link.id);
@@ -94,54 +103,111 @@ const Interface = {
     [MOVE_ELEMENTS](state, { elements }) {
       for (const el of elements) {
         const { boxId } = el;
-        const graphEl = getElementByBoxId(boxId);
+        const graphEl = Graph.getElementByBoxId(boxId);
         el.position = graphEl.position();
       }
+    },
+    [RESIZE_ELEMENT](state, { element, size }) {
+      element.size = size;
+    },
+    [OPEN_WORKFLOW](state, { elements, links }) {
+      for (const el of elements) {
+        addElementToElements(state.elements, el);
+      }
+      for (const link of links) {
+        link.id = generateUniqueId();
+        state.links.push(link);
+      }
+    },
+    [UPDATE_DATA_IN_DATA_ELEMENT](state, { boxId, data }) {
+      const el = state.elements.find(el => el.boxId == boxId);
+      el.data = data;
     }
   },
   actions: {
-    addElementByName({ commit }, name) {
+    $addElementByName({ commit }, name) {
       // buils necessary data to build an element afterwards
-      const elementPayload = buildElementFromName(name);
+      const elementPayload = createElementObjectFromName(name);
       commit(ADD_ELEMENT, elementPayload);
     },
-    duplicateElements({ commit }, { elements }) {
+    $addDataElement({ commit }, name) {
+      const el = buildDataElement(name);
+      commit(ADD_ELEMENT, el);
+    },
+    $clearElements({ commit }) {
+      commit(CLEAR_ELEMENTS);
+    },
+    $duplicateElements({ commit }, { elements }) {
+      const newElements = [];
+      for (const el of elements) {
+        const fromId = el.boxId; // duplicate case, reference to another element
+        newElements.push({
+          ...cloneDeep(el),
+          fromId,
+          position: Paper.findEmptyPosition(el.size, {
+            ...el.position
+          }),
+          boxId: generateUniqueId()
+        });
+      }
+
       commit(ADD_ELEMENTS, {
-        elements
+        elements: newElements
       });
       fireAlert("success", MESSAGE_PASTE_SUCCESS);
     },
-    deleteElements({ commit }, { elements }) {
+    $deleteElements({ commit }, { elements }) {
       commit(DELETE_ELEMENTS, {
         elements
       });
     },
-    addElementToSelection({ commit }, payload) {
+    $addElementToSelection({ commit }, payload) {
       commit(ADD_ELEMENT_TO_SELECTION, payload);
     },
-    unSelectAllElements({ commit }) {
+    $addUniqueElementToSelection({ commit }, payload) {
+      commit(ADD_UNIQUE_ELEMENT_TO_SELECTION, payload);
+    },
+    $unSelectAllElements({ commit }) {
       commit(UNSELECT_ALL_ELEMENTS);
     },
-    selectAllElements({ commit, state }) {
+    $selectElements({ commit }, payload) {
+      commit(ADD_ELEMENTS_TO_SELECTION, payload);
+    },
+    $selectAllElements({ commit, state }) {
       commit(ADD_ELEMENTS_TO_SELECTION, { elements: state.elements });
     },
-    copySelectedElements({ commit }) {
+    $copySelectedElements({ commit }) {
       commit(COPY_SELECTION);
     },
-    setSelectValueInElement({ commit }, payload) {
-      commit(SET_SELECT_VALUE, payload);
+    $setSelectValueInElement({ commit }, payload) {
+      commit(SET_INPUT_VALUE, { type: Types.SELECT.type, ...payload });
     },
-    setInputValueInElement({ commit }, payload) {
-      commit(SET_INPUT_VALUE, payload);
+    $setInputValueInElement({ commit }, payload) {
+      commit(SET_INPUT_VALUE, { type: Types.NUMBER.type, ...payload });
     },
-    addLink({ commit }, payload) {
-      commit(ADD_LINK, payload);
+    $setTextValueInElement({ commit }, payload) {
+      commit(SET_INPUT_VALUE, { type: Types.TEXT.type, ...payload });
     },
-    deleteLink({ commit }, payload) {
+    $addLink({ commit }, { link }) {
+      const l = buildLinkForStore(link);
+      commit(ADD_LINK, { link: l });
+    },
+    $deleteLink({ commit }, payload) {
       commit(DELETE_LINK, payload);
     },
-    moveSelectedElements({ commit, state }) {
-      commit(MOVE_ELEMENTS, { elements: selectedElements(state.elements) });
+    $moveSelectedElements({ commit, state }) {
+      commit(MOVE_ELEMENTS, {
+        elements: selectedElements(state.elements)
+      });
+    },
+    $resizeElement({ commit }, payload) {
+      commit(RESIZE_ELEMENT, payload);
+    },
+    $openWorkflow({ commit }, payload) {
+      commit(OPEN_WORKFLOW, payload);
+    },
+    $updateDataInDataElement({ commit }, payload) {
+      commit(UPDATE_DATA_IN_DATA_ELEMENT, payload);
     }
   }
 };

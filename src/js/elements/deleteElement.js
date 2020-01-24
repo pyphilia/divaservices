@@ -1,16 +1,35 @@
-import { getElementByBoxId } from "../layout/utils";
+import Graph from "../classes/Graph";
 
+/**
+ * delete element from joint.js graph
+ *
+ * @param {element} element
+ */
 const deleteElement = element => {
   element.remove();
 };
 
+/**
+ * delete element from graph by boxId
+ *
+ * @param {*} boxId
+ */
 export const deleteElementByBoxId = boxId => {
-  const cell = getElementByBoxId(boxId);
+  const cell = Graph.getElementByBoxId(boxId);
   deleteElement(cell);
 };
 
+/**
+ * delete link from graph
+ * @param {link} link
+ */
 export const deleteLink = link => {
   if (link) {
     link.remove();
   }
+};
+
+export const deleteLinkById = id => {
+  const link = Graph.getLinkById(id);
+  deleteLink(link);
 };

@@ -2,7 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 
 import Interface from "./modules/Interface";
-import undoRedoPlugin from "./plugins/UndoRedoPlugin";
+import plugins from "./plugins";
 
 Vue.use(Vuex);
 
@@ -10,7 +10,7 @@ const store = new Vuex.Store({
   modules: {
     Interface
   },
-  plugins: [undoRedoPlugin]
+  plugins
 });
 
 export default store;

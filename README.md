@@ -17,14 +17,76 @@ workflow (a logical succession of algorithms) can be created and edited. This
 workflow will then be saved and installed on the DIVA platform and be run from
 there.
 
-## Installation
+## Getting Started
 
-Once the repository is cloned, run `yarn` to install the dependencies.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-To run the platform on development mode, run the command `yarn dev`. It will start the webpack server, build the source files and run the platform in out default browser. 
+### Prerequisites
 
-To build the final files, run `yarn build` or `yarn dist` for a compressed version. The resulting files will be saved in the `public` folder.  
+You will need to install **yarn** to run the interface.
 
+### Installing
+
+Once yarn is installed, you can install the interface with:
+```
+yarn init
+```
+
+If necessary, update `service.xml` so that it contains correct services description. 
+
+Once all the dependencies are installed, run the following command to run the interface locally:
+
+```
+yarn dev
+```
+/!\ Don't forget to precise GET parameters `id` ! On production mode, `id` must match an existing workflow.
+
+You should open the running server with url :
+```
+http://localhost:3000?id=6
+```
+
+### Maintainance
+
+Since git hooks are installed, you will need to have a clean code which match prettier and eslint requirements.
+To prettify your code, run 
+```
+yarn prettier:write
+```
+And to check the validity of your code against eslint, run
+```
+yarn eslint
+```
+
+If no error is detected, you will be able to commit your changes.
+
+## Running the tests
+
+Run
+
+```
+yarn test
+```
+
+## Deployment
+
+This command allows you to create a distribution version of the interface. It is the one you can install directly in the `resource` of the Oppidum website.
+
+```
+yarn dist
+```
+
+The resulting files will be saved in the `public` folder.  
+
+## Built With
+
+* [Vue.js](https://vuejs.org/v2) - The web framework used
+* [Webpack](https://webpack.js.org/) - Bundler
+* [Yarn](https://yarnpkg.com/lang/en/) - Dependency Management
+
+## Authors
+
+* **Kim Lan Phan Hoang** - *Initial work* - klphanh@gmail.com
 
 ## Implemented features
 ### Interface

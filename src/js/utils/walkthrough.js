@@ -1,3 +1,8 @@
+/**
+ * This file contains the configuration of the tutorial tour
+ * state: on develpment
+ */
+
 import Shepherd from "shepherd.js";
 import {
   INTERFACE_ROOT,
@@ -5,7 +10,7 @@ import {
   FILE_MENU,
   MINIMAP_PAPER_ID,
   ALGO_ITEM_CLASS
-} from "../constants/selectors";
+} from "./selectors";
 
 export const initTour = () => {
   const tour = new Shepherd.Tour({

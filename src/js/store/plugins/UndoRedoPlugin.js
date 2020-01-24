@@ -1,6 +1,12 @@
-import cloneDeep from "lodash.clonedeep";
+/**
+ * Undo-Redo Plugin
+ */
+
+import { cloneDeep } from "lodash";
 import UndoRedoHistory from "./UndoRedoHistory";
 
+// operations which can be undo/redo
+// @TODO messages constants
 const savedOperations = [
   "Interface/INIT_GRAPH",
   "Interface/INIT_PAPER",
@@ -11,7 +17,9 @@ const savedOperations = [
   "Interface/SET_SELECT_VALUE",
   "Interface/ADD_LINK",
   "Interface/DELETE_LINK",
-  "Interface/MOVE_ELEMENTS"
+  "Interface/RESIZE_ELEMENT",
+  "Interface/MOVE_ELEMENTS",
+  "Interface/OPEN_WORKFLOW"
 ];
 
 const undoRedoPlugin = store => {

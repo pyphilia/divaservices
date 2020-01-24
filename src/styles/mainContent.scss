@@ -1,24 +1,81 @@
+$bootstrap-input-height: calc(1.5em + 0.75rem + 2px);
+
 #content-wrapper.row > div {
   border: 1px solid black;
 }
 
-.algo-box {
+input[type="file"]:hover {
+  cursor: pointer;
+  background: white;
+}
+
+.data-foreignobj {
   body {
     background: none;
+
+    > div {
+      height: 100%;
+      position: relative;
+    }
+  }
+
+  .preview {
+    height: 70%;
+    position: relative;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
+}
+
+// foreignObject
+.algo-box {
+  body {
+    background: $box-background;
+
+    @each $category, $properties in $category-properties {
+      &.#{$category} {
+        border-width: 0 0 5px 0;
+        border-bottom: map-get($properties, "color");
+        border-style: solid;
+
+        .param-name {
+          // display:inline-block;
+          // min-width:
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          color: map-get($properties, "color");
+        }
+      }
+    }
   }
 
   .row {
-    margin: 7px 0;
+    margin-bottom: 7px;
     align-items: center;
     justify-content: center;
   }
 
-  select {
-    height: 100%;
+  .selection .select2-selection {
+    height: $bootstrap-input-height;
+
+    //.select2-container--default .select2-selection--single .select2-selection__rendered
+    .select2-selection__rendered {
+      line-height: $bootstrap-input-height;
+    }
+
+    .select2-selection__arrow {
+      height: $bootstrap-input-height;
+    }
   }
 
   .title-box {
     font-size: 2em;
+    margin-left: 0;
+    margin-right: 0;
     align-items: center;
     justify-content: center;
 
@@ -30,12 +87,16 @@
 
     h3 {
       margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .tooltip-box {
       display: block;
       width: 40px;
       margin: auto 10px auto auto;
+      cursor: pointer;
 
       svg {
         display: block;
@@ -49,13 +110,9 @@
     }
   }
 
-  .param-name {
-    // display:inline-block;
-    // min-width:
-  }
-
   .reset-button {
-    background: lightgrey;
+    background: darkgrey;
+    color: white;
   }
 
   .tooltip-info-button {
@@ -82,6 +139,7 @@
 // }
 
 .joint-port-label {
+  fill: black;
   tspan:first-of-type {
     font-weight: bold;
   }
@@ -168,4 +226,74 @@
   .slidecontainer {
     text-align: center;
   }
+}
+
+/*HIGHLIGHTER*/
+
+.highlighted {
+  & > g > rect {
+    stroke-width: 5px;
+    stroke: red !important;
+  }
+}
+
+// .joint-highlight-stroke {
+//   stroke: green !important;
+// }
+
+.highlight-toolsbar {
+  // font-family: FontAwesome;
+  .icon {
+    cursor: pointer;
+  }
+  background: red;
+}
+
+.resizer {
+  z-index: 30;
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  background: red;
+}
+
+#log {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  background: rgb(48, 48, 48);
+  color: red;
+  font-size: 0.9em;
+  max-width: 75%;
+  max-height: 200px;
+  overflow: auto;
+
+  div {
+    border-bottom: 1px solid grey;
+    margin: 5px 10px;
+
+    span.name,
+    span.value {
+      color: white;
+    }
+
+    span.boxName {
+      cursor: pointer;
+      text-decoration: underline;
+
+      &:hover {
+        color: white;
+      }
+    }
+  }
+}
+#search-component {
+  background: white;
+  padding: 3px;
+  border: 1px solid grey;
+  position: absolute;
+  right: 10px;
+  top: 40px;
+  z-index: 30;
 }
