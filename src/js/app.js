@@ -37,15 +37,15 @@ export let app;
     store,
     components,
     data: {
-      paper: Paper, // in order to watch translation
+      paper: Paper, // necessary to watch translation and scale
       workflowId: undefined
     },
     computed: {
       translation() {
-        return Paper.translation;
+        return this.paper.translation;
       },
       scale() {
-        return Paper.scale;
+        return this.paper.scale;
       },
       // this computed method is necessary since we shouldn't
       // listen to the store directly
@@ -116,12 +116,6 @@ export let app;
       },
       undo() {
         UndoRedoHistory.undo();
-      },
-      addLink(payload) {
-        this.$addLink({ ...payload });
-      },
-      deleteLink(payload) {
-        this.$deleteLink({ ...payload });
       },
       deleteElementByCellView(cellView) {
         const boxId = cellView.model.attributes.boxId;

@@ -181,7 +181,7 @@ class Paper {
             distance: -30,
             action: function() {
               this.model.remove({ ui: true, tool: this.cid });
-              app.deleteLink({ link: this.model });
+              app.$deleteLink({ link: this.model });
             }
           })
         ]
@@ -194,7 +194,7 @@ class Paper {
     });
 
     this._paper.on("link:connect", linkView => {
-      app.addLink({ link: linkView.model.attributes });
+      app.$addLink({ link: linkView.model.attributes });
     });
 
     this._paper.on(

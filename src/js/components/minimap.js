@@ -17,7 +17,7 @@ import Paper from "../classes/Paper";
 const SCALE_CONTENT_PADDING = 10;
 
 const Minimap = Vue.component("Minimap", {
-  props: ["movedElements", "scale"],
+  props: ["movedElements", "scale", "translation"],
   data: function() {
     return {
       mapDragFlag: false,
