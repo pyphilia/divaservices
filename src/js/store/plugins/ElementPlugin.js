@@ -1,5 +1,8 @@
 import { addLinkFromLink, addElement } from "../../elements/addElement";
-import { deleteLinkById } from "../../elements/deleteElement";
+import {
+  deleteLinkById,
+  deleteElementByBoxId
+} from "../../elements/deleteElement";
 
 const ElementPlugin = store => {
   store.subscribe(({ type, payload }) => {
@@ -12,6 +15,12 @@ const ElementPlugin = store => {
       case "Interface/ADD_ELEMENTS": {
         for (const el of payload.elements) {
           addElement(el);
+        }
+        break;
+      }
+      case "Interface/DELETE_ELEMENTS": {
+        for (const el of payload.elements) {
+          deleteElementByBoxId(el.boxId);
         }
         break;
       }

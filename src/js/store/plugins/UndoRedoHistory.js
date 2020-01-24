@@ -79,10 +79,12 @@ class UndoRedoHistory {
     }
   }
 
+  // @TODO keep track of actual transaction and optimize update loops
   reportChanges(prevState, nextState) {
     const { elements: prevElements, links: prevLinks } = prevState.Interface;
     const { elements: nextElements, links: nextLinks } = nextState.Interface;
 
+    // watch elements and add them if they dont exist in the graph
     for (const el of Graph.getNewElements(nextElements)) {
       addElement(el);
     }
@@ -95,9 +97,6 @@ class UndoRedoHistory {
 
     /**
      * watch links
-     * on direct operation, nothing changes (mechanic operation)
-     * on start, add parsed links
-     * apply changes on undo-redo
      */
     for (const l of Graph.getNewLinks(nextLinks)) {
       addLinkFromLink(l);
@@ -114,25 +113,18 @@ class UndoRedoHistory {
 
     /**
      * watch parameters of elements
-     * on direct changes, nothing changes (mechanic operation)
-     * only apply changes on undo-redo
      */
-    // check params diff
-    const paramsDifference = findDifferenceBy(
+    for (const box of findDifferenceBy(
       nextElements,
       prevElements,
       "defaultParams"
-    );
-
-    for (const box of paramsDifference) {
+    )) {
       setSelectValueInElement(box);
       setInputValueInElement(box);
     }
 
     /**
      * watch moved elements
-     * on direct move operation, nothing changes (mechanic operation)
-     * only apply changes on undo-redo
      */
     const moveDifference = findDifferenceBy(
       nextElements,
@@ -142,9 +134,7 @@ class UndoRedoHistory {
     moveElements(moveDifference);
 
     /**
-     * watch moved elements
-     * on direct resize operation, nothing changes (mechanic operation)
-     * only apply changes on undo-redo
+     * watch resized elements
      */
     const resizeDifference = findDifferenceBy(
       nextElements,

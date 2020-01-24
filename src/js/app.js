@@ -11,7 +11,6 @@ import { initWebservices } from "./utils/globals";
 import {
   selectedElements,
   copiedElements,
-  deletedElements,
   currentElements,
   currentDataElements
 } from "./store/modules/utils";
@@ -64,9 +63,6 @@ export let app;
       },
       copiedElements() {
         return copiedElements(this.elementsData);
-      },
-      deletedElements() {
-        return deletedElements(this.elementsData);
       },
       movedElements() {
         return this.currentElements.map(({ boxId, position }) => {

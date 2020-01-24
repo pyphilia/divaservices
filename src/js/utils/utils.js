@@ -253,11 +253,15 @@ export const findDifferenceBy = (a, b, param) => {
 
 /**
  * compare arr and newArr and return deleted elements (which do not exist in newArr)
+ * or the ones newly marked as deleted
  * @param {array} arr
  * @param {array} newArr
  */
 export const getDeletedElements = (arr, newArr) => {
-  return arr.filter(el => !newArr.find(v => v.boxId == el.boxId));
+  return arr.filter(el => {
+    const newEl = newArr.find(v => v.boxId == el.boxId);
+    return !newEl || newEl.deleted;
+  });
 };
 
 /**
