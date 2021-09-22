@@ -25,7 +25,7 @@
     "divaservices-utils": "https://github.com/pyphilia/divaservices-utils",
     "dotenv": "^8.1.0",
     "file-saver": "^2.0.2",
-    "jointjs": "^3.0.4",
+    "jointjs": "^3.4.2",
     "jquery": "^3.4.1",
     "mime-types": "^2.1.25",
     "node-fetch": "^2.6.0",
