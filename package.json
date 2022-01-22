@@ -28,7 +28,7 @@
     "jointjs": "^3.0.4",
     "jquery": "^3.4.1",
     "mime-types": "^2.1.25",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^3.1.1",
     "path": "^0.12.7",
     "select2": "^4.0.9",
     "shepherd.js": "^5.0.1",
